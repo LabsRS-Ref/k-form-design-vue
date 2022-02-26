@@ -1,5 +1,8 @@
 const debug = process.env.NODE_ENV !== 'production'
 module.exports = {
+  devServer: {
+    disableHostCheck: true
+  },
   pages: {
     index: {
       // 页面入口
