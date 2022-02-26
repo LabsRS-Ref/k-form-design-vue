@@ -1,18 +1,6 @@
 # 表单设计器 k-form-design
 
-<p align="center">
-  <a href="https://github.com/vuejs/vue">
-    <img src="https://img.shields.io/badge/vue-2.6.10-brightgreen.svg" alt="vue">
-  </a>
-  <a href="https://github.com/vueComponent/ant-design-vue">
-    <img src="https://img.shields.io/badge/Ant%20Design%20Vue-1.5.1-blue" alt="ant-design-vue">
-  </a>
-  <a href="https://github.com/Kchengz/k-form-design/blob/master/LICENSE">
-    <img src="https://img.shields.io/github/license/mashape/apistatus.svg" alt="license">
-  </a>
-</p>
-
-![](http://cdn.kcz66.com/demo.gif)
+[Open in Replit.com](https://replit.com/@lauer3912/k-form-design-vue-1)
 
 ## 简介
 
@@ -20,11 +8,6 @@
 
 注：该项目不兼容vue3.0项目，暂无后续兼容vue3.0的计划
 
-- [github](https://github.com/Kchengz/k-form-design)
-- [码云](https://gitee.com/kcz66/k-form-design)
-- [项目预览](http://cdn.kcz66.com/k-form-design.html)
-- [项目文档 Github Pages](https://kchengz.github.io/k-form-design/)
-- [项目文档 Gitee Pages 较快](http://kcz66.gitee.io/k-form-design/#/)
 
 ## 特性
 - 可视化配置页面
@@ -69,11 +52,6 @@ Vue.use(KFormDesign)
 </template>
 ```
 
-## 交流
-点击链接加入qq群聊，可以直接提问及反馈bug
-
-- [【k-form-desgin交流群：1020643215】](https://jq.qq.com/?_wv=1027&k=5BeoFAr) （满人）
-- [【k-form-desgin交流二群：727396923】](https://jq.qq.com/?_wv=1027&k=uYyqQPlQ)
 
 License
 ---
