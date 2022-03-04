@@ -40,6 +40,7 @@
     "vcolorpicker": "^1.1.0",
     "vue": "^2.6.10",
     "vue-codemirror-lite": "^1.0.4",
+    "vue-draggable-resizable": "^2.3.0",
     "vue-quill-editor": "^3.0.6",
     "vue-router": "^3.0.3",
     "vuedraggable": "^2.23.2"
