@@ -484,6 +484,7 @@
  */
 import draggable from "vuedraggable";
 import formNode from "./formNode";
+
 export default {
   name: "layoutItem",
   props: {

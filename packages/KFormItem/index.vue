@@ -2,8 +2,8 @@
  * @Description: 传入record数据，通过判断record.type，来渲染对应的组件
  * @Author: kcz
  * @Date: 2020-01-02 22:41:48
- * @LastEditors: kcz
- * @LastEditTime: 2021-05-28 00:59:02
+ * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
+ * @LastEditTime : 2022-03-04 13:41:08
  -->
 <template>
   <a-form-item
@@ -383,6 +383,10 @@ import customComponent from "./customComponent";
 import ComponentArray from "../core/components_use";
 const _ = require("lodash/object");
 
+// 引入
+import VueDraggableResizable from "vue-draggable-resizable";
+import "vue-draggable-resizable/dist/VueDraggableResizable.css";
+
 export default {
   name: "KFormItem",
   props: {
@@ -410,6 +414,7 @@ export default {
     }
   },
   components: {
+    VueDraggableResizable,
     customComponent
   },
   computed: {
