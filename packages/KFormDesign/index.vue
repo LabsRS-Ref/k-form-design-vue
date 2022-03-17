@@ -148,7 +148,7 @@
                 :previewOptions="previewOptions"
               />
             </a-tab-pane>
-            <a-tab-pane :key="2" tab="控件属性设置">
+            <a-tab-pane :key="2" tab="控件属性设置" :disabled="!selectItem.key">
               <formItemProperties
                 class="form-item-properties"
                 :selectItem="selectItem"

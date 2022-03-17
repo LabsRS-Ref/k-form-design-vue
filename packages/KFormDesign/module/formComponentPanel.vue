@@ -2,8 +2,8 @@
  * @Description: 表单设计器内容展示操作组件
  * @Author: kcz
  * @Date: 2019-12-31 19:39:48
- * @LastEditors: kcz
- * @LastEditTime: 2021-05-28 00:27:22
+ * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
+ * @LastEditTime : 2022-03-17 14:32:23
  -->
 <template>
   <div class="form-panel">
@@ -18,6 +18,7 @@
       :hideRequiredMark="data.config.hideRequiredMark"
       :style="data.config.customStyle"
     >
+      <!-- 控件摆放区 -->
       <draggable
         tag="div"
         class="draggable-box"

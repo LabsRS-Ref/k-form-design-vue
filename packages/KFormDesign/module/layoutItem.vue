@@ -461,19 +461,23 @@
       </div>
     </template>
     <!-- 表格布局 end -->
+    <!-- 具体的节点 begin -->
     <template v-else>
-      <formNode
-        :key="record.key"
-        :selectItem.sync="selectItem"
-        :record="record"
-        :config="config"
-        :hideModel="hideModel"
-        @handleSelectItem="handleSelectItem"
-        @handleCopy="$emit('handleCopy')"
-        @handleDelete="$emit('handleDelete')"
-        @handleShowRightMenu="$emit('handleShowRightMenu')"
-      />
+      <VueDraggableResizableCell width="600">
+        <formNode
+          :key="record.key"
+          :selectItem.sync="selectItem"
+          :record="record"
+          :config="config"
+          :hideModel="hideModel"
+          @handleSelectItem="handleSelectItem"
+          @handleCopy="$emit('handleCopy')"
+          @handleDelete="$emit('handleDelete')"
+          @handleShowRightMenu="$emit('handleShowRightMenu')"
+        />
+      </VueDraggableResizableCell>
     </template>
+    <!-- 具体的节点 end -->
   </div>
 </template>
 <script>
@@ -482,6 +486,7 @@
  * date 2019-11-20
  * description 使用递归组件调用自己，生成布局结构及表单
  */
+ import VueDraggableResizableCell from "../../Cell/index";
 import draggable from "vuedraggable";
 import formNode from "./formNode";
 export default {
@@ -518,6 +523,7 @@ export default {
     }
   },
   components: {
+    VueDraggableResizableCell,
     formNode,
     draggable
   },
