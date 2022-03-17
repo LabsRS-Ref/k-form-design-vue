@@ -1,14 +1,22 @@
-const debug = process.env.NODE_ENV !== 'production'
+/*
+ * @Author       : sunzhifeng <ian.sun@auodigitech.com>
+ * @Date         : 2022-03-04 09:11:43
+ * @Description  : Created by sunzhifeng, Please coding something here
+ * @FilePath     : /k-form-design-vue/vue.config.js
+ * @LastEditTime : 2022-03-17 10:21:31
+ * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
+ */
+const debug = process.env.NODE_ENV !== "production";
 module.exports = {
   devServer: {
-    disableHostCheck: true
+    // disableHostCheck: true
   },
   pages: {
     index: {
       // 页面入口
       entry: "examples/main.js",
       // 模板来源
-      template: "pubilc/index.html",
+      template: "public/index.html",
       // 输出文件名
       filename: "index.html"
     }
@@ -28,9 +36,9 @@ module.exports = {
     }
   },
   configureWebpack: config => {
-     // 开发环境配置
+    // 开发环境配置
     if (debug) {
-      config.devtool = 'source-map'
+      config.devtool = "source-map";
     }
   }
 };

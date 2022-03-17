@@ -2,11 +2,9 @@
  * @Descripttion:
  * @Author: kcz
  * @Date: 2021-05-02 16:04:02
- * @LastEditors: kcz
- * @LastEditTime: 2021-05-21 13:55:46
+ * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
+ * @LastEditTime : 2022-03-17 10:21:01
  */
-// 引入@babel/polyfill处理兼容
-import "@babel/polyfill";
 
 import Vue from "vue";
 import App from "./App.vue";
