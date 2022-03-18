@@ -8,21 +8,21 @@
 const defaultDraggableResizableCell = {
   // 单元格默认配置
   cell: {
-    enable: true
-  }
+    enable: true,
+  },
 };
 
 const commonStyles = {
   styles: {
-    fontSize: undefined
-  }
+    fontSize: undefined,
+  },
 };
 
 // 基础控件
 export const basicsList = [
   {
     cell: {
-      enable: false
+      enable: false,
     },
     type: "input", // 表单类型
     label: "输入框", // 标题文字
@@ -37,18 +37,18 @@ export const basicsList = [
       addonBefore: "",
       addonAfter: "",
       hidden: false, // 是否隐藏，false显示，true隐藏
-      disabled: false // 是否禁用，false不禁用，true禁用
+      disabled: false, // 是否禁用，false不禁用，true禁用
     },
     model: "", // 数据字段
     key: "",
     help: "",
     rules: [
-      //验证规则
+      // 验证规则
       {
         required: false, // 必须填写
-        message: "必填项"
-      }
-    ]
+        message: "必填项",
+      },
+    ],
   },
   {
     type: "textarea", // 表单类型
@@ -63,7 +63,7 @@ export const basicsList = [
       clearable: false,
       hidden: false, // 是否隐藏，false显示，true隐藏
       disabled: false,
-      placeholder: "请输入"
+      placeholder: "请输入",
     },
     model: "", // 数据字段
     key: "",
@@ -71,9 +71,9 @@ export const basicsList = [
     rules: [
       {
         required: false,
-        message: "必填项"
-      }
-    ]
+        message: "必填项",
+      },
+    ],
   },
   {
     type: "number", // 表单类型
@@ -87,8 +87,8 @@ export const basicsList = [
       precision: null,
       step: 1, // 步长，点击加减按钮时候，加减多少
       hidden: false, // 是否隐藏，false显示，true隐藏
-      disabled: false, //是否禁用
-      placeholder: "请输入"
+      disabled: false, // 是否禁用
+      placeholder: "请输入",
     },
     model: "", // 数据字段
     key: "",
@@ -96,9 +96,9 @@ export const basicsList = [
     rules: [
       {
         required: false,
-        message: "必填项"
-      }
-    ]
+        message: "必填项",
+      },
+    ],
   },
   {
     type: "select", // 表单类型
@@ -118,14 +118,14 @@ export const basicsList = [
         // 下拉选择项配置
         {
           value: "1",
-          label: "下拉框1"
+          label: "下拉框1",
         },
         {
           value: "2",
-          label: "下拉框2"
-        }
+          label: "下拉框2",
+        },
       ],
-      showSearch: false // 是否显示搜索框，搜索选择的项的值，而不是文字
+      showSearch: false, // 是否显示搜索框，搜索选择的项的值，而不是文字
     },
     model: "",
     key: "",
@@ -133,16 +133,16 @@ export const basicsList = [
     rules: [
       {
         required: false,
-        message: "必填项"
-      }
-    ]
+        message: "必填项",
+      },
+    ],
   },
   {
     type: "checkbox",
     label: "多选框",
     icon: "icon-duoxuan1",
     options: {
-      disabled: false, //是否禁用
+      disabled: false, // 是否禁用
       hidden: false, // 是否隐藏，false显示，true隐藏
       defaultValue: [],
       dynamicKey: "",
@@ -150,17 +150,17 @@ export const basicsList = [
       options: [
         {
           value: "1",
-          label: "选项1"
+          label: "选项1",
         },
         {
           value: "2",
-          label: "选项2"
+          label: "选项2",
         },
         {
           value: "3",
-          label: "选项3"
-        }
-      ]
+          label: "选项3",
+        },
+      ],
     },
     model: "",
     key: "",
@@ -168,16 +168,16 @@ export const basicsList = [
     rules: [
       {
         required: false,
-        message: "必填项"
-      }
-    ]
+        message: "必填项",
+      },
+    ],
   },
   {
     type: "radio", // 表单类型
     label: "单选框", // 标题文字
     icon: "icon-danxuan-cuxiantiao",
     options: {
-      disabled: false, //是否禁用
+      disabled: false, // 是否禁用
       hidden: false, // 是否隐藏，false显示，true隐藏
       defaultValue: "", // 默认值
       dynamicKey: "",
@@ -185,17 +185,17 @@ export const basicsList = [
       options: [
         {
           value: "1",
-          label: "选项1"
+          label: "选项1",
         },
         {
           value: "2",
-          label: "选项2"
+          label: "选项2",
         },
         {
           value: "3",
-          label: "选项3"
-        }
-      ]
+          label: "选项3",
+        },
+      ],
     },
     model: "",
     key: "",
@@ -203,9 +203,9 @@ export const basicsList = [
     rules: [
       {
         required: false,
-        message: "必填项"
-      }
-    ]
+        message: "必填项",
+      },
+    ],
   },
   {
     type: "date", // 表单类型
@@ -222,7 +222,7 @@ export const basicsList = [
       clearable: false, // 是否显示清除按钮
       placeholder: "请选择",
       rangePlaceholder: ["开始时间", "结束时间"],
-      format: "YYYY-MM-DD" // 展示格式  （请按照这个规则写 YYYY-MM-DD HH:mm:ss，区分大小写）
+      format: "YYYY-MM-DD", // 展示格式  （请按照这个规则写 YYYY-MM-DD HH:mm:ss，区分大小写）
     },
     model: "",
     key: "",
@@ -230,9 +230,9 @@ export const basicsList = [
     rules: [
       {
         required: false,
-        message: "必填项"
-      }
-    ]
+        message: "必填项",
+      },
+    ],
   },
   {
     type: "time", // 表单类型
@@ -245,7 +245,7 @@ export const basicsList = [
       hidden: false, // 是否隐藏，false显示，true隐藏
       clearable: false, // 是否显示清除按钮
       placeholder: "请选择",
-      format: "HH:mm:ss" // 展示格式
+      format: "HH:mm:ss", // 展示格式
     },
     model: "",
     key: "",
@@ -253,9 +253,9 @@ export const basicsList = [
     rules: [
       {
         required: false,
-        message: "必填项"
-      }
-    ]
+        message: "必填项",
+      },
+    ],
   },
   {
     type: "rate", // 表单类型
@@ -266,7 +266,7 @@ export const basicsList = [
       max: 5, // 最大值
       disabled: false, // 是否禁用
       hidden: false, // 是否隐藏，false显示，true隐藏
-      allowHalf: false // 是否允许半选
+      allowHalf: false, // 是否允许半选
     },
     model: "",
     key: "",
@@ -274,9 +274,9 @@ export const basicsList = [
     rules: [
       {
         required: false,
-        message: "必填项"
-      }
-    ]
+        message: "必填项",
+      },
+    ],
   },
   {
     type: "slider", // 表单类型
@@ -290,7 +290,7 @@ export const basicsList = [
       min: 0, // 最小值
       max: 100, // 最大值
       step: 1, // 步长，取值必须大于 0，并且可被 (max - min) 整除
-      showInput: false // 是否显示输入框，range为true时，请勿开启
+      showInput: false, // 是否显示输入框，range为true时，请勿开启
       // range: false // 双滑块模式
     },
     model: "",
@@ -299,9 +299,9 @@ export const basicsList = [
     rules: [
       {
         required: false,
-        message: "必填项"
-      }
-    ]
+        message: "必填项",
+      },
+    ],
   },
   {
     type: "uploadFile", // 表单类型
@@ -321,7 +321,7 @@ export const basicsList = [
       fileName: "file",
       headers: {},
       action: "http://cdn.kcz66.com/uploadFile.txt",
-      placeholder: "上传"
+      placeholder: "上传",
     },
     model: "",
     key: "",
@@ -329,9 +329,9 @@ export const basicsList = [
     rules: [
       {
         required: false,
-        message: "必填项"
-      }
-    ]
+        message: "必填项",
+      },
+    ],
   },
   {
     type: "uploadImg",
@@ -349,7 +349,7 @@ export const basicsList = [
       fileName: "image",
       headers: {},
       action: "http://cdn.kcz66.com/upload-img.txt",
-      listType: "picture-card"
+      listType: "picture-card",
     },
     model: "",
     key: "",
@@ -357,16 +357,16 @@ export const basicsList = [
     rules: [
       {
         required: false,
-        message: "必填项"
-      }
-    ]
+        message: "必填项",
+      },
+    ],
   },
   {
     type: "treeSelect", // 表单类型
     label: "树选择器", // 标题文字
     icon: "icon-tree",
     options: {
-      disabled: false, //是否禁用
+      disabled: false, // 是否禁用
       defaultValue: undefined, // 默认值
       multiple: false,
       hidden: false, // 是否隐藏，false显示，true隐藏
@@ -383,9 +383,9 @@ export const basicsList = [
           children: [
             {
               value: "11",
-              label: "选项11"
-            }
-          ]
+              label: "选项11",
+            },
+          ],
         },
         {
           value: "2",
@@ -393,11 +393,11 @@ export const basicsList = [
           children: [
             {
               value: "22",
-              label: "选项22"
-            }
-          ]
-        }
-      ]
+              label: "选项22",
+            },
+          ],
+        },
+      ],
     },
     model: "",
     key: "",
@@ -405,16 +405,16 @@ export const basicsList = [
     rules: [
       {
         required: false,
-        message: "必填项"
-      }
-    ]
+        message: "必填项",
+      },
+    ],
   },
   {
     type: "cascader", // 表单类型
     label: "级联选择器", // 标题文字
     icon: "icon-guanlian",
     options: {
-      disabled: false, //是否禁用
+      disabled: false, // 是否禁用
       hidden: false, // 是否隐藏，false显示，true隐藏
       defaultValue: undefined, // 默认值
       showSearch: false, // 是否显示搜索框，搜索选择的项的值，而不是文字
@@ -429,9 +429,9 @@ export const basicsList = [
           children: [
             {
               value: "11",
-              label: "选项11"
-            }
-          ]
+              label: "选项11",
+            },
+          ],
         },
         {
           value: "2",
@@ -439,11 +439,11 @@ export const basicsList = [
           children: [
             {
               value: "22",
-              label: "选项22"
-            }
-          ]
-        }
-      ]
+              label: "选项22",
+            },
+          ],
+        },
+      ],
     },
     model: "",
     key: "",
@@ -451,9 +451,9 @@ export const basicsList = [
     rules: [
       {
         required: false,
-        message: "必填项"
-      }
-    ]
+        message: "必填项",
+      },
+    ],
   },
   {
     type: "batch",
@@ -466,11 +466,11 @@ export const basicsList = [
       hidden: false, // 是否隐藏，false显示，true隐藏
       showLabel: false,
       hideSequence: false,
-      width: "100%"
+      width: "100%",
     },
     model: "",
     key: "",
-    help: ""
+    help: "",
   },
   {
     type: "selectInputList",
@@ -480,24 +480,24 @@ export const basicsList = [
       {
         value: "1",
         label: "选项1",
-        list: []
+        list: [],
       },
       {
         value: "2",
         label: "选项2",
-        list: []
-      }
+        list: [],
+      },
     ],
     options: {
       disabled: false,
       multiple: true, // 是否允许多选
       hidden: false, // 是否隐藏，false显示，true隐藏
       showLabel: false,
-      width: "100%"
+      width: "100%",
     },
     model: "",
     key: "",
-    help: ""
+    help: "",
   },
   {
     type: "editor",
@@ -512,7 +512,7 @@ export const basicsList = [
       hidden: false, // 是否隐藏，false显示，true隐藏
       disabled: false,
       showLabel: false,
-      width: "100%"
+      width: "100%",
     },
     model: "",
     key: "",
@@ -520,9 +520,9 @@ export const basicsList = [
     rules: [
       {
         required: false,
-        message: "必填项"
-      }
-    ]
+        message: "必填项",
+      },
+    ],
   },
   {
     type: "switch", // 表单类型
@@ -531,7 +531,7 @@ export const basicsList = [
     options: {
       defaultValue: false, // 默认值 Boolean 类型
       hidden: false, // 是否隐藏，false显示，true隐藏
-      disabled: false // 是否禁用
+      disabled: false, // 是否禁用
     },
     model: "",
     key: "",
@@ -539,9 +539,9 @@ export const basicsList = [
     rules: [
       {
         required: false,
-        message: "必填项"
-      }
-    ]
+        message: "必填项",
+      },
+    ],
   },
   {
     type: "button", // 表单类型
@@ -552,9 +552,9 @@ export const basicsList = [
       handle: "submit",
       dynamicFun: "",
       hidden: false, // 是否隐藏，false显示，true隐藏
-      disabled: false // 是否禁用，false不禁用，true禁用
+      disabled: false, // 是否禁用，false不禁用，true禁用
     },
-    key: ""
+    key: "",
   },
   {
     type: "alert",
@@ -566,9 +566,9 @@ export const basicsList = [
       showIcon: false,
       banner: false,
       hidden: false, // 是否隐藏，false显示，true隐藏
-      closable: false
+      closable: false,
     },
-    key: ""
+    key: "",
   },
   {
     type: "text",
@@ -580,9 +580,9 @@ export const basicsList = [
       showRequiredMark: false,
       color: "rgb(0, 0, 0)",
       fontFamily: "SimHei",
-      fontSize: "16pt"
+      fontSize: "16pt",
     },
-    key: ""
+    key: "",
   },
   {
     type: "html",
@@ -590,18 +590,18 @@ export const basicsList = [
     icon: "icon-ai-code",
     options: {
       hidden: false, // 是否隐藏，false显示，true隐藏
-      defaultValue: "<strong>HTML</strong>"
+      defaultValue: "<strong>HTML</strong>",
     },
-    key: ""
-  }
-].map(item => {
+    key: "",
+  },
+].map((item) => {
   return {
     ...defaultDraggableResizableCell,
     ...item,
     options: {
       ...item.options,
-      ...commonStyles
-    }
+      ...commonStyles,
+    },
   };
 });
 
@@ -637,7 +637,7 @@ export const customComponents = {
     //     }
     //   ]
     // }
-  ]
+  ],
 };
 // window.$customComponentList = customComponents.list;
 
@@ -648,18 +648,18 @@ export const layoutList = [
     label: "分割线",
     icon: "icon-fengexian",
     options: {
-      orientation: "left"
+      orientation: "left",
     },
     key: "",
-    model: ""
+    model: "",
   },
   {
-    type: "freeLayout",
+    type: "free-layout",
     label: "自由布局",
     icon: "icon-chaifen",
     options: {},
     key: "",
-    model: ""
+    model: "",
   },
   {
     type: "card",
@@ -667,7 +667,7 @@ export const layoutList = [
     icon: "icon-qiapian",
     list: [],
     key: "",
-    model: ""
+    model: "",
   },
   {
     type: "tabs",
@@ -678,22 +678,22 @@ export const layoutList = [
       type: "line",
       tabPosition: "top",
       size: "default",
-      animated: true
+      animated: true,
     },
     columns: [
       {
         value: "1",
         label: "选项1",
-        list: []
+        list: [],
       },
       {
         value: "2",
         label: "选项2",
-        list: []
-      }
+        list: [],
+      },
     ],
     key: "",
-    model: ""
+    model: "",
   },
   {
     type: "grid",
@@ -702,18 +702,18 @@ export const layoutList = [
     columns: [
       {
         span: 12,
-        list: []
+        list: [],
       },
       {
         span: 12,
-        list: []
-      }
+        list: [],
+      },
     ],
     options: {
-      gutter: 0
+      gutter: 0,
     },
     key: "",
-    model: ""
+    model: "",
   },
   {
     type: "table",
@@ -725,38 +725,38 @@ export const layoutList = [
           {
             colspan: 1,
             rowspan: 1,
-            list: []
+            list: [],
           },
           {
             colspan: 1,
             rowspan: 1,
-            list: []
-          }
-        ]
+            list: [],
+          },
+        ],
       },
       {
         tds: [
           {
             colspan: 1,
             rowspan: 1,
-            list: []
+            list: [],
           },
           {
             colspan: 1,
             rowspan: 1,
-            list: []
-          }
-        ]
-      }
+            list: [],
+          },
+        ],
+      },
     ],
     options: {
       width: "100%",
       bordered: true,
       bright: false,
       small: true,
-      customStyle: ""
+      customStyle: "",
     },
     key: "",
-    model: ""
-  }
+    model: "",
+  },
 ];

@@ -33,7 +33,7 @@
         :class="{
           'show-head': showHead,
           'toolbars-top': toolbarsTop,
-          'show-head-and-toolbars-top': toolbarsTop && showHead
+          'show-head-and-toolbars-top': toolbarsTop && showHead,
         }"
       >
         <!-- 左侧控件区域 start -->
@@ -169,6 +169,7 @@
  * date 2019-11-20
  * description 表单设计器
  */
+import zhCN from "ant-design-vue/lib/locale-provider/zh_CN";
 import kHeader from "./module/header";
 import operatingArea from "./module/operatingArea";
 
@@ -179,34 +180,34 @@ import kCodeModal from "./module/codeModal";
 import collapseItem from "./module/collapseItem";
 import importJsonModal from "./module/importJsonModal";
 import previewModal from "../KFormPreview/index.vue";
-import zhCN from "ant-design-vue/lib/locale-provider/zh_CN";
 
 import { Revoke } from "../core/revoke";
 import {
   basicsList,
   layoutList,
-  customComponents
+  customComponents,
 } from "./config/formItemsConfig";
 import formItemProperties from "./module/formItemProperties";
 import formProperties from "./module/formProperties";
+
 export default {
   name: "KFormDesign",
   props: {
     title: {
       type: String,
-      default: "表单设计器 --by kcz"
+      default: "表单设计器 --by kcz",
     },
     showHead: {
       type: Boolean,
-      default: true
+      default: true,
     },
     hideResetHint: {
       type: Boolean,
-      default: false
+      default: false,
     },
     toolbarsTop: {
       type: Boolean,
-      default: false
+      default: false,
     },
     toolbars: {
       type: Array,
@@ -219,12 +220,12 @@ export default {
         "reset",
         "close",
         "undo",
-        "redo"
-      ]
+        "redo",
+      ],
     },
     showToolbarsText: {
       type: Boolean,
-      default: false
+      default: false,
     },
     fields: {
       type: Array,
@@ -253,19 +254,19 @@ export default {
         "text",
         "html",
         // 布局控件
-        "freeLayout",
+        "free-layout",
         "divider",
         "card",
         "tabs",
         "grid",
-        "table"
-      ]
+        "table",
+      ],
     },
     hideModel: {
       // 隐藏数据字段
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   data() {
     return {
@@ -287,7 +288,7 @@ export default {
         "table",
         "alert",
         "text",
-        "html"
+        "html",
       ],
       data: {
         list: [],
@@ -298,15 +299,15 @@ export default {
           labelLayout: "flex",
           wrapperCol: { xs: 18, sm: 18, md: 18, lg: 18, xl: 18, xxl: 18 },
           hideRequiredMark: false,
-          customStyle: ""
-        }
+          customStyle: "",
+        },
       },
       previewOptions: {
-        width: 850
+        width: 850,
       },
       selectItem: {
-        key: ""
-      }
+        key: "",
+      },
     };
   },
   components: {
@@ -320,7 +321,7 @@ export default {
     previewModal,
     kFormComponentPanel,
     formItemProperties,
-    formProperties
+    formProperties,
   },
   watch: {
     data: {
@@ -330,17 +331,17 @@ export default {
         });
       },
       deep: true,
-      immediate: true
-    }
+      immediate: true,
+    },
   },
   computed: {
     basicsArray() {
       // 计算需要显示的基础字段
-      return basicsList.filter(item => this.fields.includes(item.type));
+      return basicsList.filter((item) => this.fields.includes(item.type));
     },
     layoutArray() {
       // 计算需要显示的布局字段
-      return layoutList.filter(item => this.fields.includes(item.type));
+      return layoutList.filter((item) => this.fields.includes(item.type));
     },
     collapseDefaultActiveKey() {
       // 计算当前展开的控件列表
@@ -349,19 +350,18 @@ export default {
       );
       if (defaultActiveKey) {
         return defaultActiveKey.split(",");
-      } else {
-        return ["1"];
       }
-    }
+      return ["1"];
+    },
   },
   methods: {
     generateKey(list, index) {
       // 生成key值
-      const key = list[index].type + "_" + new Date().getTime();
+      const key = `${list[index].type}_${new Date().getTime()}`;
       this.$set(list, index, {
         ...list[index],
         key,
-        model: key
+        model: key,
       });
       if (this.noModel.includes(list[index].type)) {
         // 删除不需要的model属性
@@ -373,11 +373,11 @@ export default {
       // 生成key值
       if (!this.selectItem.key) {
         // 在没有选择表单时，将数据push到this.data.list
-        const key = item.type + "_" + new Date().getTime();
+        const key = `${item.type}_${new Date().getTime()}`;
         item = {
           ...item,
           key,
-          model: key
+          model: key,
         };
         if (this.noModel.includes(item.type)) {
           // 删除不需要的model属性
@@ -432,7 +432,7 @@ export default {
         cancelText: "否",
         onOk: () => {
           this.resetData();
-        }
+        },
       });
     },
     resetData() {
@@ -445,8 +445,8 @@ export default {
           labelLayout: "flex",
           wrapperCol: { xs: 18, sm: 18, md: 18, lg: 18, xl: 18, xxl: 18 },
           hideRequiredMark: false,
-          customStyle: ""
-        }
+          customStyle: "",
+        },
       };
       this.handleSetSelectItem({ key: "" });
       this.$message.success("已清空");
@@ -488,11 +488,11 @@ export default {
      */
     getFieldSchema() {
       const fields = [];
-      const traverse = array => {
-        array.forEach(element => {
+      const traverse = (array) => {
+        array.forEach((element) => {
           if (element.type === "grid" || element.type === "tabs") {
             // 栅格布局
-            element.columns.forEach(item => {
+            element.columns.forEach((item) => {
               traverse(item.list);
             });
           } else if (element.type === "card") {
@@ -503,15 +503,13 @@ export default {
             traverse(element.list);
           } else if (element.type === "table") {
             // 表格布局
-            element.trs.forEach(item => {
-              item.tds.forEach(val => {
+            element.trs.forEach((item) => {
+              item.tds.forEach((val) => {
                 traverse(val.list);
               });
             });
-          } else {
-            if (element.model) {
-              fields.push(element);
-            }
+          } else if (element.model) {
+            fields.push(element);
           }
         });
       };
@@ -523,11 +521,11 @@ export default {
       try {
         if (typeof data !== "object") {
           return false;
-        } else {
-          this.data = data;
-          // 导入json数据后，需要清除已选择key
-          this.handleSetSelectItem({ key: "" });
         }
+        this.data = data;
+        // 导入json数据后，需要清除已选择key
+        this.handleSetSelectItem({ key: "" });
+
         return true;
       } catch (error) {
         console.error(error);
@@ -580,12 +578,12 @@ export default {
     },
     handleClose() {
       this.$emit("close");
-    }
+    },
   },
   created() {
     this.revoke = new Revoke();
     this.recordList = this.revoke.recordList;
     this.redoList = this.revoke.redoList;
-  }
+  },
 };
 </script>
