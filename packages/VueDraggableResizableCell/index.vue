@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-18 15:10:11
+ * @LastEditTime : 2022-03-18 15:23:19
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/index.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -803,7 +803,13 @@ export default {
       // 高度变化比例(精确)
       const heightChangeRatio = h / this.height;
       const heightOffset = h - this.height;
-      // 获得矩形尺寸变化比例
+
+      // TODO: 为组件使用者提供参数选择缩放插值算法
+      // 获得矩形尺寸变化比例，采用的算法：最近邻插值
+      // Note: 缩放比例计算方式
+      // 1. 最近邻插值：
+      // 2. 双线性插值：
+      // 3. 双三次插值：
       const changeRatio = Math.min(widthChangeRatio, heightChangeRatio);
 
       // 同步更新内部元素的大小及解决动画问题
