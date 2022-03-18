@@ -31,13 +31,14 @@
     "vue": "^2.6.10",
     "vue-codemirror-lite": "^1.0.4",
     "vue-draggable-resizable": "^2.3.0",
+    "vue-fragment": "^1.5.2",
     "vue-quill-editor": "^3.0.6",
     "vue-router": "^3.0.3",
     "vuedraggable": "^2.23.2"
   },
   "devDependencies": {
-    "@typescript-eslint/parser": "^5.15.0",
     "@typescript-eslint/eslint-plugin": "^5.15.0",
+    "@typescript-eslint/parser": "^5.15.0",
     "@vue/cli-plugin-babel": "^5.0.3",
     "@vue/cli-plugin-typescript": "^5.0.3",
     "@vue/cli-service": "^5.0.3",
