@@ -463,7 +463,8 @@
     <!-- 表格布局 end -->
     <!-- 具体的节点 begin -->
     <template v-else>
-      <VueDraggableResizableCell width="600">
+      <!-- 是否可以自己调节大小或自由布局 -->
+      <VueDraggableResizableCell v-if="0 && record.cell.enable">
         <formNode
           :key="record.key"
           :selectItem.sync="selectItem"
@@ -476,6 +477,19 @@
           @handleShowRightMenu="$emit('handleShowRightMenu')"
         />
       </VueDraggableResizableCell>
+      <template v-else>
+        <formNode
+          :key="record.key"
+          :selectItem.sync="selectItem"
+          :record="record"
+          :config="config"
+          :hideModel="hideModel"
+          @handleSelectItem="handleSelectItem"
+          @handleCopy="$emit('handleCopy')"
+          @handleDelete="$emit('handleDelete')"
+          @handleShowRightMenu="$emit('handleShowRightMenu')"
+        />
+      </template>
     </template>
     <!-- 具体的节点 end -->
   </div>
@@ -486,7 +500,7 @@
  * date 2019-11-20
  * description 使用递归组件调用自己，生成布局结构及表单
  */
- import VueDraggableResizableCell from "../../Cell/index";
+import VueDraggableResizableCell from "../../Cell/index";
 import draggable from "vuedraggable";
 import formNode from "./formNode";
 export default {

@@ -1,0 +1,41 @@
+{
+  "compilerOptions": {
+    "target": "es2016",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "allowJs": true,
+    "declaration": true,
+    "sourceMap": true,
+    "strict": true,
+    "jsx": "preserve",
+    "noEmit": true,
+    "experimentalDecorators": true,
+    "newLine": "LF",
+    "baseUrl": ".",
+    "paths": {
+      "~/*": [
+        "./*"
+      ],
+      "@/*": [
+        "./*"
+      ]
+    },
+    "typeRoots": [
+      "./types"
+    ],
+    "types": [
+      "vue/types"
+    ]
+  },
+  "exclude": [
+    "node_modules",
+    ".nuxt",
+    "assets",
+    "coverage",
+    "docs",
+    "dist",
+    "public",
+    "static"
+  ]
+}

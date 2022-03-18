@@ -2,8 +2,8 @@
  * @Description: 传入record数据，通过判断record.type，来渲染对应的组件
  * @Author: kcz
  * @Date: 2020-01-02 22:41:48
- * @LastEditors: kcz
- * @LastEditTime: 2021-05-28 00:59:02
+ * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
+ * @LastEditTime : 2022-03-17 19:13:59
  -->
 <template>
   <a-form-item
@@ -298,21 +298,21 @@
   </a-form-item>
   <!-- button按钮 -->
   <a-form-item v-else-if="record.type === 'button'">
-    <a-button
-      :disabled="disabled || record.options.disabled"
-      @click="
-        record.options.handle === 'submit'
-          ? false
-          : record.options.handle === 'reset'
-          ? $emit('handleReset')
-          : dynamicData[record.options.dynamicFun]
-          ? dynamicData[record.options.dynamicFun]()
-          : false
-      "
-      :type="record.options.type"
-      :html-type="record.options.handle === 'submit' ? 'submit' : undefined"
-      v-text="record.label"
-    ></a-button>
+      <a-button
+        :disabled="disabled || record.options.disabled"
+        @click="
+          record.options.handle === 'submit'
+            ? false
+            : record.options.handle === 'reset'
+            ? $emit('handleReset')
+            : dynamicData[record.options.dynamicFun]
+            ? dynamicData[record.options.dynamicFun]()
+            : false
+        "
+        :type="record.options.type"
+        :html-type="record.options.handle === 'submit' ? 'submit' : undefined"
+        v-text="record.label"
+      ></a-button>
   </a-form-item>
   <!-- alert提示 -->
   <a-form-item v-else-if="record.type === 'alert'">

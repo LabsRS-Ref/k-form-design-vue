@@ -2,12 +2,18 @@
  * @Description: 将数据通过k-form-item组件解析，生成控件
  * @Author: kcz
  * @Date: 2019-12-30 00:37:05
- * @LastEditTime : 2022-03-17 14:27:50
+ * @LastEditTime : 2022-03-17 20:30:01
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/formNode.vue
  -->
 <template>
-  <div
+  <VueDraggableResizableCell
+    :resizeScope="['svg-size', 'font-size']"
+    :resizeScopeManipulation="'union'"
+  >
+    <kFormItem :formConfig="config" :record="record" />
+  </VueDraggableResizableCell>
+  <!-- <div
     class="drag-move-box"
     @click.stop="$emit('handleSelectItem', record)"
     :class="{ active: record.key === selectItem.key }"
@@ -34,7 +40,7 @@
     >
       <a-icon type="delete" />
     </div>
-  </div>
+  </div> -->
 </template>
 <script>
 /*
@@ -42,6 +48,7 @@
  * date 2019-11-20
  * description 通过json生成的单个表单节点
  */
+import VueDraggableResizableCell from "../../Cell/index";
 import kFormItem from "../../KFormItem/index";
 export default {
   props: {
@@ -63,6 +70,7 @@ export default {
     }
   },
   components: {
+    VueDraggableResizableCell,
     kFormItem
   }
 };

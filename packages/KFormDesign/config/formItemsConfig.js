@@ -3,9 +3,26 @@
  * date 2019-11-20
  * description 表单控件项
  */
+
+const cellDefaultConfig = {
+  // 单元格默认配置
+  cell: {
+    enable: true
+  }
+};
+
+const commonStyles = {
+  styles: {
+    fontSize: undefined
+  }
+};
+
 // 基础控件
 export const basicsList = [
   {
+    cell: {
+      enable: false
+    },
     type: "input", // 表单类型
     label: "输入框", // 标题文字
     icon: "icon-write",
@@ -576,7 +593,16 @@ export const basicsList = [
     },
     key: ""
   }
-];
+].map(item => {
+  return {
+    ...cellDefaultConfig,
+    ...item,
+    options: {
+      ...item.options,
+      ...commonStyles
+    }
+  };
+});
 
 // 高级控件
 // export const highList = [];
