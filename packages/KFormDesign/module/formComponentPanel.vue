@@ -3,7 +3,7 @@
  * @Author: kcz
  * @Date: 2019-12-31 19:39:48
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-18 08:28:42
+ * @LastEditTime : 2022-03-18 09:18:52
  -->
 <template>
   <div class="form-panel">
@@ -36,7 +36,7 @@
           <layoutItem
             v-for="record in data.list"
             :key="record.key"
-            :class="{ 'drag-move': record.cell.enable }"
+            :class="{ 'drag-move': 0 && record.cell.enable }"
             :record="record"
             :config="data.config"
             :selectItem.sync="selectItem"

@@ -229,6 +229,7 @@ export default {
     fields: {
       type: Array,
       default: () => [
+        // 基础控件
         "input",
         "textarea",
         "number",
@@ -251,6 +252,8 @@ export default {
         "alert",
         "text",
         "html",
+        // 布局控件
+        "freeLayout",
         "divider",
         "card",
         "tabs",

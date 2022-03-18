@@ -1,10 +1,10 @@
-/* eslint-disable camelcase */
+/* eslint-disable camelcase, no-unused-vars */
 <!--
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-16 12:13:28
- * @FilePath     : \__nuxt2.15.2_del\components\Cell\index.vue
+ * @LastEditTime : 2022-03-18 15:10:11
+ * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/index.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
 <template>
@@ -358,10 +358,14 @@ export default {
      */
     getCellBestWrapperSize({ consultWidth = 0, consultHeight = 0 }) {
       const rect = this.getCellBoundingClientRect();
-      const { width: scrollWidth, height: scrollHeight } =
-        this.getCellScrollSize();
-      const { width: offsetWidth, height: offsetHeight } =
-        this.getCellOffsetSize();
+      const {
+        width: scrollWidth,
+        height: scrollHeight,
+      } = this.getCellScrollSize();
+      const {
+        width: offsetWidth,
+        height: offsetHeight,
+      } = this.getCellOffsetSize();
 
       // 选择最优的数值
       const useBest = boundNumberFilter;
@@ -834,8 +838,7 @@ export default {
                 element.style.transition = "";
               } else {
                 // eslint-disable-next-line no-param-reassign
-                element.style.transition =
-                  this.getCellOriginalStyle().transition;
+                element.style.transition = this.getCellOriginalStyle().transition;
               }
             };
           };
@@ -1034,9 +1037,8 @@ export default {
                 );
                 if (nodeInfo) {
                   // eslint-disable-next-line no-param-reassign
-                  node.style.fontSize = `${
-                    changeRatio * parseFloat(nodeInfo.fontSize)
-                  }px`;
+                  node.style.fontSize = `${changeRatio *
+                    parseFloat(nodeInfo.fontSize)}px`;
                 }
               }
             }

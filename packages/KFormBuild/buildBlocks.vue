@@ -132,7 +132,7 @@
  * author kcz
  * date 2019-11-20
  */
-import VueDraggableResizableCell from "../Cell/index";
+import VueDraggableResizableCell from "../VueDraggableResizableCell/index";
 import KFormItem from "../KFormItem/index";
 export default {
   name: "buildBlocks",

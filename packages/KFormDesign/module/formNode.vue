@@ -48,7 +48,7 @@
  * date 2019-11-20
  * description 通过json生成的单个表单节点
  */
-import VueDraggableResizableCell from "../../Cell/index";
+import VueDraggableResizableCell from "../../VueDraggableResizableCell/index";
 import kFormItem from "../../KFormItem/index";
 export default {
   props: {

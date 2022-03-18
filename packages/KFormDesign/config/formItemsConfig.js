@@ -4,7 +4,8 @@
  * description 表单控件项
  */
 
-const cellDefaultConfig = {
+// 默认 VueDraggableResizableCell 的配置
+const defaultDraggableResizableCell = {
   // 单元格默认配置
   cell: {
     enable: true
@@ -595,7 +596,7 @@ export const basicsList = [
   }
 ].map(item => {
   return {
-    ...cellDefaultConfig,
+    ...defaultDraggableResizableCell,
     ...item,
     options: {
       ...item.options,
@@ -649,6 +650,14 @@ export const layoutList = [
     options: {
       orientation: "left"
     },
+    key: "",
+    model: ""
+  },
+  {
+    type: "freeLayout",
+    label: "自由布局",
+    icon: "icon-chaifen",
+    options: {},
     key: "",
     model: ""
   },
