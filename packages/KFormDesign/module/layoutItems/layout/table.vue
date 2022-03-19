@@ -1,3 +1,11 @@
+<!--
+ * @Author       : sunzhifeng <ian.sun@auodigitech.com>
+ * @Date         : 2022-03-18 16:20:14
+ * @Description  : Created by sunzhifeng, Please coding something here
+ * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layoutItems/layout/table.vue
+ * @LastEditTime : 2022-03-19 10:45:43
+ * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
+-->
 <template>
   <div
     class="table-box"

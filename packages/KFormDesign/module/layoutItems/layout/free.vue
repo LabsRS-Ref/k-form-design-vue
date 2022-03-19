@@ -2,13 +2,17 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-03-18 15:50:49
  * @Description  : Created by sunzhifeng, Please coding something here
- * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layouts/freeLayout.vue
- * @LastEditTime : 2022-03-18 22:06:21
+ * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layoutItems/layout/free.vue
+ * @LastEditTime : 2022-03-19 10:45:22
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 
 <template>
-  <div class="grid-box" :class="{ active: record.key === selectItem.key }">
+  <div
+    class="grid-box"
+    :class="{ active: record.key === selectItem.key }"
+    @click.stop="handleSelectItem(record)"
+  >
     <draggable
       tag="div"
       class="draggable-box"
@@ -29,7 +33,7 @@
         style="height: 100vh;"
       >
         <layoutItem
-          class0="drag-move"
+          :class="{ 'drag-move': false }"
           v-for="item in record.list"
           :key="item.key"
           :selectItem.sync="selectItem"
@@ -46,6 +50,8 @@
         />
       </transition-group>
     </draggable>
+
+    <!-- 浮动工具栏 -->
     <tool-bar v-bind="$props" v-on="{ ...$listeners }" />
   </div>
 </template>

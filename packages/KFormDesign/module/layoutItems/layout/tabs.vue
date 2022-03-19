@@ -2,8 +2,8 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-03-18 21:04:38
  * @Description  : Created by sunzhifeng, Please coding something here
- * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layouts/tabsLayout.vue
- * @LastEditTime : 2022-03-18 21:57:34
+ * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layoutItems/layout/tabs.vue
+ * @LastEditTime : 2022-03-19 10:46:01
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 <template>

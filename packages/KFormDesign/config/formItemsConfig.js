@@ -654,12 +654,13 @@ export const layoutList = [
     model: "",
   },
   {
-    type: "free-layout",
-    label: "自由布局",
-    icon: "icon-chaifen",
+    type: "free-layout", // record.type 记录类型
+    label: "自由布局", // 标题文字
+    icon: "icon-chaifen", // 图标
     options: {},
-    key: "",
-    model: "",
+    list: [], // 子项,明确指明自己是容器
+    key: "", // 唯一标识
+    model: "", // 值
   },
   {
     type: "card",

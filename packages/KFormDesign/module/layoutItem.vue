@@ -3,7 +3,7 @@
  * @Date         : 2022-03-18 09:03:05
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layoutItem.vue
- * @LastEditTime : 2022-03-18 22:01:23
+ * @LastEditTime : 2022-03-19 12:44:12
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 <template>
@@ -12,89 +12,51 @@
       'layout-width': isLayout,
     }"
   >
-    <!-- layout 节点 -->
-    <template v-if="isLayout">
-      <component
-        :is="layoutComponent"
-        v-bind="$props"
-        v-on="{
-          ...$listeners,
-          handleSelectItem,
-          handleShowRightMenu,
-        }"
-      />
-    </template>
-    <!-- 非layout 节点 -->
-    <template v-else>
-      <formNode
-        :key="record.key"
-        :selectItem.sync="selectItem"
-        :record="record"
-        :config="config"
-        :hideModel="hideModel"
-        @handleSelectItem="handleSelectItem"
-        @handleCopy="$emit('handleCopy')"
-        @handleDelete="$emit('handleDelete')"
-        @handleShowRightMenu="$emit('handleShowRightMenu')"
-      />
-    </template>
+    <component
+      :is="layoutComponent || nodeComponent"
+      v-bind="$props"
+      v-on="{
+        ...$listeners,
+      }"
+    />
   </div>
 </template>
 <script>
-// layouts
-import base from "./layouts/base";
-import cardLayout from "./layouts/cardLayout";
-import freeLayout from "./layouts/freeLayout";
-import gridLayout from "./layouts/gridLayout";
-import tableLayout from "./layouts/tableLayout";
-import tabsLayout from "./layouts/tabsLayout";
+import LayoutItems from "./layoutItems";
 
-// node
-import formNode from "./formNode";
-
+const { baseClass: base, layouts, nodes } = LayoutItems;
 export default {
   name: "layoutItem",
   extends: base,
   computed: {
-    insertAllowed() {
-      return this.insertAllowedType.includes(this.startType);
-    },
     isLayout() {
       return !!this.layoutComponent;
     },
     layoutComponent() {
       const { type } = this.record;
       return {
-        "free-layout": freeLayout,
-        table: tableLayout,
-        tabs: tabsLayout,
-        grid: gridLayout,
-        card: cardLayout,
-        divider: freeLayout,
-        html: freeLayout,
+        "free-layout": layouts.freeLayout,
+        table: layouts.tableLayout,
+        tabs: layouts.tabsLayout,
+        grid: layouts.gridLayout,
+        card: layouts.cardLayout,
+        divider: layouts.freeLayout,
+        html: layouts.freeLayout,
       }[type];
+    },
+    nodeComponent() {
+      const { type } = this.record;
+      return (
+        {
+          batch: nodes.batchNode,
+          selectInputList: nodes.selectInputListNode,
+        }[type] || nodes.baseNode
+      );
     },
   },
   components: {
-    formNode,
-    ...{
-      cardLayout,
-      freeLayout,
-      gridLayout,
-      tableLayout,
-      tabsLayout,
-    },
-  },
-  methods: {
-    handleShowRightMenu(e, record, trIndex, tdIndex) {
-      this.$emit("handleShowRightMenu", e, record, trIndex, tdIndex);
-    },
-    handleSelectItem(record) {
-      this.$emit("handleSelectItem", record);
-    },
-    handleColAdd(e, list) {
-      this.$emit("handleColAdd", e, list);
-    },
+    ...layouts,
+    ...nodes,
   },
 };
 </script>

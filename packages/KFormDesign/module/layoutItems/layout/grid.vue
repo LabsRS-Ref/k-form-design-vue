@@ -2,8 +2,8 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-03-18 16:29:19
  * @Description  : Created by sunzhifeng, Please coding something here
- * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layouts/gridLayout.vue
- * @LastEditTime : 2022-03-18 20:40:38
+ * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layoutItems/layout/grid.vue
+ * @LastEditTime : 2022-03-19 10:45:32
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 <template>
