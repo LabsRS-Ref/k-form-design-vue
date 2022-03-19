@@ -2,8 +2,8 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-03-01 10:24:28
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-16 10:03:38
- * @FilePath     : \__nuxt2.15.2_del\components\Cell\util.ts
+ * @LastEditTime : 2022-03-19 21:14:51
+ * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/util.ts
  * @Description  : Created by sunzhifeng, Please coding something here
  */
 
@@ -448,6 +448,20 @@ boundNumberFilter.min = (args: number[], options: any) =>
  */
 export function assignNoNullValue(curValue = 0, newValue = 0) {
   return curValue !== newValue && newValue !== null ? newValue : curValue;
+}
+
+/**
+ * 删除数组中的指定元素
+ * @param list
+ * @param ele
+ */
+export function splice(list: any[] = [], ele: any) {
+  if (Array.isArray(list)) {
+    const index = list.indexOf(ele);
+    if (index > -1) {
+      list.splice(index, 1);
+    }
+  }
 }
 
 /**

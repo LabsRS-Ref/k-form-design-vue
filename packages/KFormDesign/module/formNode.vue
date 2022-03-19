@@ -2,45 +2,41 @@
  * @Description: 将数据通过k-form-item组件解析，生成控件
  * @Author: kcz
  * @Date: 2019-12-30 00:37:05
- * @LastEditTime : 2022-03-17 20:30:01
+ * @LastEditTime : 2022-03-19 18:58:37
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/formNode.vue
  -->
 <template>
-  <VueDraggableResizableCell
-    :resizeScope="['svg-size', 'font-size']"
-    :resizeScopeManipulation="'union'"
-  >
-    <kFormItem :formConfig="config" :record="record" />
-  </VueDraggableResizableCell>
-  <!-- <div
-    class="drag-move-box"
-    @click.stop="$emit('handleSelectItem', record)"
-    :class="{ active: record.key === selectItem.key }"
-  >
-    <div class="form-item-box">
-      <kFormItem :formConfig="config" :record="record" />
-    </div>
+  <component :is="wrapper" v-bind="wrapperProps" v-on="wrapperListeners">
     <div
-      v-if="!hideModel"
-      class="show-key-box"
-      v-text="record.label + (record.model ? '/' + record.model : '')"
-    />
-    <div
-      class="copy"
-      :class="record.key === selectItem.key ? 'active' : 'unactivated'"
-      @click.stop="$emit('handleCopy')"
+      class="drag-move-box"
+      @click.stop="$emit('handleSelectItem', record)"
+      :class="{ active: record.key === selectItem.key }"
     >
-      <a-icon type="copy" />
+      <div class="form-item-box">
+        <kFormItem :formConfig="config" :record="record" />
+      </div>
+      <div
+        v-if="!hideModel"
+        class="show-key-box"
+        v-text="record.label + (record.model ? '/' + record.model : '')"
+      />
+      <div
+        class="copy"
+        :class="record.key === selectItem.key ? 'active' : 'unactivated'"
+        @click.stop="$emit('handleCopy')"
+      >
+        <a-icon type="copy" />
+      </div>
+      <div
+        class="delete"
+        :class="record.key === selectItem.key ? 'active' : 'unactivated'"
+        @click.stop="$emit('handleDelete')"
+      >
+        <a-icon type="delete" />
+      </div>
     </div>
-    <div
-      class="delete"
-      :class="record.key === selectItem.key ? 'active' : 'unactivated'"
-      @click.stop="$emit('handleDelete')"
-    >
-      <a-icon type="delete" />
-    </div>
-  </div> -->
+  </component>
 </template>
 <script>
 /*
@@ -48,30 +44,60 @@
  * date 2019-11-20
  * description 通过json生成的单个表单节点
  */
+
+import { Fragment } from "vue-fragment";
 import VueDraggableResizableCell from "../../VueDraggableResizableCell/index";
 import kFormItem from "../../KFormItem/index";
+
 export default {
   props: {
     record: {
       type: Object,
-      required: true
+      required: true,
     },
     selectItem: {
       type: Object,
-      default: () => {}
+      default: () => {},
     },
     config: {
       type: Object,
-      required: true
+      required: true,
     },
     hideModel: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
+  },
+  computed: {
+    wrapper() {
+      const {
+        cell: { enable },
+      } = this.record;
+      return enable ? VueDraggableResizableCell : Fragment;
+    },
+    wrapperProps() {
+      const {
+        cell: { enable },
+      } = this.record;
+      return enable
+        ? {
+            resizeScope: ["svg-size"],
+            resizeScopeManipulation: "union",
+            parent: true,
+          }
+        : {};
+    },
+    wrapperListeners() {
+      const {
+        cell: { enable },
+      } = this.record;
+      return enable ? {} : {};
+    },
   },
   components: {
     VueDraggableResizableCell,
-    kFormItem
-  }
+    Fragment,
+    kFormItem,
+  },
 };
 </script>

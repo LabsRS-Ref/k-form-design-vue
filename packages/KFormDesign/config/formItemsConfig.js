@@ -13,9 +13,7 @@ const defaultDraggableResizableCell = {
 };
 
 const commonStyles = {
-  styles: {
-    fontSize: undefined,
-  },
+  styles: "",
 };
 
 // 基础控件

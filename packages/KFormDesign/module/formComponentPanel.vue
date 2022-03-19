@@ -1,9 +1,10 @@
+/* eslint-disable no-param-reassign */
 <!--
  * @Description: 表单设计器内容展示操作组件
  * @Author: kcz
  * @Date: 2019-12-31 19:39:48
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-18 09:18:52
+ * @LastEditTime : 2022-03-19 14:49:49
  -->
 <template>
   <div class="form-panel">
@@ -26,7 +27,7 @@
           group: 'form-draggable',
           ghostClass: 'moving',
           animation: 180,
-          handle: '.drag-move'
+          handle: '.drag-move',
         }"
         v-model="data.list"
         @add="deepClone"
@@ -77,6 +78,7 @@
 import draggable from "vuedraggable";
 import layoutItem from "./layoutItem";
 import "codemirror/mode/javascript/javascript";
+
 export default {
   name: "KCenter",
   data() {
@@ -99,45 +101,45 @@ export default {
         "treeSelect",
         "switch",
         "text",
-        "html"
+        "html",
       ],
       rightMenuSelectValue: {},
       showRightMenu: false,
       menuTop: 0,
       menuLeft: 0,
       trIndex: 0,
-      tdIndex: 0
+      tdIndex: 0,
     };
   },
   props: {
     noModel: {
       type: Array,
-      required: true
+      required: true,
     },
     startType: {
       type: String,
-      required: true
+      required: true,
     },
     data: {
       type: Object,
-      required: true
+      required: true,
     },
     selectItem: {
       type: Object,
-      default: () => {}
+      default: () => {},
     },
     hideModel: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   components: {
     draggable,
-    layoutItem
+    layoutItem,
   },
   methods: {
     deepClone(evt) {
-      const newIndex = evt.newIndex;
+      const { newIndex } = evt;
       // json深拷贝一次
       const listString = JSON.stringify(this.data.list);
       this.data.list = JSON.parse(listString);
@@ -148,13 +150,13 @@ export default {
     },
     handleColAdd(evt, columns, isCopy = false) {
       // 重置或者生成key值
-      const newIndex = evt.newIndex;
-      const key = columns[newIndex].type + "_" + new Date().getTime();
+      const { newIndex } = evt;
+      const key = `${columns[newIndex].type}_${new Date().getTime()}`;
       if (columns[newIndex].key === "" || isCopy) {
         this.$set(columns, newIndex, {
           ...columns[newIndex],
           key,
-          model: key
+          model: key,
         });
         if (this.noModel.includes(columns[newIndex].type)) {
           // 删除不需要的model属性
@@ -179,7 +181,7 @@ export default {
           const columnsStr = JSON.stringify(columns[newIndex].columns);
           columns[newIndex].columns = JSON.parse(columnsStr);
           // 复制时，清空数据
-          columns[newIndex].columns.forEach(item => {
+          columns[newIndex].columns.forEach((item) => {
             item.list = [];
           });
         }
@@ -188,8 +190,8 @@ export default {
           const trsStr = JSON.stringify(columns[newIndex].trs);
           columns[newIndex].trs = JSON.parse(trsStr);
           // 复制时，清空数据
-          columns[newIndex].trs.forEach(item => {
-            item.tds.forEach(val => {
+          columns[newIndex].trs.forEach((item) => {
+            item.tds.forEach((val) => {
               val.list = [];
             });
           });
@@ -209,7 +211,7 @@ export default {
       this.$emit("handleSetSelectItem", record);
     },
     handleCopy(isCopy = true, data) {
-      const traverse = array => {
+      const traverse = (array) => {
         array.forEach((element, index) => {
           if (element.key === this.selectItem.key) {
             if (isCopy) {
@@ -221,14 +223,14 @@ export default {
             }
             // 复制完成，重置key值
             const evt = {
-              newIndex: index + 1
+              newIndex: index + 1,
             };
             this.handleColAdd(evt, array, true);
             return;
           }
           if (["grid", "tabs", "selectInputList"].includes(element.type)) {
             // 栅格布局
-            element.columns.forEach(item => {
+            element.columns.forEach((item) => {
               traverse(item.list);
             });
           } else if (element.type === "card") {
@@ -244,8 +246,8 @@ export default {
           }
           if (element.type === "table") {
             // 表格布局
-            element.trs.forEach(item => {
-              item.tds.forEach(val => {
+            element.trs.forEach((item) => {
+              item.tds.forEach((val) => {
                 traverse(val.list);
               });
             });
@@ -256,11 +258,11 @@ export default {
     },
     handleDelete() {
       // 删除已选择
-      const traverse = array => {
+      const traverse = (array) => {
         array = array.filter((element, index) => {
           if (["grid", "tabs", "selectInputList"].includes(element.type)) {
             // 栅格布局
-            element.columns.forEach(item => {
+            element.columns.forEach((item) => {
               item.list = traverse(item.list);
             });
           }
@@ -270,24 +272,23 @@ export default {
           }
           if (element.type === "table") {
             // 表格布局
-            element.trs.forEach(item => {
-              item.tds.forEach(val => {
+            element.trs.forEach((item) => {
+              item.tds.forEach((val) => {
                 val.list = traverse(val.list);
               });
             });
           }
           if (element.key !== this.selectItem.key) {
             return true;
-          } else {
-            if (array.length === 1) {
-              this.handleSelectItem({ key: "" });
-            } else if (array.length - 1 > index) {
-              this.handleSelectItem(array[index + 1]);
-            } else {
-              this.handleSelectItem(array[index - 1]);
-            }
-            return false;
           }
+          if (array.length === 1) {
+            this.handleSelectItem({ key: "" });
+          } else if (array.length - 1 > index) {
+            this.handleSelectItem(array[index + 1]);
+          } else {
+            this.handleSelectItem(array[index - 1]);
+          }
+          return false;
         });
         return array;
       };
@@ -348,7 +349,7 @@ export default {
       // 向右合并
       // 获取当前列的所有colspan总和
       const sumCols = this.rightMenuSelectValue.trs[this.trIndex].tds
-        .map(item => item.colspan)
+        .map((item) => item.colspan)
         .reduce(function(partial, value) {
           return partial + value;
         });
@@ -419,7 +420,7 @@ export default {
           this.rightMenuSelectValue.trs[rowIndex].tds.splice(colIndex, 1, {
             colspan: 1,
             rowspan: 1,
-            list: []
+            list: [],
           });
         }
       }
@@ -430,11 +431,11 @@ export default {
     handleAddCol() {
       // 增加列
 
-      this.rightMenuSelectValue.trs.forEach(item => {
+      this.rightMenuSelectValue.trs.forEach((item) => {
         item.tds.splice(this.tdIndex + 1, 0, {
           colspan: 1,
           rowspan: 1,
-          list: []
+          list: [],
         });
       });
     },
@@ -442,7 +443,7 @@ export default {
       // 增加行
       // 获取总col值
       const sumCols = this.rightMenuSelectValue.trs[0].tds
-        .map(item => item.colspan)
+        .map((item) => item.colspan)
         .reduce(function(partial, value) {
           return partial + value;
         });
@@ -451,13 +452,13 @@ export default {
         rowJson.tds.push({
           colspan: 1,
           rowspan: 1,
-          list: []
+          list: [],
         });
       }
 
       // 取当前rowspan最大值
       let maxRowSpan = 1;
-      this.rightMenuSelectValue.trs[this.trIndex].tds.forEach(item => {
+      this.rightMenuSelectValue.trs[this.trIndex].tds.forEach((item) => {
         if (maxRowSpan < item.rowspan) {
           maxRowSpan = item.rowspan;
         }
@@ -491,7 +492,7 @@ export default {
     handleRemoveRightMenu() {
       // 取消右键菜单
       this.showRightMenu = false;
-    }
+    },
   },
   mounted() {
     // 添加监听取消右键菜单
@@ -506,6 +507,6 @@ export default {
       this.handleRemoveRightMenu,
       true
     );
-  }
+  },
 };
 </script>

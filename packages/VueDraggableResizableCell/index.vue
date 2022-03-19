@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-18 15:23:19
+ * @LastEditTime : 2022-03-19 21:40:40
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/index.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -60,12 +60,10 @@ import {
   assignNoNullValue,
   checkAssert,
   isFunction,
+  splice,
   getBoundingClientRect,
   isPointInDOMRect,
   forEachNode,
-  getOffsetRect,
-  addEvent,
-  removeEvent,
   getDocumentElementFontSize,
   fitTextToBox,
   boundNumberFilter,
@@ -222,21 +220,7 @@ export default {
     },
   },
   created() {
-    debug(
-      "created",
-      `${this._uid} created`,
-      ` parent: ${this.$parent._uid}`,
-      this
-    );
-    let parent = this.$parent;
-    while (parent) {
-      if (this.isTypeOfCell(parent)) {
-        this.cell.parent = parent;
-        parent.cell.children.push(this);
-        break;
-      }
-      parent = parent?.$parent;
-    }
+    this.updateHierarchy();
     store.cells.push(this);
   },
   beforeMount() {
@@ -249,9 +233,38 @@ export default {
     debug("updated", this._uid);
   },
   destroyed() {
-    store.cells.splice(store.cells.indexOf(this), 1);
+    splice(store.cells, this);
+    const { parent } = this.cell;
+    splice(parent?.cell?.children, this);
   },
   methods: {
+    updateHierarchy() {
+      let parentCell = null;
+      let parent = this.$parent;
+      while (parent) {
+        if (this.isTypeOfCell(parent)) {
+          parentCell = parent;
+          break;
+        }
+        parent = parent?.$parent;
+      }
+      if (parentCell) {
+        this.cell.parent = parentCell;
+        parentCell.cell.children.push(this);
+      }
+
+      // debug
+      debug(
+        "updateHierarchy",
+        `${this._uid} created`,
+        `parent:${this.$parent._uid}`,
+        {
+          store,
+          this: this,
+          parentCell,
+        }
+      );
+    },
     /**
      * 独立方法：用于同一处理组件挂载后的整体操作
      * 计算及更新布局，包括子元素的布局
@@ -403,9 +416,10 @@ export default {
      * 判断是否为本组件实例
      */
     isTypeOfCell(vueInstance) {
+      const { $options: options } = vueInstance;
       return !!(
-        vueInstance?.isVueDraggableResizableCell &&
-        [vueComponentName, `<${vueComponentName}>`].includes(vueInstance?._name)
+        options?.computed?.isVueDraggableResizableCell &&
+        [vueComponentName, `<${vueComponentName}>`].includes(options?.name)
       );
     },
     /**
@@ -559,6 +573,7 @@ export default {
         node[this.privateMarkPropertyName] = key;
         let extraInfo = {};
         onCacheHooks.forEach(
+          // eslint-disable-next-line no-return-assign
           (hook) =>
             (extraInfo = Object.assign(
               extraInfo,
@@ -688,8 +703,8 @@ export default {
             step,
             context,
           });
-          context && (context = newContext);
-          step && (step = newStep);
+          context = newContext;
+          step = newStep;
         });
         const effectHandler = step(this, context);
         // 调用后置钩子
@@ -902,6 +917,7 @@ export default {
       });
 
       // FIX: 解决内部元素变更的问题
+      // eslint-disable-next-line no-unused-expressions
       1 &&
         this.registerResizeStep("fix-inner-ele-resize-issue", () => {
           // 方便函数

@@ -3,7 +3,7 @@
  * @Date         : 2022-03-18 15:50:49
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layoutItems/layout/free.vue
- * @LastEditTime : 2022-03-19 10:45:22
+ * @LastEditTime : 2022-03-19 16:53:15
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 
@@ -32,22 +32,28 @@
         class="list-main"
         style="height: 100vh;"
       >
-        <layoutItem
-          :class="{ 'drag-move': false }"
+        <vue-draggable-resizable-cell
           v-for="item in record.list"
           :key="item.key"
-          :selectItem.sync="selectItem"
-          :startType="startType"
-          :insertAllowedType="insertAllowedType"
-          :record="item"
-          :hideModel="hideModel"
-          :config="config"
-          @handleSelectItem="handleSelectItem"
-          @handleColAdd="handleColAdd"
-          @handleCopy="$emit('handleCopy')"
-          @handleShowRightMenu="handleShowRightMenu"
-          @handleDelete="$emit('handleDelete')"
-        />
+          :resizeScope="['svg-size', 'font-size']"
+          :resizeScopeManipulation="'union'"
+          :parent="true"
+        >
+          <layoutItem
+            :class="{ 'drag-move': false }"
+            :selectItem.sync="selectItem"
+            :startType="startType"
+            :insertAllowedType="insertAllowedType"
+            :record="item"
+            :hideModel="hideModel"
+            :config="config"
+            @handleSelectItem="handleSelectItem"
+            @handleColAdd="handleColAdd"
+            @handleCopy="$emit('handleCopy')"
+            @handleShowRightMenu="handleShowRightMenu"
+            @handleDelete="$emit('handleDelete')"
+          />
+        </vue-draggable-resizable-cell>
       </transition-group>
     </draggable>
 

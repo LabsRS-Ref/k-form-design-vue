@@ -4,7 +4,7 @@
  * @Date         : 2022-03-18 11:42:28
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/.eslintrc.js
- * @LastEditTime : 2022-03-18 15:12:17
+ * @LastEditTime : 2022-03-19 21:38:48
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  */
 
@@ -48,6 +48,7 @@ module.exports = {
   rules: {
     // eslint 对eslint 内置规则的定制
     ...def(1, {
+      "no-unused-vars": "warn",
       "no-underscore-dangle": [0],
       "func-names": [0],
       "promise/param-names": [0],
