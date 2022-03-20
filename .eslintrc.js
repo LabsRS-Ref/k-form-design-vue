@@ -4,7 +4,7 @@
  * @Date         : 2022-03-18 11:42:28
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/.eslintrc.js
- * @LastEditTime : 2022-03-19 21:38:48
+ * @LastEditTime : 2022-03-20 14:57:36
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  */
 
@@ -103,6 +103,8 @@ module.exports = {
           htmlWhitespaceSensitivity: "css",
           // 换行符使用 lf
           endOfLine: "lf",
+          // 设置最大的宽度
+          printWidth: 120,
         },
         {
           usePrettierrc: false,
