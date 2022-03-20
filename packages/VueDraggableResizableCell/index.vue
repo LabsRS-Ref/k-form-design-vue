@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-19 21:40:40
+ * @LastEditTime : 2022-03-20 15:51:25
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/index.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -39,6 +39,7 @@
     :on-drag="checkAllowContinueDrag"
     :parent="constraintsInParent"
     @dragging="onDraggingEvent"
+    @dragstop="onDragEndEvent"
     @resizing="onResizingEvent"
     @resizestop="onResizeStopEvent"
     @activated="onActivatedEvent"
@@ -149,14 +150,10 @@ export default {
         return this.resizeScope;
       }
       if (this.resizeScopeManipulation === "intersect") {
-        return DEF.resizeScope.filter((item) =>
-          this.resizeScope.includes(item)
-        );
+        return DEF.resizeScope.filter((item) => this.resizeScope.includes(item));
       }
       if (this.resizeScopeManipulation === "difference") {
-        return DEF.resizeScope.filter(
-          (item) => !this.resizeScope.includes(item)
-        );
+        return DEF.resizeScope.filter((item) => !this.resizeScope.includes(item));
       }
       if (this.resizeScopeManipulation === "union") {
         return [...new Set([...this.resizeScope, ...DEF.resizeScope])];
@@ -210,12 +207,7 @@ export default {
   },
   watch: {
     size(val, oldVal) {
-      debug(
-        "watch",
-        `[vid=${this._uid},parent=${this.cell.parent?._uid}] size change`,
-        val,
-        oldVal
-      );
+      debug("watch", `[vid=${this._uid},parent=${this.cell.parent?._uid}] size change`, val, oldVal);
       this.computeAndUpdateLayout();
     },
   },
@@ -254,16 +246,11 @@ export default {
       }
 
       // debug
-      debug(
-        "updateHierarchy",
-        `${this._uid} created`,
-        `parent:${this.$parent._uid}`,
-        {
-          store,
-          this: this,
-          parentCell,
-        }
-      );
+      debug("updateHierarchy", `${this._uid} created`, `parent:${this.$parent._uid}`, {
+        store,
+        this: this,
+        parentCell,
+      });
     },
     /**
      * 独立方法：用于同一处理组件挂载后的整体操作
@@ -355,30 +342,17 @@ export default {
      */
     getCellOffsetRect() {
       const rect = this.getCellBoundingClientRect();
-      const scrollLeft =
-        window.pageXOffset || document.documentElement.scrollLeft;
-      const scrollTop =
-        window.pageYOffset || document.documentElement.scrollTop;
-      return new DOMRect(
-        rect.left + scrollLeft,
-        rect.top + scrollTop,
-        rect.width,
-        rect.height
-      );
+      const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      return new DOMRect(rect.left + scrollLeft, rect.top + scrollTop, rect.width, rect.height);
     },
     /**
      * 获得Cell最佳的包裹宽高
      */
     getCellBestWrapperSize({ consultWidth = 0, consultHeight = 0 }) {
       const rect = this.getCellBoundingClientRect();
-      const {
-        width: scrollWidth,
-        height: scrollHeight,
-      } = this.getCellScrollSize();
-      const {
-        width: offsetWidth,
-        height: offsetHeight,
-      } = this.getCellOffsetSize();
+      const { width: scrollWidth, height: scrollHeight } = this.getCellScrollSize();
+      const { width: offsetWidth, height: offsetHeight } = this.getCellOffsetSize();
 
       // 选择最优的数值
       const useBest = boundNumberFilter;
@@ -388,18 +362,8 @@ export default {
       const useScrollSize = ["SVG"].includes(ele?.nodeName);
 
       return {
-        width: useBest([
-          rect.width,
-          offsetWidth,
-          consultWidth,
-          ...[useScrollSize ? scrollWidth : 0],
-        ]),
-        height: useBest([
-          rect.height,
-          offsetHeight,
-          consultHeight,
-          ...[useScrollSize ? scrollHeight : 0],
-        ]),
+        width: useBest([rect.width, offsetWidth, consultWidth, ...[useScrollSize ? scrollWidth : 0]]),
+        height: useBest([rect.height, offsetHeight, consultHeight, ...[useScrollSize ? scrollHeight : 0]]),
       };
     },
     /**
@@ -506,10 +470,7 @@ export default {
 
           if (returnValForBeforeHooks) {
             fns.forEach((fn) => fn(e, ...args));
-            hooksOnAfter.reduce(
-              (state, fn) => check(state) && check(fn(e, ctx, ...args)),
-              {}
-            );
+            hooksOnAfter.reduce((state, fn) => check(state) && check(fn(e, ctx, ...args)), {});
           }
         };
         handler.__extra__ = {
@@ -551,15 +512,9 @@ export default {
     cacheCellLayoutData({ width, height }) {
       debug("cacheCellLayoutData", `${this._uid}`, { width, height });
       const ele = this.getCellElement();
-      const beforeHooks = [].concat(
-        this.cellChildNodeInitInfoHooks?.beforeInit || []
-      );
-      const onCacheHooks = [].concat(
-        this.cellChildNodeInitInfoHooks?.onCacheEachNode || []
-      );
-      const afterHooks = [].concat(
-        this.cellChildNodeInitInfoHooks?.afterInit || []
-      );
+      const beforeHooks = [].concat(this.cellChildNodeInitInfoHooks?.beforeInit || []);
+      const onCacheHooks = [].concat(this.cellChildNodeInitInfoHooks?.onCacheEachNode || []);
+      const afterHooks = [].concat(this.cellChildNodeInitInfoHooks?.afterInit || []);
 
       beforeHooks.forEach((hook) => hook(this, ele));
 
@@ -574,20 +529,12 @@ export default {
         let extraInfo = {};
         onCacheHooks.forEach(
           // eslint-disable-next-line no-return-assign
-          (hook) =>
-            (extraInfo = Object.assign(
-              extraInfo,
-              hook(this, node, key, extraInfo) || {}
-            ))
+          (hook) => (extraInfo = Object.assign(extraInfo, hook(this, node, key, extraInfo) || {}))
         );
         const boundingClientRect = getBoundingClientRect(node);
 
-        const fontSize = parseFloat(
-          this.getHTMLElementComputedStyle(node, "font-size")
-        );
-        const lineHeight = parseFloat(
-          this.getHTMLElementComputedStyle(node, "line-height")
-        );
+        const fontSize = parseFloat(this.getHTMLElementComputedStyle(node, "font-size"));
+        const lineHeight = parseFloat(this.getHTMLElementComputedStyle(node, "line-height"));
         const getDefaultFontSize = getDocumentElementFontSize;
 
         this.cell.cache[key] = this.cell.cache[key] ?? {};
@@ -605,9 +552,7 @@ export default {
           // 字体大小，可能为NaN
           fontSize: Number.isNaN(fontSize) ? getDefaultFontSize() : fontSize,
           // 行高，可能为NaN
-          lineHeight: Number.isNaN(lineHeight)
-            ? getDefaultFontSize() * 1.5
-            : lineHeight,
+          lineHeight: Number.isNaN(lineHeight) ? getDefaultFontSize() * 1.5 : lineHeight,
         };
 
         // 初始化状态, 用于记录最初状态，不用频繁更新
@@ -677,12 +622,7 @@ export default {
         effects: { resize: resizeEffects },
       } = this.cell;
 
-      const [
-        beforeHooks = [],
-        afterHooks = [],
-        beforeEachHooks = [],
-        afterEachHooks = [],
-      ] = [
+      const [beforeHooks = [], afterHooks = [], beforeEachHooks = [], afterEachHooks = []] = [
         "beforeRunAllResizeSteps",
         "afterRunAllResizeSteps",
         "beforeRunEachResizeStep",
@@ -708,9 +648,7 @@ export default {
         });
         const effectHandler = step(this, context);
         // 调用后置钩子
-        afterEachHooks.forEach((hook) =>
-          hook(this, { key, step, context, effectHandler })
-        );
+        afterEachHooks.forEach((hook) => hook(this, { key, step, context, effectHandler }));
         if (isFunction(effectHandler)) {
           effectHandler.__extra__ = { key, context };
           this.registerResizeEffect(key, effectHandler);
@@ -774,14 +712,8 @@ export default {
       this.top = assignNoNullValue(this.top, top);
     },
     changeSize(width = 0, height = 0) {
-      checkAssert(
-        width >= 0,
-        `width is not available [${width}], must be greater than 0`
-      );
-      checkAssert(
-        height >= 0,
-        `"height is not available [${height}], must be greater than 0`
-      );
+      checkAssert(width >= 0, `width is not available [${width}], must be greater than 0`);
+      checkAssert(height >= 0, `"height is not available [${height}], must be greater than 0`);
 
       this.width = assignNoNullValue(this.width, width);
       this.height = assignNoNullValue(this.height, height);
@@ -802,9 +734,7 @@ export default {
     resizeCell(l, t, w, h, parent = null) {
       const beforeHooks = [].concat(this.resizeHooks?.beforeResizeCell || []);
       const afterHooks = [].concat(this.resizeHooks?.afterResizeCell || []);
-      const onHooks = [].concat(
-        this.resizeHooks?.onResizeCellForEachNode || []
-      );
+      const onHooks = [].concat(this.resizeHooks?.onResizeCellForEachNode || []);
       beforeHooks.forEach((hook) => hook(this, l, t, w, h));
 
       // 计算偏移量
@@ -841,10 +771,7 @@ export default {
         (_, { ele: element }) => {
           const recursiveChildNodes = false;
           const rootHandle = () => {
-            if (
-              typeof this.reserveCellTransition === "boolean" &&
-              !this.reserveCellTransition
-            ) {
+            if (typeof this.reserveCellTransition === "boolean" && !this.reserveCellTransition) {
               // eslint-disable-next-line no-param-reassign
               element.style.transition = "none";
             } else if (typeof this.reserveCellTransition === "string") {
@@ -866,10 +793,7 @@ export default {
           const allChildNodesHandle = () => {
             forEachNode(ele, (node) => {
               let transition = "";
-              if (
-                typeof this.reserveCellTransition === "boolean" &&
-                !this.reserveCellTransition
-              ) {
+              if (typeof this.reserveCellTransition === "boolean" && !this.reserveCellTransition) {
                 transition = "none";
               } else if (typeof this.reserveCellTransition === "string") {
                 transition = this.reserveCellTransition;
@@ -888,10 +812,7 @@ export default {
               forEachNode(ele, (node) => {
                 const key = node[this.privateMarkPropertyName];
                 const nodeInfo = this.getCellChildNodeInitInfoByKey(key);
-                if (
-                  ![undefined, null].includes(node?.style?.transition) &&
-                  nodeInfo
-                ) {
+                if (![undefined, null].includes(node?.style?.transition) && nodeInfo) {
                   // eslint-disable-next-line no-param-reassign
                   node.style.transition = nodeInfo?.style?.transition;
                 }
@@ -964,25 +885,18 @@ export default {
                 // 根据宽度和高度重新设位置及尺寸
                 nestingCell.onResizingEvent(left, top, width, height, parent);
                 // 注册自身子Cell的resize副作用事件
-                this.registerResizeEffect(
-                  `nesting-cell-resize-effect-${nestingCell._uid}-${this._uid}`,
-                  () => {
-                    debug(
-                      `nesting-cell-resize-effect call`,
-                      `${nestingCell._uid}-${this._uid}`,
-                      {
-                        left,
-                        top,
-                        width,
-                        height,
-                        widthChangeRatio,
-                        heightChangeRatio,
-                      }
-                    );
-                    // 计算新的left， top，width，height
-                    nestingCell.onResizeStopEvent(left, top, width, height);
-                  }
-                );
+                this.registerResizeEffect(`nesting-cell-resize-effect-${nestingCell._uid}-${this._uid}`, () => {
+                  debug(`nesting-cell-resize-effect call`, `${nestingCell._uid}-${this._uid}`, {
+                    left,
+                    top,
+                    width,
+                    height,
+                    widthChangeRatio,
+                    heightChangeRatio,
+                  });
+                  // 计算新的left， top，width，height
+                  nestingCell.onResizeStopEvent(left, top, width, height);
+                });
               }
               return;
             }
@@ -994,8 +908,7 @@ export default {
               const nodeInfo = _getNodeInfo(key, { node, key });
               if (!nodeInfo.isRootNode) {
                 // eslint-disable-next-line no-param-reassign
-                node.style.zoom =
-                  changeRatio * parseFloat(nodeInfo.style.zoom || 1.0);
+                node.style.zoom = changeRatio * parseFloat(nodeInfo.style.zoom || 1.0);
               }
             }
 
@@ -1003,13 +916,8 @@ export default {
             if (this.enableResizeFontSize) {
               if (node?.nodeName === "#text") {
                 const { parentNode, nodeValue } = node;
-                const key =
-                  parentNode[(parent ?? this).privateMarkPropertyName];
-                const nodeInfo = _getNodeInfo(
-                  key,
-                  { node, key, parentNode },
-                  parent ?? this
-                );
+                const key = parentNode[(parent ?? this).privateMarkPropertyName];
+                const nodeInfo = _getNodeInfo(key, { node, key, parentNode }, parent ?? this);
                 if (nodeInfo) {
                   // 计算合适的字体大小
                   const {
@@ -1027,8 +935,7 @@ export default {
                     parentNode.clientHeight,
                     this.getHTMLElementComputedStyle(parentNode, "font-family")
                   );
-                  const ratioFontSize =
-                    Math.min(w / width, h / height) * initialFontSize;
+                  const ratioFontSize = Math.min(w / width, h / height) * initialFontSize;
 
                   const strategy = this.resizeFontStrategy;
                   const [_, fontSize] = [
@@ -1052,15 +959,10 @@ export default {
 
               if (node?.nodeName === "INPUT") {
                 const key = node[(parent ?? this).privateMarkPropertyName];
-                const nodeInfo = _getNodeInfo(
-                  key,
-                  { node, key },
-                  parent ?? this
-                );
+                const nodeInfo = _getNodeInfo(key, { node, key }, parent ?? this);
                 if (nodeInfo) {
                   // eslint-disable-next-line no-param-reassign
-                  node.style.fontSize = `${changeRatio *
-                    parseFloat(nodeInfo.fontSize)}px`;
+                  node.style.fontSize = `${changeRatio * parseFloat(nodeInfo.fontSize)}px`;
                 }
               }
             }
@@ -1087,16 +989,17 @@ export default {
      * @return {boolean}
      */
     hasChildrenCellContainsPoint(point = { x: 0, y: 0 }, options = {}) {
-      const fn = (children = []) => {
+      const fn = (getChildrenFn = () => [], context = this) => {
+        const children = getChildrenFn(context);
         if (children.length === 0) return false;
         return children.some((child) => {
           if (this.isTypeOfCell(child)) {
             return child.isPointInCell(point);
           }
-          return fn(child.$children);
+          return fn(getChildrenFn, child);
         });
       };
-      return fn(this.$children);
+      return fn((context) => context?.$children, this);
     },
     /**
      * 是否允许Resize启动
@@ -1110,8 +1013,7 @@ export default {
       const mouseY = e.touches ? e.touches[0].pageY : e.pageY;
 
       // check the mouse is in the cell child node
-      if (this.hasChildrenCellContainsPoint({ x: mouseX, y: mouseY }))
-        return false;
+      if (this.hasChildrenCellContainsPoint({ x: mouseX, y: mouseY })) return false;
 
       return true;
     },
@@ -1125,16 +1027,8 @@ export default {
       // check enable resize for width or height
       const checkFns = [
         () => {
-          if (
-            !this.enableResizeWidth &&
-            Math.round(width) !== Math.round(this.width)
-          )
-            return false;
-          if (
-            !this.enableResizeHeight &&
-            Math.round(height) !== Math.round(this.height)
-          )
-            return false;
+          if (!this.enableResizeWidth && Math.round(width) !== Math.round(this.width)) return false;
+          if (!this.enableResizeHeight && Math.round(height) !== Math.round(this.height)) return false;
 
           return true;
         },
@@ -1149,13 +1043,17 @@ export default {
      * @returns {boolean} true, 允许，false，不允许
      */
     checkAllowDragStart(e) {
+      // 不管是否允许，都转发事件
+      this.$emit(DEF.instanceEventType.dragStart, this, e);
+
       // check enable drag for event
       const mouseX = e.touches ? e.touches[0].pageX : e.pageX;
       const mouseY = e.touches ? e.touches[0].pageY : e.pageY;
 
       // check the mouse is in the cell child node
-      if (this.hasChildrenCellContainsPoint({ x: mouseX, y: mouseY }))
-        return false;
+      if (this.hasChildrenCellContainsPoint({ x: mouseX, y: mouseY })) return false;
+
+      this.$emit(DEF.instanceEventType.cellDragStart, this, e);
 
       return true;
     },
@@ -1177,6 +1075,8 @@ export default {
      * @param {object} parent 用于嵌套Cell的指明有谁引起的，直接穿透
      */
     onResizingEvent(left, top, width, height, parent = null) {
+      this.$emit(DEF.instanceEventType.resizing, { left, top, width, height });
+
       const params = JSON.stringify({ left, top, width, height });
       if (this.tempData.lastResizeInfo === params) return;
 
@@ -1190,6 +1090,13 @@ export default {
       this.resizeCell(left, top, width, height, parent);
       afterHooks.forEach((hook) => hook(this, left, top, width, height));
 
+      this.$emit(DEF.instanceEventType.cellResizing, {
+        left,
+        top,
+        width,
+        height,
+      });
+
       // 记录最后一次的改变信息
       this.tempData.lastResizeInfo = params;
     },
@@ -1202,6 +1109,8 @@ export default {
      */
     onResizeStopEvent(left, top, width, height) {
       debug(`onResizeStopEvent`, `${this._uid}`);
+      this.$emit(DEF.instanceEventType.resizestop, { left, top, width, height });
+
       const beforeHooks = [].concat(this.resizeHooks?.beforeResizeStop || []);
       const afterHooks = [].concat(this.resizeHooks?.afterResizeStop || []);
       beforeHooks.forEach((hook) => hook(this, left, top, width, height));
@@ -1209,13 +1118,19 @@ export default {
       // 更新当前容器元素的属性值
       this.changePosition(left, top);
       this.changeSize(width, height);
-      this.$emit(DEF.instanceEventType.cellResizeEnd, left, top, width, height);
 
       // 副作用启动
       this.activeAllResizeEffects();
 
       // 钩子函数
       afterHooks.forEach((hook) => hook(this, left, top, width, height));
+
+      this.$emit(DEF.instanceEventType.cellResizeEnd, {
+        left,
+        top,
+        width,
+        height,
+      });
     },
     /**
      * 拖拽的回调
@@ -1223,6 +1138,8 @@ export default {
      * @param {number} top
      */
     onDraggingEvent(left, top) {
+      this.$emit(DEF.instanceEventType.dragging, { left, top });
+
       const params = JSON.stringify({ left, top });
       if (this.tempData.lastDraggingInfo === params) return;
       debug(`onDraggingEvent`, `${this._uid}`);
@@ -1235,21 +1152,40 @@ export default {
       this.changePosition(left, top);
 
       afterHooks.forEach((hook) => hook(this, left, top));
+      this.$emit(DEF.instanceEventType.cellDragging, { left, top });
 
       // 记录最后一次的改变信息
       this.tempData.lastDraggingInfo = params;
     },
     /**
+     * 拖拽结束的事件通知
+     * @param {number} left
+     * @param {number} top
+     */
+    onDragEndEvent(left, top) {
+      this.$emit(DEF.instanceEventType.dragEnd, { left, top });
+
+      const beforeHooks = [].concat(this.dragHooks?.beforeDragEnd || []);
+      const afterHooks = [].concat(this.dragHooks?.afterDragEnd || []);
+      beforeHooks.forEach((hook) => hook(this, left, top));
+
+      // 更新当前容器元素的属性值
+      this.changePosition(left, top);
+
+      afterHooks.forEach((hook) => hook(this, left, top));
+      this.$emit(DEF.instanceEventType.cellDragEnd, { left, top });
+    },
+    /**
      * 挂载激活事件
      */
     onActivatedEvent() {
-      // debug(`onActivatedEvent)
+      this.$emit(DEF.instanceEventType.activated, this);
     },
     /**
      * 未激活选择事件
      */
     onDeactivatedEvent() {
-      debug("onDeactivatedEvent", `${this._uid}`);
+      this.$emit(DEF.instanceEventType.deactivated, this);
     },
   },
 };

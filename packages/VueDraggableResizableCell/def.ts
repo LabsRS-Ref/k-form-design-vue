@@ -2,8 +2,8 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-28 10:25:12
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-16 14:50:51
- * @FilePath     : \__nuxt2.15.2_del\components\Cell\def.ts
+ * @LastEditTime : 2022-03-20 15:59:25
+ * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/def.ts
  * @Description  : Created by sunzhifeng, Please coding something here
  */
 
@@ -125,15 +125,18 @@ const def = {
    * @type: {Object}
    */
   instanceEventType: {
-    cellResizeEnd: "cell-resize-end",
-    cellResizeStart: "cell-resize-start",
-    cellResizing: "cell-resizing",
-    cellDragStart: "cell-drag-start",
-    cellDragging: "cell-dragging",
-    cellDragEnd: "cell-drag-end",
+    cellResizeEnd: "cellResizeEnd",
+    cellResizeStart: "cellResizeStart",
+    cellResizing: "cellResizing",
+    cellDragStart: "cellDragStart",
+    cellDragging: "cellDragging",
+    cellDragEnd: "cellDragEnd",
+    dragStart: "dragStart",
     dragging: "dragging",
+    dragEnd: "dragEnd",
     resizing: "resizing",
     resizestop: "resizestop",
+    activated: "activated",
     deactivated: "deactivated",
   },
 };
