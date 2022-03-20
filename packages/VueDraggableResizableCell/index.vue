@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-20 15:51:25
+ * @LastEditTime : 2022-03-20 21:08:24
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/index.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -115,8 +115,8 @@ export default {
       right: null,
       bottom: null,
 
-      width: 100,
-      height: 100,
+      width: this.initWidth ?? 10,
+      height: this.initHeight ?? 10,
 
       cell: {
         parent: null,
@@ -210,6 +210,12 @@ export default {
       debug("watch", `[vid=${this._uid},parent=${this.cell.parent?._uid}] size change`, val, oldVal);
       this.computeAndUpdateLayout();
     },
+    x(val) {
+      this.left = val;
+    },
+    y(val) {
+      this.top = val;
+    },
   },
   created() {
     this.updateHierarchy();
@@ -219,7 +225,10 @@ export default {
     this.initHooks();
   },
   mounted() {
-    this.computeAndUpdateLayout();
+    this.computeAndUpdateLayout({
+      consultWidth: this.initWidth,
+      consultHeight: this.initHeight,
+    });
   },
   updated() {
     debug("updated", this._uid);
@@ -976,9 +985,6 @@ export default {
       // 运行所有的resizeStep
       this.runResizeSteps();
 
-      // 发送事件
-      this.$emit(DEF.instanceEventType.cellResizing, this, w, h);
-
       // after hooks
       afterHooks.forEach((hook) => hook(this, w, h));
     },
@@ -1075,7 +1081,7 @@ export default {
      * @param {object} parent 用于嵌套Cell的指明有谁引起的，直接穿透
      */
     onResizingEvent(left, top, width, height, parent = null) {
-      this.$emit(DEF.instanceEventType.resizing, { left, top, width, height });
+      this.$emit(DEF.instanceEventType.resizing, this, { left, top, width, height });
 
       const params = JSON.stringify({ left, top, width, height });
       if (this.tempData.lastResizeInfo === params) return;
@@ -1090,7 +1096,8 @@ export default {
       this.resizeCell(left, top, width, height, parent);
       afterHooks.forEach((hook) => hook(this, left, top, width, height));
 
-      this.$emit(DEF.instanceEventType.cellResizing, {
+      // 发送事件
+      this.$emit(DEF.instanceEventType.cellResizing, this, {
         left,
         top,
         width,
@@ -1109,7 +1116,7 @@ export default {
      */
     onResizeStopEvent(left, top, width, height) {
       debug(`onResizeStopEvent`, `${this._uid}`);
-      this.$emit(DEF.instanceEventType.resizestop, { left, top, width, height });
+      this.$emit(DEF.instanceEventType.resizestop, this, { left, top, width, height });
 
       const beforeHooks = [].concat(this.resizeHooks?.beforeResizeStop || []);
       const afterHooks = [].concat(this.resizeHooks?.afterResizeStop || []);
@@ -1125,7 +1132,7 @@ export default {
       // 钩子函数
       afterHooks.forEach((hook) => hook(this, left, top, width, height));
 
-      this.$emit(DEF.instanceEventType.cellResizeEnd, {
+      this.$emit(DEF.instanceEventType.cellResizeEnd, this, {
         left,
         top,
         width,
@@ -1138,7 +1145,7 @@ export default {
      * @param {number} top
      */
     onDraggingEvent(left, top) {
-      this.$emit(DEF.instanceEventType.dragging, { left, top });
+      this.$emit(DEF.instanceEventType.dragging, this, { left, top });
 
       const params = JSON.stringify({ left, top });
       if (this.tempData.lastDraggingInfo === params) return;
@@ -1152,7 +1159,7 @@ export default {
       this.changePosition(left, top);
 
       afterHooks.forEach((hook) => hook(this, left, top));
-      this.$emit(DEF.instanceEventType.cellDragging, { left, top });
+      this.$emit(DEF.instanceEventType.cellDragging, this, { left, top });
 
       // 记录最后一次的改变信息
       this.tempData.lastDraggingInfo = params;
@@ -1173,7 +1180,7 @@ export default {
       this.changePosition(left, top);
 
       afterHooks.forEach((hook) => hook(this, left, top));
-      this.$emit(DEF.instanceEventType.cellDragEnd, { left, top });
+      this.$emit(DEF.instanceEventType.cellDragEnd, this, { left, top });
     },
     /**
      * 挂载激活事件

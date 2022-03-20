@@ -3,13 +3,13 @@
  * @Date         : 2022-03-18 09:03:05
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layoutItem.vue
- * @LastEditTime : 2022-03-19 16:27:04
+ * @LastEditTime : 2022-03-20 09:33:34
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 <template>
   <div
     :class="{
-      'layout-width': isLayout,
+      'layout-width': enableUseLayoutWidth,
     }"
   >
     <component
@@ -29,8 +29,9 @@ export default {
   name: "layoutItem",
   extends: base,
   computed: {
-    isLayout() {
-      return !!this.layoutComponent;
+    enableUseLayoutWidth() {
+      const { type } = this.record;
+      return !!this.layoutComponent || ["html", "divider"].includes(type);
     },
     layoutComponent() {
       const { type } = this.record;
@@ -40,8 +41,6 @@ export default {
         tabs: layouts.tabsLayout,
         grid: layouts.gridLayout,
         card: layouts.cardLayout,
-        divider: layouts.freeLayout,
-        html: layouts.freeLayout,
       }[type];
     },
     nodeComponent() {

@@ -15,6 +15,17 @@
           <a-input v-model="selectItem.label" placeholder="请输入" />
         </a-form-item>
 
+        <a-form-item label="VDRCell属性">
+          <kCheckbox
+            v-if="typeof vdrCellOptions.enable !== 'undefined'"
+            v-model="vdrCellOptions.enable"
+            label="启用Cell"
+          />
+          <p style="overflow-wrap: anywhere;">
+            {{ JSON.stringify(vdrCellOptions, 2) }}
+          </p>
+          <a-input-number v-model="vdrCellOptions.x" label="x" />
+        </a-form-item>
 
         <a-form-item label="样式">
           <a-input v-model="options.styles" placeholder="样式" />
@@ -215,7 +226,7 @@
               'select',
               'switch',
               'slider',
-              'html'
+              'html',
             ].includes(selectItem.type) &&
               typeof options.defaultValue !== 'undefined'
           "
@@ -570,6 +581,7 @@
  */
 import KChangeOption from "../../KChangeOption/index.vue";
 import kCheckbox from "../../KCheckbox/index.vue";
+
 export default {
   name: "formItemProperties",
   data() {
@@ -578,92 +590,95 @@ export default {
         // 字体选择设置
         {
           value: "SimSun",
-          label: "宋体"
+          label: "宋体",
         },
         {
           value: "FangSong",
-          label: "仿宋"
+          label: "仿宋",
         },
         {
           value: "SimHei",
-          label: "黑体"
+          label: "黑体",
         },
         {
           value: "PingFangSC-Regular",
-          label: "苹方"
+          label: "苹方",
         },
         {
           value: "KaiTi",
-          label: "楷体"
+          label: "楷体",
         },
         {
           value: "LiSu",
-          label: "隶书"
-        }
+          label: "隶书",
+        },
       ],
       sizeOptions: [
-        //字号选择设置
+        // 字号选择设置
         {
           value: "26pt",
-          label: "一号"
+          label: "一号",
         },
         {
           value: "24pt",
-          label: "小一"
+          label: "小一",
         },
         {
           value: "22pt",
-          label: "二号"
+          label: "二号",
         },
         {
           value: "18pt",
-          label: "小二"
+          label: "小二",
         },
         {
           value: "16pt",
-          label: "三号"
+          label: "三号",
         },
         {
           value: "15pt",
-          label: "小三"
+          label: "小三",
         },
         {
           value: "14pt",
-          label: "四号"
+          label: "四号",
         },
         {
           value: "12pt",
-          label: "小四"
+          label: "小四",
         },
         {
           value: "10.5pt",
-          label: "五号"
+          label: "五号",
         },
         {
           value: "9pt",
-          label: "小五"
-        }
-      ]
+          label: "小五",
+        },
+      ],
     };
   },
   computed: {
     options() {
       return this.selectItem.options || {};
-    }
+    },
+    vdrCellOptions() {
+      return this.selectItem.vdrCellOptions || {};
+    },
   },
   props: {
     selectItem: {
       type: Object,
-      required: true
+      required: true,
     },
     hideModel: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   components: {
     KChangeOption,
-    kCheckbox
-  }
+    kCheckbox,
+  },
 };
 </script>

@@ -2,12 +2,13 @@
  * @Description: 将数据通过k-form-item组件解析，生成控件
  * @Author: kcz
  * @Date: 2019-12-30 00:37:05
- * @LastEditTime : 2022-03-19 18:58:37
+ * @LastEditTime : 2022-03-20 20:47:19
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/formNode.vue
  -->
 <template>
-  <component :is="wrapper" v-bind="wrapperProps" v-on="wrapperListeners">
+  <!-- <component :is="wrapper" v-bind="wrapperProps" @cellDragging="handleCellDragging"> -->
+  <component :is="wrapper" v-bind="wrapperProps" v-on="{ ...$listeners, ...wrapperListeners }">
     <div
       class="drag-move-box"
       @click.stop="$emit('handleSelectItem', record)"
@@ -16,11 +17,7 @@
       <div class="form-item-box">
         <kFormItem :formConfig="config" :record="record" />
       </div>
-      <div
-        v-if="!hideModel"
-        class="show-key-box"
-        v-text="record.label + (record.model ? '/' + record.model : '')"
-      />
+      <div v-if="!hideModel" class="show-key-box" v-text="record.label + (record.model ? '/' + record.model : '')" />
       <div
         class="copy"
         :class="record.key === selectItem.key ? 'active' : 'unactivated'"
@@ -69,35 +66,70 @@ export default {
     },
   },
   computed: {
+    /** 获得针对 VueDraggableResizableCell 的选项 */
+    vdrCellOptions() {
+      const { vdrCellOptions = {} } = this.record;
+      return vdrCellOptions;
+    },
+    /** 判断是否启用了 VueDraggableResizableCell */
+    isVDRCellEnable() {
+      const { enable = false } = this.vdrCellOptions;
+      return enable;
+    },
     wrapper() {
-      const {
-        cell: { enable },
-      } = this.record;
-      return enable ? VueDraggableResizableCell : Fragment;
+      return this.isVDRCellEnable ? VueDraggableResizableCell : Fragment;
     },
     wrapperProps() {
-      const {
-        cell: { enable },
-      } = this.record;
-      return enable
+      return this.isVDRCellEnable
         ? {
             resizeScope: ["svg-size"],
             resizeScopeManipulation: "union",
             parent: true,
+            x: this.vdrCellOptions.x,
+            y: this.vdrCellOptions.y,
+            initWidth: this.vdrCellOptions.width,
+            initHeight: this.vdrCellOptions.height,
           }
         : {};
     },
     wrapperListeners() {
-      const {
-        cell: { enable },
-      } = this.record;
-      return enable ? {} : {};
+      return this.isVDRCellEnable
+        ? {
+            cellDragStart: this.handleCellDragStart,
+            cellDragging: this.handleCellDragging,
+            cellDragEnd: this.handleCellDragEnd,
+            cellResizeEnd: this.handleCellResizeEnd,
+            cellResizeStart: this.handleCellResizeStart,
+            cellResizing: this.handleCellResizing,
+          }
+        : {};
     },
   },
   components: {
     VueDraggableResizableCell,
     Fragment,
     kFormItem,
+  },
+  methods: {
+    handleCellDragStart(_) {
+      console.log("%c%s", "color: #44e600", "handleCellDragStart");
+    },
+    handleCellDragging(_, { left, top }) {
+      console.log("%c%s", "color: #00a3cc", "handleCellDragging");
+      this.vdrCellOptions.x = left;
+      this.vdrCellOptions.y = top;
+    },
+    handleCellDragEnd(_) {
+      console.log("%c%s", "color: #aa00ff", "handleCellDragEnd");
+    },
+    handleCellResizeStart(_) {},
+    handleCellResizing(_, { left, top, width, height }) {
+      this.vdrCellOptions.width = width;
+      this.vdrCellOptions.height = height;
+      this.vdrCellOptions.x = left;
+      this.vdrCellOptions.y = top;
+    },
+    handleCellResizeEnd(_) {},
   },
 };
 </script>

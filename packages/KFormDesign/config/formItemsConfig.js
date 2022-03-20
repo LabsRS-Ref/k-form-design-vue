@@ -7,8 +7,13 @@
 // 默认 VueDraggableResizableCell 的配置
 const defaultDraggableResizableCell = {
   // 单元格默认配置
-  cell: {
+  vdrCellOptions: {
     enable: true,
+    x: 0,
+    y: 0,
+    z: 0,
+    width: 100,
+    height: 100,
   },
 };
 
@@ -19,7 +24,7 @@ const commonStyles = {
 // 基础控件
 export const basicsList = [
   {
-    cell: {
+    vdrCellOptions: {
       enable: false,
     },
     type: "input", // 表单类型
@@ -542,6 +547,10 @@ export const basicsList = [
     ],
   },
   {
+    vdrCellOptions: {
+      width: 200,
+      height: 100,
+    },
     type: "button", // 表单类型
     label: "按钮", // 标题文字
     icon: "icon-button-remove",
@@ -594,11 +603,14 @@ export const basicsList = [
   },
 ].map((item) => {
   return {
-    ...defaultDraggableResizableCell,
     ...item,
     options: {
       ...item.options,
       ...commonStyles,
+    },
+    vdrCellOptions: {
+      ...(defaultDraggableResizableCell.vdrCellOptions ?? {}),
+      ...(item.vdrCellOptions ?? {}),
     },
   };
 });

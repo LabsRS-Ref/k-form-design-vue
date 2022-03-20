@@ -2,8 +2,8 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-28 10:26:57
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-16 14:29:46
- * @FilePath     : \__nuxt2.15.2_del\components\Cell\props.ts
+ * @LastEditTime : 2022-03-20 20:20:11
+ * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/props.ts
  * @Description  : Created by sunzhifeng, Please coding something here
  */
 
@@ -89,6 +89,30 @@ const props = {
     default: "auto",
     validator: (val: number | string) =>
       typeof val === "string" ? val === "auto" : val >= 0,
+  },
+  /**
+   * @description: 设置Cell初始化的宽度
+   * @type: {Number, undefined}
+   * @default: undefined
+   */
+  initWidth: {
+    type: [Number, undefined],
+    default: undefined,
+    validator: (val: number | undefined) => {
+      return val === undefined || val >= 1;
+    }
+  },
+  /**
+   * @description: 设置Cell初始化的高度
+   * @type: {Number, undefined}
+   * @default: undefined
+   */
+  initHeight: {
+    type: [Number, undefined],
+    default: undefined,
+    validator: (val: number | undefined) => {
+      return val === undefined || val >= 1;
+    }
   },
   /**
    * @description: 设置Cell最小宽度
