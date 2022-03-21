@@ -2,7 +2,7 @@
  * @Description: 将数据通过k-form-item组件解析，生成控件
  * @Author: kcz
  * @Date: 2019-12-30 00:37:05
- * @LastEditTime : 2022-03-21 11:42:30
+ * @LastEditTime : 2022-03-21 16:58:08
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/formNode.vue
  -->
@@ -61,13 +61,7 @@ export default {
     wrapperProps() {
       return this.isVDRCellEnable
         ? {
-            resizeScope: ["svg-size"],
-            resizeScopeManipulation: "union",
-            parent: true,
-            x: this.vdrCellOptions.x,
-            y: this.vdrCellOptions.y,
-            initWidth: this.vdrCellOptions.width,
-            initHeight: this.vdrCellOptions.height,
+            ...this.vdrCellOptions,
           }
         : {};
     },
