@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-21 11:31:49
+ * @LastEditTime : 2022-03-21 17:26:48
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/index.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -69,6 +69,11 @@ import {
   fitTextToBox,
   boundNumberFilter,
 } from "./util";
+
+// 导入steps
+import fixTransitionResizeIssuesStep from "./steps/fix-transition-resize-issues";
+import fixVNodeDataResizeIssuesStep from "./steps/fix-vnode-data-resize-issues";
+import fixInnerElementResizeIssuesStep from "./steps/fix-inner-element-resize-issues";
 
 const debug = (...args) => {
   const group = args[0];
@@ -771,213 +776,26 @@ export default {
         ele.style.height = `${h}px`;
       });
 
-      // FIX：解决动画问题
-      this.registerResizeStep(
-        "fix-root-ele-transition-issue",
-        (_, { ele: element }) => {
-          const recursiveChildNodes = false;
-          const rootHandle = () => {
-            if (typeof this.reserveCellTransition === "boolean" && !this.reserveCellTransition) {
-              // eslint-disable-next-line no-param-reassign
-              element.style.transition = "none";
-            } else if (typeof this.reserveCellTransition === "string") {
-              // eslint-disable-next-line no-param-reassign
-              element.style.transition = this.reserveCellTransition;
-            }
+      // 解决动画问题
+      fixTransitionResizeIssuesStep.install(this);
 
-            // 恢复内部元素的样式Resize前的样式
-            return () => {
-              if (!this.getCellOriginalStyle().transition) {
-                // eslint-disable-next-line no-param-reassign
-                element.style.transition = "";
-              } else {
-                // eslint-disable-next-line no-param-reassign
-                element.style.transition = this.getCellOriginalStyle().transition;
-              }
-            };
-          };
-          const allChildNodesHandle = () => {
-            forEachNode(ele, (node) => {
-              let transition = "";
-              if (typeof this.reserveCellTransition === "boolean" && !this.reserveCellTransition) {
-                transition = "none";
-              } else if (typeof this.reserveCellTransition === "string") {
-                transition = this.reserveCellTransition;
-              }
+      // 解决vnode节点data数据没有被更新
+      fixVNodeDataResizeIssuesStep.install(this);
 
-              const key = node[this.privateMarkPropertyName];
-              const nodeInfo = this.getCellChildNodeInitInfoByKey(key);
-
-              if (![undefined, null].includes(node.style?.transition)) {
-                // eslint-disable-next-line no-param-reassign
-                node.style.transition = transition;
-              }
-            });
-
-            return () => {
-              forEachNode(ele, (node) => {
-                const key = node[this.privateMarkPropertyName];
-                const nodeInfo = this.getCellChildNodeInitInfoByKey(key);
-                if (![undefined, null].includes(node?.style?.transition) && nodeInfo) {
-                  // eslint-disable-next-line no-param-reassign
-                  node.style.transition = nodeInfo?.style?.transition;
-                }
-              });
-            };
-          };
-
-          return recursiveChildNodes ? allChildNodesHandle() : rootHandle();
-        },
-        { ele }
-      );
-
-      // FIX: 解决vnode节点data数据没有被更新
-      this.registerResizeStep("fix-root-vnode-data-issue", () => {
-        // 更新内部元素的VNode
-        const node = this.getCellVNode();
-        if (node.data?.style?.width) {
-          node.data.style.width = `${w}px`;
-        }
-        if (node.data?.style?.height) {
-          node.data.style.height = `${h}px`;
-        }
+      // 解决内部元素变更的问题
+      fixInnerElementResizeIssuesStep.install(this, {
+        w,
+        h,
+        offsetLeft,
+        offsetTop,
+        widthChangeRatio,
+        heightChangeRatio,
+        changeRatio,
+        widthOffset,
+        heightOffset,
+        onHooks,
+        parent,
       });
-
-      // FIX: 解决内部元素变更的问题
-      // eslint-disable-next-line no-unused-expressions
-      1 &&
-        this.registerResizeStep("fix-inner-ele-resize-issue", () => {
-          // 方便函数
-          const _getNodeInfo = (key, context = {}, instance = this) => {
-            const nodeInfo = instance.getCellChildNodeInitInfoByKey(key);
-            checkAssert(nodeInfo, "nodeInfo is not available", {
-              context,
-              instance,
-            });
-            return nodeInfo;
-          };
-
-          // 遍历内部元素
-          forEachNode(ele, (node) => {
-            // 检测是否为嵌套子Cell中的元素，
-            // 如果是，根据处理策略是交由嵌套子Cell处理，还是直接不处理
-            const nestingCell = this.getANestedLevel0ChildCell(node);
-            if (nestingCell) {
-              // 嵌套子Cell
-              if (this.enableResizeNestingCell) {
-                // T计算偏移，left, top 应该放到合适位置
-                const { left, top } = nestingCell;
-
-                // 计算尺寸
-                const method = this.nestingCellResizeStrategy;
-                const widths = [
-                  nestingCell.width + widthOffset,
-                  nestingCell.width,
-                  Math.floor(nestingCell.width * widthChangeRatio + 0.5),
-                ];
-                const heights = [
-                  nestingCell.height + heightOffset,
-                  nestingCell.height,
-                  Math.floor(nestingCell.height * heightChangeRatio + 0.5),
-                ];
-                const [_, width, height] = [
-                  [method === "resize-wh", widths[0], heights[0]],
-                  [method === "resize-w", widths[0], heights[1]],
-                  [method === "resize-h", widths[1], heights[0]],
-                  [method === "resize-wh-ratio", widths[2], heights[2]],
-                  [method === "resize-w-ratio", widths[2], heights[1]],
-                  [method === "resize-h-ratio", widths[1], heights[2]],
-                ].filter(([m]) => m)[0];
-                // 根据宽度和高度重新设位置及尺寸
-                nestingCell.onResizingEvent(left, top, width, height, parent);
-                // 注册自身子Cell的resize副作用事件
-                this.registerResizeEffect(`nesting-cell-resize-effect-${nestingCell._uid}-${this._uid}`, () => {
-                  debug(`nesting-cell-resize-effect call`, `${nestingCell._uid}-${this._uid}`, {
-                    left,
-                    top,
-                    width,
-                    height,
-                    widthChangeRatio,
-                    heightChangeRatio,
-                  });
-                  // 计算新的left， top，width，height
-                  nestingCell.onResizeStopEvent(left, top, width, height);
-                });
-              }
-              return;
-            }
-
-            // debug(`node =`, node);
-            // 内部含有SVG元素时，需要计算比例
-            if (this.enableResizeSvgSize && node?.nodeName === "svg") {
-              const key = node[this.privateMarkPropertyName];
-              const nodeInfo = _getNodeInfo(key, { node, key });
-              if (!nodeInfo.isRootNode) {
-                // eslint-disable-next-line no-param-reassign
-                node.style.zoom = changeRatio * parseFloat(nodeInfo.style.zoom || 1.0);
-              }
-            }
-
-            // 更新font-size
-            if (this.enableResizeFontSize) {
-              if (node?.nodeName === "#text") {
-                const { parentNode, nodeValue } = node;
-                const key = parentNode[(parent ?? this).privateMarkPropertyName];
-                const nodeInfo = _getNodeInfo(key, { node, key, parentNode }, parent ?? this);
-                if (nodeInfo) {
-                  // 计算合适的字体大小
-                  const {
-                    // 使用初始化值，这样能保证整体字体大小符合常规模式
-                    initial: {
-                      fontSize: initialFontSize,
-                      cell: { width = 1, height = 1 },
-                    },
-                  } = nodeInfo;
-
-                  // 计算(勿要超过容器高度)
-                  const fitFontSize = fitTextToBox.px(
-                    nodeValue,
-                    parentNode.clientWidth,
-                    parentNode.clientHeight,
-                    this.getHTMLElementComputedStyle(parentNode, "font-family")
-                  );
-                  const ratioFontSize = Math.min(w / width, h / height) * initialFontSize;
-
-                  const strategy = this.resizeFontStrategy;
-                  const [_, fontSize] = [
-                    [strategy === "ratio", ratioFontSize],
-                    [strategy === "fit", fitFontSize],
-                    [strategy === "auto", Math.min(ratioFontSize, fitFontSize)],
-                  ].filter(([m]) => m)[0];
-
-                  debug(`update-font-size`, `${this._uid}`, {
-                    fontSize,
-                    ratioFontSize,
-                    fitFontSize,
-                    initialFontSize,
-                    width,
-                    height,
-                  });
-                  // eslint-disable-next-line no-param-reassign
-                  parentNode.style.fontSize = `${fontSize}px`;
-                }
-              }
-
-              if (node?.nodeName === "INPUT") {
-                const key = node[(parent ?? this).privateMarkPropertyName];
-                const nodeInfo = _getNodeInfo(key, { node, key }, parent ?? this);
-                if (nodeInfo) {
-                  // eslint-disable-next-line no-param-reassign
-                  node.style.fontSize = `${changeRatio * parseFloat(nodeInfo.fontSize)}px`;
-                }
-              }
-            }
-
-            onHooks.forEach((hook) => hook(this, node, w, h, changeRatio));
-          });
-
-          return () => {};
-        });
 
       // 运行所有的resizeStep
       this.runResizeSteps();
@@ -1078,7 +896,12 @@ export default {
      * @param {object} parent 用于嵌套Cell的指明有谁引起的，直接穿透
      */
     onResizingEvent(left, top, width, height, parent = null) {
-      this.$emit(DEF.instanceEventType.resizing, this, { left, top, width, height });
+      this.$emit(DEF.instanceEventType.resizing, this, {
+        left,
+        top,
+        width,
+        height,
+      });
 
       const params = JSON.stringify({ left, top, width, height });
       if (this.tempData.lastResizeInfo === params) return;
@@ -1113,7 +936,12 @@ export default {
      */
     onResizeStopEvent(left, top, width, height) {
       debug(`onResizeStopEvent`, `${this._uid}`);
-      this.$emit(DEF.instanceEventType.resizestop, this, { left, top, width, height });
+      this.$emit(DEF.instanceEventType.resizestop, this, {
+        left,
+        top,
+        width,
+        height,
+      });
 
       const beforeHooks = [].concat(this.resizeHooks?.beforeResizeStop || []);
       const afterHooks = [].concat(this.resizeHooks?.afterResizeStop || []);
