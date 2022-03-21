@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-21 10:52:43
+ * @LastEditTime : 2022-03-21 11:31:49
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/index.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -115,8 +115,8 @@ export default {
       right: null,
       bottom: null,
 
-      width: this.initWidth ?? 10,
-      height: this.initHeight ?? 10,
+      width: 10,
+      height: 10,
 
       cell: {
         parent: null,
@@ -225,10 +225,7 @@ export default {
     this.initHooks();
   },
   mounted() {
-    this.computeAndUpdateLayout({
-      consultWidth: this.initWidth,
-      consultHeight: this.initHeight,
-    });
+    this.computeAndUpdateLayout();
   },
   updated() {
     debug("updated", this._uid);
@@ -848,7 +845,7 @@ export default {
 
       // FIX: 解决内部元素变更的问题
       // eslint-disable-next-line no-unused-expressions
-      0 &&
+      1 &&
         this.registerResizeStep("fix-inner-ele-resize-issue", () => {
           // 方便函数
           const _getNodeInfo = (key, context = {}, instance = this) => {

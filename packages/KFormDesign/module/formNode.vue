@@ -2,34 +2,17 @@
  * @Description: 将数据通过k-form-item组件解析，生成控件
  * @Author: kcz
  * @Date: 2019-12-30 00:37:05
- * @LastEditTime : 2022-03-21 10:06:50
+ * @LastEditTime : 2022-03-21 11:42:30
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/formNode.vue
  -->
 <template>
   <!-- <component :is="wrapper" v-bind="wrapperProps" @cellDragging="handleCellDragging"> -->
-  <component :is="wrapper" v-bind="wrapperProps" v-on="{ ...$listeners, ...wrapperListeners }">
-    <div class="drag-move-box" :class="{ active: record.key === selectItem.key }">
-      <div class="form-item-box">
-        <kFormItem :formConfig="config" :record="record" />
-      </div>
-      <div v-if="!hideModel" class="show-key-box" v-text="record.label + (record.model ? '/' + record.model : '')" />
-      <div
-        class="copy"
-        :class="record.key === selectItem.key ? 'active' : 'unactivated'"
-        @click.stop="$emit('handleCopy')"
-      >
-        <a-icon type="copy" />
-      </div>
-      <div
-        class="delete"
-        :class="record.key === selectItem.key ? 'active' : 'unactivated'"
-        @click.stop="$emit('handleDelete')"
-      >
-        <a-icon type="delete" />
-      </div>
-    </div>
-  </component>
+  <Fragment>
+    <component :is="wrapper" v-bind="wrapperProps" v-on="{ ...$listeners, ...wrapperListeners }">
+      <kFormItem :formConfig="config" :record="record" />
+    </component>
+  </Fragment>
 </template>
 <script>
 /*
@@ -109,8 +92,15 @@ export default {
     kFormItem,
   },
   methods: {
-    handleActivated() {
+    updateVDRCellOptions(options = {}) {
+      Object.assign(this.vdrCellOptions, options);
+    },
+    handleActivated(t) {
       this.$emit("handleSelectItem", this.record);
+      this.updateVDRCellOptions({
+        width: t.width,
+        height: t.height,
+      });
     },
     handleDeactivated() {},
     handleCellDragStart(_) {
@@ -118,18 +108,22 @@ export default {
     },
     handleCellDragging(_, { left, top }) {
       console.log("%c%s", "color: #00a3cc", "handleCellDragging");
-      this.vdrCellOptions.x = left;
-      this.vdrCellOptions.y = top;
+      this.updateVDRCellOptions({
+        x: left,
+        y: top,
+      });
     },
     handleCellDragEnd(_) {
       console.log("%c%s", "color: #aa00ff", "handleCellDragEnd");
     },
     handleCellResizeStart(_) {},
-    handleCellResizing(_, { left, top, width, height }) {
-      this.vdrCellOptions.width = width;
-      this.vdrCellOptions.height = height;
-      this.vdrCellOptions.x = left;
-      this.vdrCellOptions.y = top;
+    handleCellResizing(_, { left: x, top: y, width, height }) {
+      this.updateVDRCellOptions({
+        x,
+        y,
+        width,
+        height,
+      });
     },
     handleCellResizeEnd(_) {},
   },
