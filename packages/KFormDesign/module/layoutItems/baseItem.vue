@@ -3,7 +3,7 @@
  * @Date         : 2022-03-18 16:05:59
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layoutItems/baseItem.vue
- * @LastEditTime : 2022-03-19 17:33:13
+ * @LastEditTime : 2022-03-21 09:50:15
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 <script>
@@ -23,8 +23,7 @@ export default {
   },
   components: {
     draggable: () => import("vuedraggable"),
-    vueDraggableResizableCell: () =>
-      import("../../../VueDraggableResizableCell/index"),
+    VueDraggableResizableCell: () => import("../../../VueDraggableResizableCell/index"),
     Fragment: () => import("vue-fragment"), // 使用Fragment，解决不允许多节点问题
   },
   methods: {

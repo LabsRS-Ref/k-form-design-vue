@@ -3,22 +3,13 @@
  * @Date         : 2022-03-18 16:29:19
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layoutItems/layout/grid.vue
- * @LastEditTime : 2022-03-19 10:45:32
+ * @LastEditTime : 2022-03-21 09:32:18
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 <template>
-  <div
-    class="grid-box"
-    :class="{ active: record.key === selectItem.key }"
-    @click.stop="handleSelectItem(record)"
-  >
+  <div class="grid-box" :class="{ active: record.key === selectItem.key }" @click.stop="handleSelectItem(record)">
     <a-row class="grid-row" :gutter="record.options.gutter">
-      <a-col
-        class="grid-col"
-        v-for="(colItem, idnex) in record.columns"
-        :key="idnex"
-        :span="colItem.span || 0"
-      >
+      <a-col class="grid-col" v-for="(colItem, idnex) in record.columns" :key="idnex" :span="colItem.span || 0">
         <draggable
           tag="div"
           class="draggable-box"
