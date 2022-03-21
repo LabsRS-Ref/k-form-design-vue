@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-20 21:08:24
+ * @LastEditTime : 2022-03-21 10:52:43
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/index.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -848,7 +848,7 @@ export default {
 
       // FIX: 解决内部元素变更的问题
       // eslint-disable-next-line no-unused-expressions
-      1 &&
+      0 &&
         this.registerResizeStep("fix-inner-ele-resize-issue", () => {
           // 方便函数
           const _getNodeInfo = (key, context = {}, instance = this) => {

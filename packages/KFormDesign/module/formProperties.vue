@@ -15,21 +15,12 @@
             <a-radio-button value="Grid">栅格</a-radio-button>
           </a-radio-group>
         </a-form-item>
-        <a-form-item
-          v-show="config.labelLayout === 'flex'"
-          label="标签宽度（px）"
-        >
+        <a-form-item v-show="config.labelLayout === 'flex'" label="标签宽度（px）">
           <a-input-number v-model="config.labelWidth" />
         </a-form-item>
         <a-form-item label="labelCol" v-show="config.labelLayout !== 'flex'">
           <div class="change-col-box">
-            <a-slider
-              id="test"
-              :max="24"
-              :min="0"
-              v-model="config.labelCol.xs"
-              @change="handleChangeCol"
-            />
+            <a-slider id="test" :max="24" :min="0" v-model="config.labelCol.xs" @change="handleChangeCol" />
             <div>
               <label>xs:</label>
               <a-input-number v-model="config.labelCol.xs" />
@@ -107,20 +98,21 @@
  * description 表单属性设置面板组件
  */
 import kCheckbox from "../../KCheckbox/index.vue";
+
 export default {
   name: "formProperties",
   components: {
-    kCheckbox
+    kCheckbox,
   },
   props: {
     config: {
       type: Object,
-      required: true
+      required: true,
     },
     previewOptions: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   methods: {
     handleChangeCol(e) {
@@ -128,8 +120,8 @@ export default {
 
       this.config.wrapperCol.xs = this.config.wrapperCol.sm = this.config.wrapperCol.md = this.config.wrapperCol.lg = this.config.wrapperCol.xl = this.config.wrapperCol.xxl =
         24 - e;
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="less" scoped>

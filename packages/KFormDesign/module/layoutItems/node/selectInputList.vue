@@ -29,18 +29,12 @@
           : {}
       "
       :style="
-        config.layout === 'horizontal' &&
-        config.labelLayout === 'flex' &&
-        record.options.showLabel
+        config.layout === 'horizontal' && config.labelLayout === 'flex' && record.options.showLabel
           ? { display: 'flex' }
           : {}
       "
     >
-      <div
-        class="column-box"
-        v-for="(column, index) in record.columns"
-        :key="index"
-      >
+      <div class="column-box" v-for="(column, index) in record.columns" :key="index">
         <div class="check-box">
           <a-checkbox v-if="record.options.multiple" disabled>
             {{ column.label }}

@@ -7,11 +7,7 @@
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 <template>
-  <div
-    class="grid-box"
-    :class="{ active: record.key === selectItem.key }"
-    @click.stop="handleSelectItem(record)"
-  >
+  <div class="grid-box" :class="{ active: record.key === selectItem.key }" @click.stop="handleSelectItem(record)">
     <a-tabs
       class="grid-row"
       :default-active-key="0"
@@ -21,11 +17,7 @@
       :tabPosition="record.options.tabPosition"
       :animated="record.options.animated"
     >
-      <a-tab-pane
-        v-for="(tabItem, index) in record.columns"
-        :key="index"
-        :tab="tabItem.label"
-      >
+      <a-tab-pane v-for="(tabItem, index) in record.columns" :key="index" :tab="tabItem.label">
         <div class="grid-col">
           <draggable
             tag="div"

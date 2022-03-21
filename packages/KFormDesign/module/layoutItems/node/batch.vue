@@ -7,11 +7,7 @@
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 <template>
-  <div
-    class="batch-box"
-    :class="{ active: record.key === selectItem.key }"
-    @click.stop="handleSelectItem(record)"
-  >
+  <div class="batch-box" :class="{ active: record.key === selectItem.key }" @click.stop="handleSelectItem(record)">
     <a-form-item
       :label="!record.options.showLabel ? '' : record.label"
       :label-col="
@@ -29,9 +25,7 @@
           : {}
       "
       :style="
-        config.layout === 'horizontal' &&
-        config.labelLayout === 'flex' &&
-        record.options.showLabel
+        config.layout === 'horizontal' && config.labelLayout === 'flex' && record.options.showLabel
           ? { display: 'flex' }
           : {}
       "

@@ -21,10 +21,7 @@
       :remove="remove"
       :beforeUpload="beforeUpload"
     >
-      <a-button
-        v-if="fileList.length < record.options.limit"
-        :disabled="record.options.disabled || parentDisabled"
-      >
+      <a-button v-if="fileList.length < record.options.limit" :disabled="record.options.disabled || parentDisabled">
         <a-icon type="upload" /> {{ record.options.placeholder }}
       </a-button>
     </a-upload>
@@ -62,7 +59,7 @@ export default {
   props: ["record", "value", "config", "parentDisabled", "dynamicData"],
   data() {
     return {
-      fileList: []
+      fileList: [],
     };
   },
   watch: {
@@ -74,8 +71,8 @@ export default {
         }
       },
       immediate: true,
-      deep: true
-    }
+      deep: true,
+    },
   },
 
   computed: {
@@ -86,7 +83,7 @@ export default {
         console.error(err);
         return {};
       }
-    }
+    },
   },
   methods: {
     setFileList() {
@@ -102,7 +99,7 @@ export default {
     },
     handleSelectChange() {
       setTimeout(() => {
-        const arr = this.fileList.map(item => {
+        const arr = this.fileList.map((item) => {
           if (typeof item.response !== "undefined") {
             const res = item.response;
             return {
@@ -110,17 +107,16 @@ export default {
               name: item.name,
               status: item.status,
               uid: res.data.fileId || Date.now(),
-              url: res.data.url || ""
-            };
-          } else {
-            return {
-              type: "file",
-              name: item.name,
-              status: item.status,
-              uid: item.uid,
-              url: item.url || ""
+              url: res.data.url || "",
             };
           }
+          return {
+            type: "file",
+            name: item.name,
+            status: item.status,
+            uid: item.uid,
+            url: item.url || "",
+          };
         });
 
         this.$emit("change", arr);
@@ -129,8 +125,8 @@ export default {
     },
     handlePreview(file) {
       // 下载文件
-      const downloadWay = this.record.options.downloadWay;
-      const dynamicFun = this.record.options.dynamicFun;
+      const { downloadWay } = this.record.options;
+      const { dynamicFun } = this.record.options;
       if (downloadWay === "a") {
         // 使用a标签下载
         const a = document.createElement("a");
@@ -139,7 +135,7 @@ export default {
         a.click();
       } else if (downloadWay === "ajax") {
         // 使用ajax获取文件blob，并保持到本地
-        this.getBlob(file.url || file.thumbUrl).then(blob => {
+        this.getBlob(file.url || file.thumbUrl).then((blob) => {
           this.saveAs(blob, file.name);
         });
       } else if (downloadWay === "dynamic") {
@@ -152,7 +148,7 @@ export default {
      * url 目标文件地址
      */
     getBlob(url) {
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         const xhr = new XMLHttpRequest();
 
         xhr.open("GET", url, true);
@@ -211,7 +207,7 @@ export default {
       } else if (info.file.status === "error") {
         this.$message.error(`文件上传失败`);
       }
-    }
-  }
+    },
+  },
 };
 </script>

@@ -3,16 +3,12 @@
  * @Date         : 2022-03-18 15:50:49
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layoutItems/layout/free.vue
- * @LastEditTime : 2022-03-19 16:53:15
+ * @LastEditTime : 2022-03-21 10:56:24
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 
 <template>
-  <div
-    class="grid-box"
-    :class="{ active: record.key === selectItem.key }"
-    @click.stop="handleSelectItem(record)"
-  >
+  <div class="grid-box" :class="{ active: record.key === selectItem.key }" @click.stop="handleSelectItem(record)">
     <draggable
       tag="div"
       class="draggable-box"
@@ -26,12 +22,7 @@
       @start="$emit('dragStart', $event, record.list)"
       @add="$emit('handleColAdd', $event, record.list)"
     >
-      <transition-group
-        tag="div"
-        name="list"
-        class="list-main"
-        style="height: 100vh;"
-      >
+      <transition-group tag="div" name="list" class="list-main" style="height: 100vh;">
         <vue-draggable-resizable-cell
           v-for="item in record.list"
           :key="item.key"

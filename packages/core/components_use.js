@@ -38,7 +38,7 @@ import {
   FormModel,
   Collapse,
   Cascader,
-  TreeSelect
+  TreeSelect,
 } from "ant-design-vue";
 import vcolorpicker from "vcolorpicker";
 
@@ -67,7 +67,7 @@ export default {
   cascader: Cascader,
   batch: KBatch,
   selectInputList: KSelectInputList,
-  editor: KEditor
+  editor: KEditor,
 };
 
 Vue.use(ConfigProvider);

@@ -7,11 +7,7 @@
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 <template>
-  <div
-    class="table-box"
-    :class="{ active: record.key === selectItem.key }"
-    @click.stop="handleSelectItem(record)"
-  >
+  <div class="table-box" :class="{ active: record.key === selectItem.key }" @click.stop="handleSelectItem(record)">
     <table
       class="table-layout kk-table-9136076486841527"
       :class="{
@@ -29,9 +25,7 @@
           :key="tdIndex"
           :colspan="tdItem.colspan"
           :rowspan="tdItem.rowspan"
-          @contextmenu.prevent="
-            $emit('handleShowRightMenu', $event, record, trIndex, tdIndex)
-          "
+          @contextmenu.prevent="$emit('handleShowRightMenu', $event, record, trIndex, tdIndex)"
         >
           <draggable
             tag="div"

@@ -3,7 +3,7 @@
  * @Date         : 2022-03-18 16:05:59
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layoutItems/baseItem.vue
- * @LastEditTime : 2022-03-21 09:50:15
+ * @LastEditTime : 2022-03-21 10:55:08
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 <script>
@@ -31,7 +31,6 @@ export default {
       this.$emit("handleShowRightMenu", e, record, trIndex, tdIndex);
     },
     handleSelectItem(record) {
-      console.log(`handleSelectItem: ${record.key}`);
       this.$emit("handleSelectItem", record);
     },
     handleColAdd(e, list) {

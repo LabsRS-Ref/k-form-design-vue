@@ -23,7 +23,7 @@
         'uploadImg',
         'uploadFile',
         'cascader',
-        'treeSelect'
+        'treeSelect',
       ].includes(record.type)
     "
     :prop="`domains.${record.model}`"
@@ -35,7 +35,7 @@
       v-if="record.type === 'textarea'"
       :autoSize="{
         minRows: record.options.minRows,
-        maxRows: record.options.maxRows
+        maxRows: record.options.maxRows,
       }"
       :disabled="record.options.disabled || parentDisabled"
       :placeholder="record.options.placeholder"
@@ -80,11 +80,7 @@
     />
 
     <!-- 滑块 -->
-    <div
-      v-else-if="record.type === 'slider'"
-      :style="`width:${record.options.width}`"
-      class="slider-box"
-    >
+    <div v-else-if="record.type === 'slider'" :style="`width:${record.options.width}`" class="slider-box">
       <div class="slider">
         <a-slider
           :disabled="record.options.disabled || parentDisabled"
@@ -110,26 +106,13 @@
 
     <component
       v-else
-      :style="
-        `width:${
-          record.options.width !== '100%' ? record.options.width : '120px'
-        }`
-      "
+      :style="`width:${record.options.width !== '100%' ? record.options.width : '120px'}`"
       v-bind="componentOption"
-      :min="
-        record.options.min || record.options.min === 0
-          ? record.options.min
-          : -Infinity
-      "
-      :max="
-        record.options.max || record.options.max === 0
-          ? record.options.max
-          : Infinity
-      "
+      :min="record.options.min || record.options.min === 0 ? record.options.min : -Infinity"
+      :max="record.options.max || record.options.max === 0 ? record.options.max : Infinity"
       :count="record.options.max"
       :precision="
-        record.options.precision > 50 ||
-        (!record.options.precision && record.options.precision !== 0)
+        record.options.precision > 50 || (!record.options.precision && record.options.precision !== 0)
           ? null
           : record.options.precision
       "
@@ -142,11 +125,7 @@
       :filterOption="
         record.options.showSearch
           ? (inputValue, option) => {
-              return (
-                option.componentOptions.children[0].text
-                  .toLowerCase()
-                  .indexOf(inputValue.toLowerCase()) >= 0
-              );
+              return option.componentOptions.children[0].text.toLowerCase().indexOf(inputValue.toLowerCase()) >= 0;
             }
           : false
       "
@@ -179,17 +158,14 @@
         :style="{
           fontFamily: record.options.fontFamily,
           fontSize: record.options.fontSize,
-          color: record.options.color
+          color: record.options.color,
         }"
         v-text="record.label"
       ></label>
     </div>
   </a-form-model-item>
   <!-- html -->
-  <div
-    v-else-if="record.type === 'html'"
-    v-html="record.options.defaultValue"
-  ></div>
+  <div v-else-if="record.type === 'html'" v-html="record.options.defaultValue"></div>
 
   <div v-else>
     <!-- 空 -->
@@ -207,24 +183,17 @@ import UploadImg from "../../UploadImg";
 import KDatePicker from "../../KDatePicker";
 import KTimePicker from "../../KTimePicker";
 import ComponentArray from "../../core/components_use";
+
 const _ = require("lodash/object");
 
 export default {
   name: "KFormItem",
-  props: [
-    "record",
-    "domains",
-    "index",
-    "value",
-    "parentDisabled",
-    "dynamicData",
-    "config"
-  ],
+  props: ["record", "domains", "index", "value", "parentDisabled", "dynamicData", "config"],
   components: {
     UploadImg,
     UploadFile,
     KDatePicker,
-    KTimePicker
+    KTimePicker,
   },
   computed: {
     componentItem() {
@@ -232,7 +201,7 @@ export default {
     },
     componentOption() {
       return _.omit(this.record.options, ["defaultValue", "disabled"]);
-    }
+    },
   },
   methods: {
     handleChange(e) {
@@ -241,8 +210,8 @@ export default {
         value = e.target.value;
       }
       this.$emit("input", value);
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="less" scoped>

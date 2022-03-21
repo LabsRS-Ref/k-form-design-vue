@@ -13,24 +13,24 @@ export default {
   name: "kCheckbox",
   data() {
     return {
-      chackboxVal: false
+      chackboxVal: false,
     };
   },
   props: {
     value: {
       type: Boolean,
-      default: false
+      default: false,
     },
     label: {
       type: String,
-      default: ""
-    }
+      default: "",
+    },
   },
   computed: {
     _val() {
       this.handleSetChackboxVal(this.value);
       return this.value;
-    }
+    },
   },
   methods: {
     handleChange(e) {
@@ -38,7 +38,7 @@ export default {
     },
     handleSetChackboxVal(val) {
       this.chackboxVal = val;
-    }
-  }
+    },
+  },
 };
 </script>

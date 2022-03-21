@@ -18,6 +18,7 @@
 </template>
 <script>
 import moment from "moment";
+
 export default {
   // eslint-disable-next-line vue/require-prop-types
   props: ["record", "value", "parentDisabled"],
@@ -25,10 +26,9 @@ export default {
     time() {
       if (!this.value) {
         return undefined;
-      } else {
-        return moment(this.value, this.record.options.format);
       }
-    }
+      return moment(this.value, this.record.options.format);
+    },
   },
   methods: {
     handleSelectChange(val) {
@@ -40,7 +40,7 @@ export default {
       }
       this.$emit("change", time);
       this.$emit("input", time);
-    }
-  }
+    },
+  },
 };
 </script>

@@ -38,16 +38,9 @@
       >
         <!-- 左侧控件区域 start -->
         <aside class="left">
-          <a-collapse
-            @change="collapseChange"
-            :defaultActiveKey="collapseDefaultActiveKey"
-          >
+          <a-collapse @change="collapseChange" :defaultActiveKey="collapseDefaultActiveKey">
             <!-- 基础控件 start -->
-            <a-collapse-panel
-              v-if="basicsArray.length > 0"
-              header="基础控件"
-              key="1"
-            >
+            <a-collapse-panel v-if="basicsArray.length > 0" header="基础控件" key="1">
               <collapseItem
                 :list="basicsArray"
                 @generateKey="generateKey"
@@ -57,11 +50,7 @@
             </a-collapse-panel>
             <!-- 基础控件 end -->
             <!-- 自定义控件 start -->
-            <a-collapse-panel
-              v-if="customComponents.list.length > 0"
-              :header="customComponents.title"
-              key="3"
-            >
+            <a-collapse-panel v-if="customComponents.list.length > 0" :header="customComponents.title" key="3">
               <collapseItem
                 :list="customComponents.list"
                 @generateKey="generateKey"
@@ -72,11 +61,7 @@
             <!-- 自定义控件 end -->
 
             <!-- 布局控件 start -->
-            <a-collapse-panel
-              v-if="layoutArray.length > 0"
-              header="布局控件"
-              key="4"
-            >
+            <a-collapse-panel v-if="layoutArray.length > 0" header="布局控件" key="4">
               <collapseItem
                 :list="layoutArray"
                 @generateKey="generateKey"
@@ -137,23 +122,12 @@
 
         <!-- 右侧控件属性区域 start -->
         <aside class="right">
-          <a-tabs
-            :activeKey="activeKey"
-            @change="changeTab"
-            :tabBarStyle="{ margin: 0 }"
-          >
+          <a-tabs :activeKey="activeKey" @change="changeTab" :tabBarStyle="{ margin: 0 }">
             <a-tab-pane :key="1" tab="表单属性设置">
-              <formProperties
-                :config="data.config"
-                :previewOptions="previewOptions"
-              />
+              <formProperties :config="data.config" :previewOptions="previewOptions" />
             </a-tab-pane>
             <a-tab-pane :key="2" tab="控件属性设置" :disabled="!selectItem.key">
-              <formItemProperties
-                class="form-item-properties"
-                :selectItem="selectItem"
-                :hideModel="hideModel"
-              />
+              <formItemProperties class="form-item-properties" :selectItem="selectItem" :hideModel="hideModel" />
             </a-tab-pane>
           </a-tabs>
         </aside>
@@ -182,11 +156,7 @@ import importJsonModal from "./module/importJsonModal";
 import previewModal from "../KFormPreview/index.vue";
 
 import { Revoke } from "../core/revoke";
-import {
-  basicsList,
-  layoutList,
-  customComponents,
-} from "./config/formItemsConfig";
+import { basicsList, layoutList, customComponents } from "./config/formItemsConfig";
 import formItemProperties from "./module/formItemProperties";
 import formProperties from "./module/formProperties";
 
@@ -211,17 +181,7 @@ export default {
     },
     toolbars: {
       type: Array,
-      default: () => [
-        "save",
-        "preview",
-        "importJson",
-        "exportJson",
-        "exportCode",
-        "reset",
-        "close",
-        "undo",
-        "redo",
-      ],
+      default: () => ["save", "preview", "importJson", "exportJson", "exportCode", "reset", "close", "undo", "redo"],
     },
     showToolbarsText: {
       type: Boolean,
@@ -279,17 +239,7 @@ export default {
       revoke: null,
       recordList: [],
       redoList: [],
-      noModel: [
-        "button",
-        "divider",
-        "card",
-        "grid",
-        "tabs",
-        "table",
-        "alert",
-        "text",
-        "html",
-      ],
+      noModel: ["button", "divider", "card", "grid", "tabs", "table", "alert", "text", "html"],
       data: {
         list: [],
         config: {
@@ -345,9 +295,7 @@ export default {
     },
     collapseDefaultActiveKey() {
       // 计算当前展开的控件列表
-      const defaultActiveKey = window.localStorage.getItem(
-        "collapseDefaultActiveKey"
-      );
+      const defaultActiveKey = window.localStorage.getItem("collapseDefaultActiveKey");
       if (defaultActiveKey) {
         return defaultActiveKey.split(",");
       }

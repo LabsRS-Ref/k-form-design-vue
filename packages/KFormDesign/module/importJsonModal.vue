@@ -12,18 +12,9 @@
   >
     <p class="hint-box">导入格式如下:</p>
     <div class="json-box-9136076486841527">
-      <codemirror
-        style="height:100%;"
-        ref="myEditor"
-        v-model="jsonFormat"
-      ></codemirror>
+      <codemirror style="height:100%;" ref="myEditor" v-model="jsonFormat"></codemirror>
     </div>
-    <a-upload
-      action="/abc"
-      :beforeUpload="beforeUpload"
-      :showUploadList="false"
-      accept="application/json"
-    >
+    <a-upload action="/abc" :beforeUpload="beforeUpload" :showUploadList="false" accept="application/json">
       <a-button type="primary"> 导入json文件 </a-button>
     </a-upload>
   </a-modal>
@@ -36,6 +27,7 @@
  */
 import { codemirror } from "vue-codemirror-lite";
 import jsonFormat from "../config/jsonFormat";
+
 export default {
   name: "importJsonModal",
   data() {
@@ -43,7 +35,7 @@ export default {
       visible: false,
       jsonFormat,
       jsonData: {},
-      handleSetSelectItem: null
+      handleSetSelectItem: null,
     };
   },
   watch: {
@@ -51,16 +43,16 @@ export default {
       if (val) {
         this.jsonFormat = jsonFormat;
       }
-    }
+    },
   },
   components: {
-    codemirror
+    codemirror,
   },
   computed: {
     editor() {
       // get current editor object
       return this.$refs.myEditor.editor;
-    }
+    },
   },
   methods: {
     handleCancel() {
@@ -93,8 +85,8 @@ export default {
         console.error(error);
         this.$message.error("导入失败，数据格式不对");
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

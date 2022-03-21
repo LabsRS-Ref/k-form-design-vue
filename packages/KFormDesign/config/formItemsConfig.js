@@ -11,7 +11,7 @@ const defaultDraggableResizableCell = {
     enable: true,
     x: 0,
     y: 0,
-    z: 0,
+    z: "auto",
     width: 100,
     height: 100,
   },

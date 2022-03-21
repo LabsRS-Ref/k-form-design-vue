@@ -31,6 +31,9 @@
   </a-modal>
 </template>
 <script>
+/* eslint-enable */
+import previewCode from "../../PreviewCode/index";
+
 const codeVueFront = `<template>
   <div>
     <k-form-build
@@ -128,8 +131,6 @@ let codeHtmlFront = `<!DOCTYPE html>
 </body>
 
 </html>`
-/* eslint-enable */
-import previewCode from "../../PreviewCode/index";
 export default {
   name: "CodeModal",
   data() {
@@ -137,27 +138,25 @@ export default {
       visible: false,
       editorVueJson: "",
       editorHtmlJson: "",
-      jsonData: {}
+      jsonData: {},
     };
   },
   watch: {
     visible(val) {
       if (val) {
-        this.editorVueJson =
-          codeVueFront + JSON.stringify(this.jsonData) + codeVueLast;
+        this.editorVueJson = codeVueFront + JSON.stringify(this.jsonData) + codeVueLast;
 
-        this.editorHtmlJson =
-          codeHtmlFront + JSON.stringify(this.jsonData) + codeHtmlLast;
+        this.editorHtmlJson = codeHtmlFront + JSON.stringify(this.jsonData) + codeHtmlLast;
       }
-    }
+    },
   },
   components: {
-    previewCode
+    previewCode,
   },
   methods: {
     handleCancel() {
       this.visible = false;
-    }
-  }
+    },
+  },
 };
 </script>

@@ -1,9 +1,7 @@
 <template>
   <a-config-provider :locale="locale">
     <a-form
-      v-if="
-        typeof value.list !== 'undefined' && typeof value.config !== 'undefined'
-      "
+      v-if="typeof value.list !== 'undefined' && typeof value.config !== 'undefined'"
       class="k-form-build-9136076486841527"
       :layout="value.config.layout"
       :hideRequiredMark="value.config.hideRequiredMark"
@@ -33,8 +31,8 @@
  * date 2019-11-20
  * description 将json数据构建成表单
  */
-import buildBlocks from "./buildBlocks";
 import zhCN from "ant-design-vue/lib/locale-provider/zh_CN";
+import buildBlocks from "./buildBlocks";
 // import moment from "moment";
 export default {
   name: "KFormBuild",
@@ -43,48 +41,47 @@ export default {
       locale: zhCN,
       form: this.$form.createForm(this),
       validatorError: {},
-      defaultDynamicData: {}
+      defaultDynamicData: {},
     };
   },
   // props: ["value", "dynamicData"],
   props: {
     value: {
       type: Object,
-      required: true
+      required: true,
     },
     dynamicData: {
       type: Object,
       default: () => {
         return {};
-      }
+      },
     },
     config: {
       type: Object,
-      default: () => ({})
+      default: () => ({}),
     },
     disabled: {
       type: Boolean,
-      default: false
+      default: false,
     },
     outputString: {
       type: Boolean,
-      default: false
+      default: false,
     },
     defaultValue: {
       type: Object,
-      default: () => ({})
-    }
+      default: () => ({}),
+    },
   },
   components: {
-    buildBlocks
+    buildBlocks,
   },
   computed: {
     getDynamicData() {
-      return typeof this.dynamicData === "object" &&
-        Object.keys(this.dynamicData).length
+      return typeof this.dynamicData === "object" && Object.keys(this.dynamicData).length
         ? this.dynamicData
         : window.$kfb_dynamicData || {};
-    }
+    },
   },
   methods: {
     // moment,
@@ -112,7 +109,7 @@ export default {
               return;
             }
             this.validatorError = {};
-            this.$refs.buildBlocks.forEach(item => {
+            this.$refs.buildBlocks.forEach((item) => {
               if (!item.validationSubform()) {
                 reject(err);
               }
@@ -124,9 +121,7 @@ export default {
                 if (type === "string" || type === "undefined") {
                   continue;
                 } else if (type === "object") {
-                  values[key] = `k-form-design#${type}#${JSON.stringify(
-                    values[key]
-                  )}`;
+                  values[key] = `k-form-design#${type}#${JSON.stringify(values[key])}`;
                 } else {
                   values[key] = `k-form-design#${type}#${String(values[key])}`;
                 }
@@ -177,14 +172,14 @@ export default {
       fields = new Set(fields);
 
       // 递归遍历控件树
-      const traverse = array => {
-        array.forEach(element => {
+      const traverse = (array) => {
+        array.forEach((element) => {
           if (fields.has(element.model)) {
             this.$set(element.options, optionName, value);
           }
           if (element.type === "grid" || element.type === "tabs") {
             // 栅格布局 and 标签页
-            element.columns.forEach(item => {
+            element.columns.forEach((item) => {
               traverse(item.list);
             });
           } else if (element.type === "card" || element.type === "batch") {
@@ -192,8 +187,8 @@ export default {
             traverse(element.list);
           } else if (element.type === "table") {
             // 表格布局
-            element.trs.forEach(item => {
-              item.tds.forEach(val => {
+            element.trs.forEach((item) => {
+              item.tds.forEach((val) => {
                 traverse(val.list);
               });
             });
@@ -221,12 +216,12 @@ export default {
     handleChange(value, key) {
       // 触发change事件
       this.$emit("change", value, key);
-    }
+    },
   },
   mounted() {
     this.$nextTick(() => {
       this.setData(this.defaultValue);
     });
-  }
+  },
 };
 </script>

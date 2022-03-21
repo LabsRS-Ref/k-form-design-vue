@@ -55,20 +55,12 @@
       </draggable>
     </a-form>
     <!-- 右键菜单 start -->
-    <div
-      v-show="showRightMenu"
-      :style="{ top: menuTop + 'px', left: menuLeft + 'px' }"
-      class="right-menu"
-    >
+    <div v-show="showRightMenu" :style="{ top: menuTop + 'px', left: menuLeft + 'px' }" class="right-menu">
       <ul>
         <li @click="handleDownMerge"><a-icon type="caret-down" />向下合并</li>
         <li @click="handleRightMerge"><a-icon type="caret-right" />向右合并</li>
-        <li @click="handleRightSplit">
-          <a-icon type="border-inner" />拆分单元格
-        </li>
-        <li @click="handleAddCol">
-          <a-icon type="border-horizontal" />增加一列
-        </li>
+        <li @click="handleRightSplit"><a-icon type="border-inner" />拆分单元格</li>
+        <li @click="handleAddCol"><a-icon type="border-horizontal" />增加一列</li>
         <li @click="handleAddRow"><a-icon type="border-verticle" />增加一行</li>
       </ul>
     </div>
@@ -300,9 +292,7 @@ export default {
 
       // 判断当前行是否是最后一行，最后一行无法向下合并
       if (
-        this.rightMenuSelectValue.trs.length -
-          this.rightMenuSelectValue.trs[this.trIndex].tds[this.tdIndex]
-            .rowspan <=
+        this.rightMenuSelectValue.trs.length - this.rightMenuSelectValue.trs[this.trIndex].tds[this.tdIndex].rowspan <=
         this.trIndex
       ) {
         this.$message.error("当前是最后一行，无法向下合并");
@@ -310,40 +300,28 @@ export default {
       }
 
       // 获取当前单元格的rowspan
-      const currentRowspan = this.rightMenuSelectValue.trs[this.trIndex].tds[
-        this.tdIndex
-      ].rowspan;
+      const currentRowspan = this.rightMenuSelectValue.trs[this.trIndex].tds[this.tdIndex].rowspan;
 
       // 判断下一列单元格与当前单元格的colspan是否一致，如果不一致则无法合并
       if (
-        this.rightMenuSelectValue.trs[this.trIndex].tds[this.tdIndex]
-          .colspan !==
-        this.rightMenuSelectValue.trs[this.trIndex + currentRowspan].tds[
-          this.tdIndex
-        ].colspan
+        this.rightMenuSelectValue.trs[this.trIndex].tds[this.tdIndex].colspan !==
+        this.rightMenuSelectValue.trs[this.trIndex + currentRowspan].tds[this.tdIndex].colspan
       ) {
         this.$message.error("当前表格无法向下合并");
         return false;
       }
 
       // 获取下一列单元格的rowspan
-      const nextRowSpan = this.rightMenuSelectValue.trs[
-        this.trIndex + currentRowspan
-      ].tds[this.tdIndex].rowspan;
+      const nextRowSpan = this.rightMenuSelectValue.trs[this.trIndex + currentRowspan].tds[this.tdIndex].rowspan;
 
       // 当前单元格rowspan等于当前单元格rowspan加上下一列单元格rowspan
-      this.rightMenuSelectValue.trs[this.trIndex].tds[this.tdIndex].rowspan =
-        currentRowspan + nextRowSpan;
+      this.rightMenuSelectValue.trs[this.trIndex].tds[this.tdIndex].rowspan = currentRowspan + nextRowSpan;
 
       // 将被合并的单元rowspan修改为0
-      this.rightMenuSelectValue.trs[this.trIndex + currentRowspan].tds[
-        this.tdIndex
-      ].rowspan = 0;
+      this.rightMenuSelectValue.trs[this.trIndex + currentRowspan].tds[this.tdIndex].rowspan = 0;
 
       // 清空被合并单元格list
-      this.rightMenuSelectValue.trs[this.trIndex + currentRowspan].tds[
-        this.tdIndex
-      ].list = [];
+      this.rightMenuSelectValue.trs[this.trIndex + currentRowspan].tds[this.tdIndex].list = [];
     },
     handleRightMerge() {
       // 向右合并
@@ -355,67 +333,41 @@ export default {
         });
 
       // 判断是否是最后一列，最后一列无法继续向右合并
-      if (
-        sumCols -
-          this.rightMenuSelectValue.trs[this.trIndex].tds[this.tdIndex]
-            .colspan <=
-        this.tdIndex
-      ) {
+      if (sumCols - this.rightMenuSelectValue.trs[this.trIndex].tds[this.tdIndex].colspan <= this.tdIndex) {
         this.$message.error("当前是最后一列，无法向右合并");
         return false;
       }
 
       // 获取当前单元格的colspan
-      const currentColspan = this.rightMenuSelectValue.trs[this.trIndex].tds[
-        this.tdIndex
-      ].colspan;
+      const currentColspan = this.rightMenuSelectValue.trs[this.trIndex].tds[this.tdIndex].colspan;
 
       // 判断需要合并的单元格rowspan是否与当前单元格一致
       if (
-        this.rightMenuSelectValue.trs[this.trIndex].tds[this.tdIndex]
-          .rowspan !==
-        this.rightMenuSelectValue.trs[this.trIndex].tds[
-          this.tdIndex + currentColspan
-        ].rowspan
+        this.rightMenuSelectValue.trs[this.trIndex].tds[this.tdIndex].rowspan !==
+        this.rightMenuSelectValue.trs[this.trIndex].tds[this.tdIndex + currentColspan].rowspan
       ) {
         this.$message.error("当前表格无法向右合并");
         return false;
       }
 
       // 合并单元格colspan
-      this.rightMenuSelectValue.trs[this.trIndex].tds[
-        this.tdIndex
-      ].colspan += this.rightMenuSelectValue.trs[this.trIndex].tds[
-        this.tdIndex + currentColspan
-      ].colspan;
+      this.rightMenuSelectValue.trs[this.trIndex].tds[this.tdIndex].colspan += this.rightMenuSelectValue.trs[
+        this.trIndex
+      ].tds[this.tdIndex + currentColspan].colspan;
 
       // 将被合并的单元格colspan设置为0
-      this.rightMenuSelectValue.trs[this.trIndex].tds[
-        this.tdIndex + currentColspan
-      ].colspan = 0;
+      this.rightMenuSelectValue.trs[this.trIndex].tds[this.tdIndex + currentColspan].colspan = 0;
 
       // 情况被合并单元格的list
-      this.rightMenuSelectValue.trs[this.trIndex].tds[
-        this.tdIndex + currentColspan
-      ].list = [];
+      this.rightMenuSelectValue.trs[this.trIndex].tds[this.tdIndex + currentColspan].list = [];
     },
     // 拆分单元格
     handleRightSplit() {
       // 获取当前单元格的colspan及rowspan
-      const { colspan, rowspan } = this.rightMenuSelectValue.trs[
-        this.trIndex
-      ].tds[this.tdIndex];
+      const { colspan, rowspan } = this.rightMenuSelectValue.trs[this.trIndex].tds[this.tdIndex];
 
-      for (
-        let rowIndex = this.trIndex, rowLen = this.trIndex + rowspan;
-        rowIndex < rowLen;
-        rowIndex++
-      ) {
-        for (
-          let colIndex = this.tdIndex, colLen = this.tdIndex + colspan;
-          colIndex < colLen;
-          colIndex++
-        ) {
+      for (let rowIndex = this.trIndex, rowLen = this.trIndex + rowspan; rowIndex < rowLen; rowIndex++) {
+        for (let colIndex = this.tdIndex, colLen = this.tdIndex + colspan; colIndex < colLen; colIndex++) {
           if (rowIndex === this.trIndex && colIndex === this.tdIndex) continue;
           this.rightMenuSelectValue.trs[rowIndex].tds.splice(colIndex, 1, {
             colspan: 1,
@@ -465,11 +417,7 @@ export default {
       });
 
       // 在rowspan最大值处插入数据
-      this.rightMenuSelectValue.trs.splice(
-        this.trIndex + maxRowSpan,
-        0,
-        rowJson
-      );
+      this.rightMenuSelectValue.trs.splice(this.trIndex + maxRowSpan, 0, rowJson);
     },
     handleShowRightMenu(e, val, trIndex, tdIndex) {
       // 显示右键菜单
@@ -502,11 +450,7 @@ export default {
   destroyed() {
     // 移除监听
     document.removeEventListener("click", this.handleRemoveRightMenu, true);
-    document.removeEventListener(
-      "contextmenu",
-      this.handleRemoveRightMenu,
-      true
-    );
+    document.removeEventListener("contextmenu", this.handleRemoveRightMenu, true);
   },
 };
 </script>

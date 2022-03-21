@@ -19,13 +19,14 @@
  * description 生成json Modal
  */
 import previewCode from "../../PreviewCode/index";
+
 export default {
   name: "JsonModal",
   data() {
     return {
       visible: false,
       editorJson: "",
-      jsonData: {}
+      jsonData: {},
     };
   },
   watch: {
@@ -33,15 +34,15 @@ export default {
       if (val) {
         this.editorJson = JSON.stringify(this.jsonData, null, "\t");
       }
-    }
+    },
   },
   components: {
-    previewCode
+    previewCode,
   },
   methods: {
     handleCancel() {
       this.visible = false;
-    }
-  }
+    },
+  },
 };
 </script>

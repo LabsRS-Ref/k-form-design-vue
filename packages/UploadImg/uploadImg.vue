@@ -6,10 +6,7 @@
  * @LastEditTime: 2021-05-05 12:12:39
  -->
 <template>
-  <div
-    :style="{ width: record.options.width }"
-    class="upload-img-box-9136076486841527"
-  >
+  <div :style="{ width: record.options.width }" class="upload-img-box-9136076486841527">
     <a-upload
       :name="config.uploadImageName || record.options.fileName"
       :headers="config.uploadImageHeaders || record.options.headers"
@@ -26,19 +23,13 @@
       :beforeUpload="beforeUpload"
     >
       <a-button
-        v-if="
-          record.options.listType !== 'picture-card' &&
-            fileList.length < record.options.limit
-        "
+        v-if="record.options.listType !== 'picture-card' && fileList.length < record.options.limit"
         :disabled="record.options.disabled || parentDisabled"
       >
         <a-icon type="upload" /> {{ record.options.placeholder }}
       </a-button>
       <div
-        v-if="
-          record.options.listType === 'picture-card' &&
-            fileList.length < record.options.limit
-        "
+        v-if="record.options.listType === 'picture-card' && fileList.length < record.options.limit"
         :disabled="record.options.disabled || parentDisabled"
       >
         <a-icon type="plus" />
@@ -64,7 +55,7 @@ export default {
     return {
       fileList: [],
       previewVisible: false,
-      previewImageUrl: ""
+      previewImageUrl: "",
     };
   },
   watch: {
@@ -76,8 +67,8 @@ export default {
         }
       },
       immediate: true,
-      deep: true
-    }
+      deep: true,
+    },
   },
   computed: {
     optionsData() {
@@ -87,7 +78,7 @@ export default {
         console.error(err);
         return {};
       }
-    }
+    },
   },
   methods: {
     setFileList() {
@@ -103,7 +94,7 @@ export default {
     },
     handleSelectChange() {
       setTimeout(() => {
-        const arr = this.fileList.map(item => {
+        const arr = this.fileList.map((item) => {
           if (typeof item.response !== "undefined") {
             const res = item.response;
             return {
@@ -111,17 +102,16 @@ export default {
               name: item.name,
               status: item.status,
               uid: item.uid,
-              url: res.data.url || ""
-            };
-          } else {
-            return {
-              type: "img",
-              name: item.name,
-              status: item.status,
-              uid: item.uid,
-              url: item.url || ""
+              url: res.data.url || "",
             };
           }
+          return {
+            type: "img",
+            name: item.name,
+            status: item.status,
+            uid: item.uid,
+            url: item.url || "",
+          };
         });
 
         this.$emit("change", arr);
@@ -160,8 +150,8 @@ export default {
       } else if (info.file.status === "error") {
         this.$message.error(`图片上传失败`);
       }
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="less">

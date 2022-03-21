@@ -19,10 +19,7 @@ import KFormDesign from "./KFormDesign/index";
 import KFormPreview from "./KFormPreview/index";
 import KFormBuild from "./KFormBuild/index";
 import KFormItem from "./KFormItem/index";
-import {
-  customComponents,
-  basicsList
-} from "./KFormDesign/config/formItemsConfig";
+import { customComponents, basicsList } from "./KFormDesign/config/formItemsConfig";
 
 const components = [KFormDesign, KFormBuild, KFormItem, KFormPreview];
 
@@ -31,7 +28,7 @@ const install = function(Vue) {
   if (install.installed) return;
   install.installed = true;
 
-  components.map(component => {
+  components.map((component) => {
     Vue.component(component.name, component);
   });
 };
@@ -58,9 +55,8 @@ function setFormDesignConfig(config) {
     window.$customComponentList = config.list || [];
     // uploadFile 配置 start
     // 配置uploadFile默认上传地址
-    const uploadFile = basicsList.filter(item => item.type === "uploadFile")[0];
-    uploadFile.options.action =
-      config.uploadFile || "http://cdn.kcz66.com/uploadFile.txt";
+    const uploadFile = basicsList.filter((item) => item.type === "uploadFile")[0];
+    uploadFile.options.action = config.uploadFile || "http://cdn.kcz66.com/uploadFile.txt";
 
     // 配置uploadFile默认额外参数
     uploadFile.options.data = JSON.stringify(config.uploadFileData || {});
@@ -73,9 +69,8 @@ function setFormDesignConfig(config) {
 
     // uploadImage配置 start
     // 配置uploadImage默认上传地址
-    const uploadImg = basicsList.filter(item => item.type === "uploadImg")[0];
-    uploadImg.options.action =
-      config.uploadImage || "http://cdn.kcz66.com/upload-img.txt";
+    const uploadImg = basicsList.filter((item) => item.type === "uploadImg")[0];
+    uploadImg.options.action = config.uploadImage || "http://cdn.kcz66.com/upload-img.txt";
     // 配置uploadImage默认额外参数
     uploadImg.options.data = JSON.stringify(config.uploadImageData || {});
     // 配置uploadFile默认name
@@ -107,20 +102,12 @@ function setFormBuildConfig(config) {
 }
 
 // 这里可以用es6的解构语法导入组件
-export {
-  install,
-  KFormDesign,
-  KFormBuild,
-  KFormItem,
-  KFormPreview,
-  setFormDesignConfig,
-  setFormBuildConfig
-};
+export { install, KFormDesign, KFormBuild, KFormItem, KFormPreview, setFormDesignConfig, setFormBuildConfig };
 
 // 这里默认导入全部组件
 export default {
   install,
   setConfig: setFormDesignConfig,
-  setFormDesignConfig: setFormDesignConfig,
-  setFormBuildConfig: setFormBuildConfig
+  setFormDesignConfig,
+  setFormBuildConfig,
 };
