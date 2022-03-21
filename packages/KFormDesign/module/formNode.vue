@@ -2,18 +2,14 @@
  * @Description: 将数据通过k-form-item组件解析，生成控件
  * @Author: kcz
  * @Date: 2019-12-30 00:37:05
- * @LastEditTime : 2022-03-20 20:47:19
+ * @LastEditTime : 2022-03-21 10:06:50
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/formNode.vue
  -->
 <template>
   <!-- <component :is="wrapper" v-bind="wrapperProps" @cellDragging="handleCellDragging"> -->
   <component :is="wrapper" v-bind="wrapperProps" v-on="{ ...$listeners, ...wrapperListeners }">
-    <div
-      class="drag-move-box"
-      @click.stop="$emit('handleSelectItem', record)"
-      :class="{ active: record.key === selectItem.key }"
-    >
+    <div class="drag-move-box" :class="{ active: record.key === selectItem.key }">
       <div class="form-item-box">
         <kFormItem :formConfig="config" :record="record" />
       </div>
@@ -95,6 +91,8 @@ export default {
     wrapperListeners() {
       return this.isVDRCellEnable
         ? {
+            activated: this.handleActivated,
+            deactivated: this.handleDeactivated,
             cellDragStart: this.handleCellDragStart,
             cellDragging: this.handleCellDragging,
             cellDragEnd: this.handleCellDragEnd,
@@ -111,6 +109,10 @@ export default {
     kFormItem,
   },
   methods: {
+    handleActivated() {
+      this.$emit("handleSelectItem", this.record);
+    },
+    handleDeactivated() {},
     handleCellDragStart(_) {
       console.log("%c%s", "color: #44e600", "handleCellDragStart");
     },
