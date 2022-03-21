@@ -3,7 +3,7 @@
  * @Date         : 2022-03-21 13:47:29
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/steps/fix-inner-element-resize-issues.ts
- * @LastEditTime : 2022-03-21 16:48:19
+ * @LastEditTime : 2022-03-21 20:04:55
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  */
 
@@ -93,9 +93,12 @@ export default {
           const key = node[(parent ?? vdrCell).privateMarkPropertyName];
           const nodeInfo = _getNodeInfo(key, { node, key }, parent ?? vdrCell);
           if (nodeInfo) {
+            const { width: oldWidth, height: oldHeight } = nodeInfo.boundingClientRect;
+            const newWidth = Math.floor(oldWidth * widthChangeRatio + 0.5);
+            const newH = Math.floor(oldHeight * heightChangeRatio + 0.5);
             // eslint-disable-next-line no-param-reassign
-            node.style.width = `${widthChangeRatio * parseFloat(nodeInfo.boundingClientRect.width)}px`;
-            node.style.height = `${heightChangeRatio * parseFloat(nodeInfo.boundingClientRect.height)}px`;
+            node.style.width = `${newWidth}px`;
+            node.style.height = `${newH}px`;
           }
         }
 

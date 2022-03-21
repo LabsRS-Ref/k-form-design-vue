@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-21 17:26:48
+ * @LastEditTime : 2022-03-21 22:17:09
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/index.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -71,6 +71,7 @@ import {
 } from "./util";
 
 // 导入steps
+import cellSelfResizeStep from "./steps/cell-self-resize";
 import fixTransitionResizeIssuesStep from "./steps/fix-transition-resize-issues";
 import fixVNodeDataResizeIssuesStep from "./steps/fix-vnode-data-resize-issues";
 import fixInnerElementResizeIssuesStep from "./steps/fix-inner-element-resize-issues";
@@ -213,7 +214,10 @@ export default {
   watch: {
     size(val, oldVal) {
       debug("watch", `[vid=${this._uid},parent=${this.cell.parent?._uid}] size change`, val, oldVal);
-      this.computeAndUpdateLayout();
+      this.computeAndUpdateLayout({
+        consultWidth: val.width,
+        consultHeight: val.height,
+      });
     },
     x(val) {
       this.left = val;
@@ -230,7 +234,12 @@ export default {
     this.initHooks();
   },
   mounted() {
-    this.computeAndUpdateLayout();
+    this.computeAndUpdateLayout({
+      consultLeft: this.left,
+      consultTop: this.top,
+      consultWidth: this.width,
+      consultHeight: this.height,
+    });
   },
   updated() {
     debug("updated", this._uid);
@@ -277,7 +286,12 @@ export default {
       consultWidth = 0,
       consultHeight = 0,
     } = {}) {
-      debug("computeAndUpdateLayout", `${this._uid}`);
+      debug("computeAndUpdateLayout", `${this._uid}`, {
+        consultLeft,
+        consultTop,
+        consultWidth,
+        consultHeight,
+      });
       // 自适应内部元素的大小(考虑line-height的影响)
       const { width: w, height: h } = this.getCellBestWrapperSize({
         consultWidth,
@@ -289,8 +303,10 @@ export default {
       this.changeSize(w, h);
 
       // 更新缓存数据
-      this.cacheCellLayoutData({ width: w, height: h });
-      this.cell.aspectRatioInitialized = true;
+      this.$nextTick(() => {
+        this.cacheCellLayoutData({ width: w, height: h });
+        this.cell.aspectRatioInitialized = true;
+      });
 
       // 调用钩子函数, 方便开发者自定义操作, 开发者可以修改实例的属性及状态
       // @example (self) => {self.width = 100; self.height = 100;}
@@ -372,9 +388,35 @@ export default {
       const ele = this.getCellElement();
       const useScrollSize = ["SVG"].includes(ele?.nodeName);
 
+      // TODO: 补充针对maxWidth，maxHeight的处理
+      const finalWidth = useBest([
+        rect.width,
+        offsetWidth,
+        consultWidth,
+        this.minWidth,
+        ...[useScrollSize ? scrollWidth : 0],
+      ]);
+      const finalHeight = useBest([
+        rect.height,
+        offsetHeight,
+        consultHeight,
+        this.minHeight,
+        ...[useScrollSize ? scrollHeight : 0],
+      ]);
+
+      debug("getCellBestWrapperSize", `${this._uid}`, {
+        finalWidth,
+        finalHeight,
+        offsetWidth,
+        offsetHeight,
+        scrollWidth,
+        scrollHeight,
+        rect,
+      });
+
       return {
-        width: useBest([rect.width, offsetWidth, consultWidth, ...[useScrollSize ? scrollWidth : 0]]),
-        height: useBest([rect.height, offsetHeight, consultHeight, ...[useScrollSize ? scrollHeight : 0]]),
+        width: finalWidth,
+        height: finalHeight,
       };
     },
     /**
@@ -768,20 +810,12 @@ export default {
       // 3. 双三次插值：
       const changeRatio = Math.min(widthChangeRatio, heightChangeRatio);
 
-      // 同步更新内部元素的大小及解决动画问题
-      const ele = this.getCellElement();
-      // debug(`ele =`, ele);
-      this.registerResizeStep("resize-cell-width-and-height", () => {
-        ele.style.width = `${w}px`;
-        ele.style.height = `${h}px`;
-      });
-
+      // Cell 自身缩放
+      cellSelfResizeStep.install(this);
       // 解决动画问题
       fixTransitionResizeIssuesStep.install(this);
-
       // 解决vnode节点data数据没有被更新
       fixVNodeDataResizeIssuesStep.install(this);
-
       // 解决内部元素变更的问题
       fixInnerElementResizeIssuesStep.install(this, {
         w,
@@ -848,9 +882,18 @@ export default {
       // check enable resize for width or height
       const checkFns = [
         () => {
-          if (!this.enableResizeWidth && Math.round(width) !== Math.round(this.width)) return false;
-          if (!this.enableResizeHeight && Math.round(height) !== Math.round(this.height)) return false;
-
+          if (!this.enableResizeWidth && Math.floor(width) !== Math.floor(this.width)) return false;
+          if (!this.enableResizeHeight && Math.floor(height) !== Math.floor(this.height)) return false;
+          return true;
+        },
+        () => {
+          if (this.enableResizeWidth && Math.floor(width) <= 0) return false;
+          if (this.enableResizeHeight && Math.floor(height) <= 0) return false;
+          return true;
+        },
+        () => {
+          if (this.enableResizeWidth && Math.floor(width) < Math.floor(this.minWidth)) return false;
+          if (this.enableResizeHeight && Math.floor(height) < Math.floor(this.minHeight)) return false;
           return true;
         },
       ];
@@ -935,7 +978,7 @@ export default {
      * @param {number} height 新的高度
      */
     onResizeStopEvent(left, top, width, height) {
-      debug(`onResizeStopEvent`, `${this._uid}`);
+      debug(`onResizeStopEvent`, `${this._uid}`, { left, top, width, height });
       this.$emit(DEF.instanceEventType.resizestop, this, {
         left,
         top,

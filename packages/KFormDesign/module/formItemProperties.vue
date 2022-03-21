@@ -10,9 +10,14 @@
 
         <a-form-item label="VDRCell属性">
           <kCheckbox
-            v-if="typeof vdrCellOptions.enable !== 'undefined'"
-            v-model="vdrCellOptions.enable"
-            label="启用Cell"
+            v-if="typeof vdrCellOptions.draggable !== 'undefined'"
+            v-model="vdrCellOptions.draggable"
+            label="可拖拽"
+          />
+          <kCheckbox
+            v-if="typeof vdrCellOptions.resizable !== 'undefined'"
+            v-model="vdrCellOptions.resizable"
+            label="可缩放"
           />
           <p style="overflow-wrap: anywhere;">
             {{ JSON.stringify(vdrCellOptions, 2) }}
