@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-22 11:41:07
+ * @LastEditTime : 2022-03-22 14:16:53
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/index.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -73,7 +73,6 @@ import {
 // 导入steps
 import cellSelfResizeStep from "./steps/cell-self-resize";
 import fixTransitionResizeIssuesStep from "./steps/fix-transition-resize-issues";
-import fixVNodeDataResizeIssuesStep from "./steps/fix-vnode-data-resize-issues";
 import fixInnerElementResizeIssuesStep from "./steps/fix-inner-element-resize-issues";
 
 const debug = (...args) => {
@@ -121,8 +120,8 @@ export default {
       right: null,
       bottom: null,
 
-      width: this.w,
-      height: this.h,
+      width: this.w || 10,
+      height: this.h || 10,
 
       cell: {
         parent: null,
@@ -267,6 +266,7 @@ export default {
     splice(parent?.cell?.children, this);
   },
   methods: {
+    /** 更新层次结构 */
     updateHierarchy() {
       let parentCell = null;
       let parent = this.$parent;
@@ -397,6 +397,9 @@ export default {
       const { width: scrollWidth, height: scrollHeight } = this.getCellScrollSize();
       const { width: offsetWidth, height: offsetHeight } = this.getCellOffsetSize();
 
+      let finalWidth = 0;
+      let finalHeight = 0;
+
       // 选择最优的数值
       const useBest = boundNumberFilter;
 
@@ -404,21 +407,16 @@ export default {
       const ele = this.getCellElement();
       const useScrollSize = ["SVG"].includes(ele?.nodeName);
 
+      const [calcWidth, calcHeight] = [
+        useBest([rect.width, offsetWidth, consultWidth, this.minWidth, ...[useScrollSize ? scrollWidth : 0]]),
+        useBest([rect.height, offsetHeight, consultHeight, this.minHeight, ...[useScrollSize ? scrollHeight : 0]]),
+      ];
+
+      // 计算最佳宽高
+      finalWidth = calcWidth;
+      finalHeight = calcHeight;
+
       // TODO: 补充针对maxWidth，maxHeight的处理
-      const finalWidth = useBest([
-        rect.width,
-        offsetWidth,
-        consultWidth,
-        this.minWidth,
-        ...[useScrollSize ? scrollWidth : 0],
-      ]);
-      const finalHeight = useBest([
-        rect.height,
-        offsetHeight,
-        consultHeight,
-        this.minHeight,
-        ...[useScrollSize ? scrollHeight : 0],
-      ]);
 
       debug("getCellBestWrapperSize", `${this._uid}`, {
         finalWidth,
@@ -782,14 +780,17 @@ export default {
     getCellOriginalStyle() {
       return this.getCellRootNodeInitInfo().style;
     },
+    /** 更新所有子节点布局 */
     updateChildrenLayout(left, top, width, height) {
       debug("updateChildrenLayout", `${this._uid}`, { left, top, width, height });
       this.resizeCell(left, top, width, height);
     },
+    /** 变更位置 */
     changePosition(left = 0, top = 0) {
       this.left = assignNoNullValue(this.left, left);
       this.top = assignNoNullValue(this.top, top);
     },
+    /** 变更大小 */
     changeSize(width = 0, height = 0) {
       checkAssert(width >= 0, `width is not available [${width}], must be greater than 0`);
       checkAssert(height >= 0, `"height is not available [${height}], must be greater than 0`);
@@ -838,12 +839,10 @@ export default {
       // 3. 双三次插值：
       const changeRatio = Math.min(widthChangeRatio, heightChangeRatio);
 
-      // Cell 自身缩放
-      cellSelfResizeStep.install(this);
       // 解决动画问题
       fixTransitionResizeIssuesStep.install(this);
-      // 解决vnode节点data数据没有被更新
-      fixVNodeDataResizeIssuesStep.install(this);
+      // 解决Cell自身缩放问题
+      cellSelfResizeStep.install(this);
       // 解决内部元素变更的问题
       fixInnerElementResizeIssuesStep.install(this, {
         w,

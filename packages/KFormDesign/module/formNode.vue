@@ -2,7 +2,7 @@
  * @Description: 将数据通过k-form-item组件解析，生成控件
  * @Author: kcz
  * @Date: 2019-12-30 00:37:05
- * @LastEditTime : 2022-03-22 10:53:29
+ * @LastEditTime : 2022-03-22 14:01:39
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/formNode.vue
  -->
@@ -12,6 +12,26 @@
     <component :is="wrapper" v-bind="wrapperProps" v-on="{ ...$listeners, ...wrapperListeners }">
       <kFormItem :formConfig="config" :record="record" />
     </component>
+    <div class="drag-move-box" :class="{ active: record.key === selectItem.key }" style="display: none;">
+      <div class="form-item-box">
+        <kFormItem :formConfig="config" :record="record" />
+      </div>
+      <div v-if="!hideModel" class="show-key-box" v-text="record.label + (record.model ? '/' + record.model : '')" />
+      <div
+        class="copy"
+        :class="record.key === selectItem.key ? 'active' : 'unactivated'"
+        @click.stop="$emit('handleCopy')"
+      >
+        <a-icon type="copy" />
+      </div>
+      <div
+        class="delete"
+        :class="record.key === selectItem.key ? 'active' : 'unactivated'"
+        @click.stop="$emit('handleDelete')"
+      >
+        <a-icon type="delete" />
+      </div>
+    </div>
   </Fragment>
 </template>
 <script>
