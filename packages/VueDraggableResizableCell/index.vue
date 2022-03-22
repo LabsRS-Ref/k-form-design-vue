@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-22 14:16:53
+ * @LastEditTime : 2022-03-22 21:57:21
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/index.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -133,6 +133,10 @@ export default {
           resize: {},
         },
       },
+
+      isResizing: false,
+      isDragging: false,
+
       tempData: {
         lastResizeInfo: null,
         lastDraggingInfo: null,
@@ -255,6 +259,7 @@ export default {
       consultTop: this.top,
       consultWidth: this.width,
       consultHeight: this.height,
+      updateCache: true,
     });
   },
   updated() {
@@ -296,12 +301,14 @@ export default {
      * @param {number} consultTop 参考顶边距, 默认 null, 相对于父元素，用于平移transform特性
      * @param {number} consultWidth 参考宽度，默认0
      * @param {number} consultHeight 参考高度，默认0
+     * @param {boolean} updateCache 是否更新缓存
      */
     computeAndUpdateLayout({
       consultLeft = this.left,
       consultTop = this.top,
       consultWidth = 0,
       consultHeight = 0,
+      updateCache = false,
     } = {}) {
       debug("computeAndUpdateLayout", `${this._uid}`, {
         consultLeft,
@@ -313,16 +320,23 @@ export default {
       const { width: w, height: h } = this.getCellBestWrapperSize({
         consultWidth,
         consultHeight,
+        recursiveCalcChildrenNodes: updateCache,
       });
 
       // 计算边界
-      this.updateChildrenLayout(consultLeft, consultTop, w, h);
+      if (!updateCache) {
+        this.updateChildrenLayout(consultLeft, consultTop, w, h);
+      }
       this.changePosition(consultLeft, consultTop);
       this.changeSize(w, h);
 
       // 更新缓存数据
-      this.cacheCellLayoutData({ width: w, height: h });
-      this.cell.aspectRatioInitialized = true;
+      if (updateCache) {
+        this.$nextTick(() => {
+          this.cacheCellLayoutData({ width: w, height: h });
+          this.cell.aspectRatioInitialized = true;
+        });
+      }
 
       // 调用钩子函数, 方便开发者自定义操作, 开发者可以修改实例的属性及状态
       // @example (self) => {self.width = 100; self.height = 100;}
@@ -391,21 +405,34 @@ export default {
     },
     /**
      * 获得Cell最佳的包裹宽高
+     * @param {number} consultWidth 参考宽度
+     * @param {number} consultHeight 参考高度
+     * @param {boolean} recursiveCalcChildrenNodes 递归计算子元素的最佳包裹宽高 (默认false)
+     * @returns {object} {width, height}
      */
-    getCellBestWrapperSize({ consultWidth = 0, consultHeight = 0 }) {
+    getCellBestWrapperSize({ consultWidth = 0, consultHeight = 0, recursiveCalcChildrenNodes = false } = {}) {
       const rect = this.getCellBoundingClientRect();
       const { width: scrollWidth, height: scrollHeight } = this.getCellScrollSize();
       const { width: offsetWidth, height: offsetHeight } = this.getCellOffsetSize();
 
-      let finalWidth = 0;
-      let finalHeight = 0;
-
       // 选择最优的数值
-      const useBest = boundNumberFilter;
+      const useBest = (args) => Math.max(...args);
 
-      // 有些元素，不能获取offsetWidth和offsetHeight， 例如：SVG元素，需要使用scrollWidth和scrollHeight
       const ele = this.getCellElement();
+      // 有些元素，不能获取offsetWidth和offsetHeight， 例如：SVG元素，需要使用scrollWidth和scrollHeight
       const useScrollSize = ["SVG"].includes(ele?.nodeName);
+
+      // 有的时候，子元素的宽度和高度都超过了容器
+      let childNodeMaxWidth = 0;
+      let childNodeMaxHeight = 0;
+      if (recursiveCalcChildrenNodes) {
+        forEachNode(ele, (htmlNode) => {
+          const { width, height } = getBoundingClientRect(htmlNode);
+          // TODO: 是否考虑 offset 和 scrollSize
+          childNodeMaxWidth = Math.max(childNodeMaxWidth, width || 0);
+          childNodeMaxHeight = Math.max(childNodeMaxHeight, height || 0);
+        });
+      }
 
       const [calcWidth, calcHeight] = [
         useBest([rect.width, offsetWidth, consultWidth, this.minWidth, ...[useScrollSize ? scrollWidth : 0]]),
@@ -413,8 +440,10 @@ export default {
       ];
 
       // 计算最佳宽高
-      finalWidth = calcWidth;
-      finalHeight = calcHeight;
+      const [finalWidth, finalHeight] = [
+        useBest([calcWidth, childNodeMaxWidth]),
+        useBest([calcHeight, childNodeMaxHeight]),
+      ];
 
       // TODO: 补充针对maxWidth，maxHeight的处理
 
@@ -600,6 +629,16 @@ export default {
         );
         const boundingClientRect = getBoundingClientRect(node);
 
+        // FIXME: 如果是根元素，要考略传递过来的宽高，有可能计算后的包裹尺寸要大于根元素本身的尺寸
+        if (key === -1) {
+          if (boundingClientRect.width < width) {
+            boundingClientRect.width = width;
+          }
+          if (boundingClientRect.height < height) {
+            boundingClientRect.height = height;
+          }
+        }
+
         const fontSize = parseFloat(this.getHTMLElementComputedStyle(node, "font-size"));
         const lineHeight = parseFloat(this.getHTMLElementComputedStyle(node, "line-height"));
         const getDefaultFontSize = getDocumentElementFontSize;
@@ -613,6 +652,7 @@ export default {
 
         // 公共数据
         const common = {
+          // 对应的VNode节点
           vnode,
           // 关联的内联样式Style数据
           style: JSON.parse(JSON.stringify(node?.style ?? {})),
@@ -783,7 +823,20 @@ export default {
     /** 更新所有子节点布局 */
     updateChildrenLayout(left, top, width, height) {
       debug("updateChildrenLayout", `${this._uid}`, { left, top, width, height });
-      this.resizeCell(left, top, width, height);
+      const willResize = [
+        [this.left, left],
+        [this.top, top],
+        [this.width, width],
+        [this.height, height],
+      ].some(([origin, target]) => {
+        return origin !== target;
+      });
+
+      if (willResize) {
+        this.resizeCell(left, top, width, height);
+        // 副作用启动
+        this.activeAllResizeEffects();
+      }
     },
     /** 变更位置 */
     changePosition(left = 0, top = 0) {
@@ -819,17 +872,25 @@ export default {
       const onHooks = [].concat(this.resizeHooks?.onResizeCellForEachNode || []);
       beforeHooks.forEach((hook) => hook(this, l, t, w, h));
 
+      const rootNodeInitInfo = this.getCellRootNodeInitInfo();
+      const {
+        left: initLeft,
+        top: initTop,
+        width: initWidth,
+        height: initHeight,
+      } = rootNodeInitInfo.boundingClientRect;
+
       // 计算偏移量
-      const offsetLeft = l - this.left;
-      const offsetTop = t - this.top;
+      const offsetLeft = l - initLeft;
+      const offsetTop = t - initTop;
       debug("resizeCell-offset", `${this._uid}`, offsetLeft, offsetTop);
 
       // 宽度变化比例(精确)
-      const widthChangeRatio = w / this.width;
-      const widthOffset = w - this.width;
+      const widthChangeRatio = w / initWidth;
+      const widthOffset = w - initWidth;
       // 高度变化比例(精确)
-      const heightChangeRatio = h / this.height;
-      const heightOffset = h - this.height;
+      const heightChangeRatio = h / initHeight;
+      const heightOffset = h - initHeight;
 
       // TODO: 为组件使用者提供参数选择缩放插值算法
       // 获得矩形尺寸变化比例，采用的算法：最近邻插值
@@ -976,6 +1037,7 @@ export default {
       const params = JSON.stringify({ left, top, width, height });
       if (this.tempData.lastResizeInfo === params) return;
 
+      this.isResizing = true;
       debug("onResizingEvent", `${this._uid} =`, { left, top, width, height });
 
       const beforeHooks = [].concat(this.resizeHooks?.beforeResizing || []);
@@ -1033,6 +1095,7 @@ export default {
         width,
         height,
       });
+      this.isResizing = false;
     },
     /**
      * 拖拽的回调
@@ -1044,6 +1107,8 @@ export default {
 
       const params = JSON.stringify({ left, top });
       if (this.tempData.lastDraggingInfo === params) return;
+
+      this.isDragging = true;
       debug(`onDraggingEvent`, `${this._uid}`);
 
       const beforeHooks = [].concat(this.dragHooks?.beforeDragging || []);
@@ -1076,6 +1141,8 @@ export default {
 
       afterHooks.forEach((hook) => hook(this, left, top));
       this.$emit(DEF.instanceEventType.cellDragEnd, this, { left, top });
+
+      this.isDragging = false;
     },
     /**
      * 挂载激活事件
@@ -1094,7 +1161,7 @@ export default {
 </script>
 <style lang="less" scoped>
 .cell {
-  border: none;
+  // border: none;
 }
 
 .cell-tip {

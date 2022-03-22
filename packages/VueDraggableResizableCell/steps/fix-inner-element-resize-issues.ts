@@ -3,7 +3,7 @@
  * @Date         : 2022-03-21 13:47:29
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/steps/fix-inner-element-resize-issues.ts
- * @LastEditTime : 2022-03-22 11:51:53
+ * @LastEditTime : 2022-03-22 21:37:36
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  */
 
@@ -24,6 +24,7 @@ export default {
   install: (vdrCell: IVDRCell, options: IResizeStepOptions = {}) => {
     const { widthOffset = 0, heightOffset = 0, widthChangeRatio = 1, heightChangeRatio = 1, changeRatio = 1, w = 0, h = 0, onHooks = [], parent = null } = options;
     const ele = vdrCell.getCellElement();
+    // 注册resize步骤
     vdrCell.registerResizeStep("fix-inner-ele-resize-issue", () => {
       // 方便函数
       const _getNodeInfo = (key: string, context = {}, instance: IVDRCell = vdrCell) => {
@@ -93,6 +94,13 @@ export default {
           return;
         }
 
+        // 执行过程中，可以hook一些逻辑
+        // @ts-ignore
+        const canContinue = onHooks.some((hook) => hook(vdrCell, node, options));
+        if (!canContinue) {
+          // return;
+        }
+
         // 内部有Button
         if (node?.nodeName === "BUTTON") {
           // @ts-ignore
@@ -116,14 +124,14 @@ export default {
               nodeInfo,
             })
 
+            // eslint-disable-next-line no-param-reassign
+            node.style.width = `${newWidth}px`;
+            node.style.height = `${newHeight}px`;
+
             // update vnode
             const { vnode } = nodeInfo;
             updateVNodeStyle(vnode, `width`, `${newWidth}px`);
             updateVNodeStyle(vnode, `height`, `${newHeight}px`);
-
-            // eslint-disable-next-line no-param-reassign
-            node.style.width = `${newWidth}px`;
-            node.style.height = `${newHeight}px`;
 
             debug("resizeCell-inner-ele-resize-issue ::button::end", `${vdrCell._uid}`, {
               newWidth,
@@ -196,13 +204,13 @@ export default {
                 height,
               });
 
-              // @ts-ignore
-              // eslint-disable-next-line no-param-reassign
-              parentNode.style.fontSize = `${fontSize}px`;
-
               // update vnode
               const { vnode } = nodeInfo;
               updateVNodeStyle(vnode, `fontSize`, `${fontSize}px`);
+
+              // @ts-ignore
+              // eslint-disable-next-line no-param-reassign
+              parentNode.style.fontSize = `${fontSize}px`;
             }
           }
   
@@ -212,19 +220,16 @@ export default {
             const nodeInfo = _getNodeInfo(key, { node, key }, parent ?? vdrCell);
             if (nodeInfo) {
               const newFontSize = `${changeRatio * parseFloat(nodeInfo.fontSize)}px`;
-              // eslint-disable-next-line no-param-reassign
-              node.style.fontSize = newFontSize;
 
               // update vnode
               const { vnode } = nodeInfo;
               updateVNodeStyle(vnode, `fontSize`, newFontSize);
 
+              // eslint-disable-next-line no-param-reassign
+              node.style.fontSize = newFontSize;
             }
           }
         }
-  
-        // @ts-ignore
-        onHooks.forEach((hook) => hook(vdrCell, node, w, h, changeRatio));
 
         debug("resizeCell-inner-ele-resize-issue ::end", `${vdrCell._uid} - {nodeName=${node?.nodeName}}`, node);
       });
