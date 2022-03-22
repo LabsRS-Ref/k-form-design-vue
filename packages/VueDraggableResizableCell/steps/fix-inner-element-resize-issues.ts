@@ -3,7 +3,7 @@
  * @Date         : 2022-03-21 13:47:29
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/steps/fix-inner-element-resize-issues.ts
- * @LastEditTime : 2022-03-21 20:04:55
+ * @LastEditTime : 2022-03-22 11:51:53
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  */
 
@@ -16,6 +16,7 @@ import {
   checkAssert,
   forEachNode,
   fitTextToBox,
+  updateVNodeStyle,
 } from "../util";
 
 
@@ -31,6 +32,7 @@ export default {
           context,
           instance,
         });
+        debug("_getNodeInfo", `${instance._uid}`, { nodeInfo });
         return nodeInfo;
       };
   
@@ -38,7 +40,7 @@ export default {
       // @ts-ignore
       forEachNode(ele, (htmlNode) => {
         const node = htmlNode as HTMLElement;
-        debug("resizeCell-inner-ele-resize-issue", `${vdrCell._uid}`, node);
+        debug("resizeCell-inner-ele-resize-issue ::begin", `${vdrCell._uid} - {nodeName=${node?.nodeName}}`, node);
         // 检测是否为嵌套子Cell中的元素，
         // 如果是，根据处理策略是交由嵌套子Cell处理，还是直接不处理
         const nestingCell = vdrCell.getANestedLevel0ChildCell(node);
@@ -49,7 +51,7 @@ export default {
             const { left, top } = nestingCell;
   
             // 计算尺寸
-            const method = vdrCell.nestingCellResizeStrategy;
+            const strategy = vdrCell.nestingCellResizeStrategy;
             const widths = [
               nestingCell.width + widthOffset,
               nestingCell.width,
@@ -60,14 +62,18 @@ export default {
               nestingCell.height,
               Math.floor(nestingCell.height * heightChangeRatio + 0.5),
             ];
+
+            // 根据不同的策略，计算宽度和高度
             const [_, width, height] = [
-              [method === "resize-wh", widths[0], heights[0]],
-              [method === "resize-w", widths[0], heights[1]],
-              [method === "resize-h", widths[1], heights[0]],
-              [method === "resize-wh-ratio", widths[2], heights[2]],
-              [method === "resize-w-ratio", widths[2], heights[1]],
-              [method === "resize-h-ratio", widths[1], heights[2]],
+              [strategy === "resize-wh", widths[0], heights[0]],
+              [strategy === "resize-w", widths[0], heights[1]],
+              [strategy === "resize-h", widths[1], heights[0]],
+              [strategy === "resize-wh-ratio", widths[2], heights[2]],
+              [strategy === "resize-w-ratio", widths[2], heights[1]],
+              [strategy === "resize-h-ratio", widths[1], heights[2]],
             ].filter(([m]) => m)[0];
+
+
             // 根据宽度和高度重新设位置及尺寸
             nestingCell.onResizingEvent(left, top, width, height, parent);
             // 注册自身子Cell的resize副作用事件
@@ -95,10 +101,37 @@ export default {
           if (nodeInfo) {
             const { width: oldWidth, height: oldHeight } = nodeInfo.boundingClientRect;
             const newWidth = Math.floor(oldWidth * widthChangeRatio + 0.5);
-            const newH = Math.floor(oldHeight * heightChangeRatio + 0.5);
+            const newHeight = Math.floor(oldHeight * heightChangeRatio + 0.5);
+
+            if (oldWidth === newWidth && oldHeight === newHeight) {
+              debug("resizeCell-inner-ele-resize-issue ::button::skip", `${vdrCell._uid} - {nodeName=${node?.nodeName}}`, node);
+              return;
+            }
+
+            debug("resizeCell-inner-ele-resize-issue ::button::begin", `${vdrCell._uid}`, {
+              oldWidth,
+              oldHeight,
+              widthChangeRatio,
+              heightChangeRatio,
+              nodeInfo,
+            })
+
+            // update vnode
+            const { vnode } = nodeInfo;
+            updateVNodeStyle(vnode, `width`, `${newWidth}px`);
+            updateVNodeStyle(vnode, `height`, `${newHeight}px`);
+
             // eslint-disable-next-line no-param-reassign
             node.style.width = `${newWidth}px`;
-            node.style.height = `${newH}px`;
+            node.style.height = `${newHeight}px`;
+
+            debug("resizeCell-inner-ele-resize-issue ::button::end", `${vdrCell._uid}`, {
+              newWidth,
+              newHeight,
+              widthChangeRatio,
+              heightChangeRatio,
+              nodeInfo,
+            })
           }
         }
 
@@ -108,9 +141,14 @@ export default {
           const key = node[vdrCell.privateMarkPropertyName];
           const nodeInfo = _getNodeInfo(key, { node, key });
           if (!nodeInfo.isRootNode) {
+            const newZoom = changeRatio * parseFloat(nodeInfo?.style?.zoom ?? 1.0);
             // @ts-ignore
             // eslint-disable-next-line no-param-reassign
-            node.style.zoom = changeRatio * parseFloat(nodeInfo.style.zoom || 1.0);
+            node.style.zoom = newZoom;
+
+            // update vnode
+            const { vnode } = nodeInfo;
+            updateVNodeStyle(vnode, `zoom`, newZoom);
           }
         }
   
@@ -157,9 +195,14 @@ export default {
                 width,
                 height,
               });
+
               // @ts-ignore
               // eslint-disable-next-line no-param-reassign
               parentNode.style.fontSize = `${fontSize}px`;
+
+              // update vnode
+              const { vnode } = nodeInfo;
+              updateVNodeStyle(vnode, `fontSize`, `${fontSize}px`);
             }
           }
   
@@ -168,16 +211,24 @@ export default {
             const key = node[(parent ?? vdrCell).privateMarkPropertyName];
             const nodeInfo = _getNodeInfo(key, { node, key }, parent ?? vdrCell);
             if (nodeInfo) {
+              const newFontSize = `${changeRatio * parseFloat(nodeInfo.fontSize)}px`;
               // eslint-disable-next-line no-param-reassign
-              node.style.fontSize = `${changeRatio * parseFloat(nodeInfo.fontSize)}px`;
+              node.style.fontSize = newFontSize;
+
+              // update vnode
+              const { vnode } = nodeInfo;
+              updateVNodeStyle(vnode, `fontSize`, newFontSize);
+
             }
           }
         }
   
         // @ts-ignore
         onHooks.forEach((hook) => hook(vdrCell, node, w, h, changeRatio));
+
+        debug("resizeCell-inner-ele-resize-issue ::end", `${vdrCell._uid} - {nodeName=${node?.nodeName}}`, node);
       });
-  
+
       return () => {};
     });
   }

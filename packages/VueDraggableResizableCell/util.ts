@@ -2,7 +2,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-03-01 10:24:28
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-19 21:14:51
+ * @LastEditTime : 2022-03-22 10:17:03
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/util.ts
  * @Description  : Created by sunzhifeng, Please coding something here
  */
@@ -484,4 +484,23 @@ export function debug(group: string, ...args: any[]) {
   if (filters.includes(group)) return;
   // eslint-disable-next-line no-console
   console.log(`[${group}]☛`, ...args);
+}
+
+/**
+ * 更新VNode data 样式数据
+ * @param vnode
+ * @param styleKey
+ * @param styleValue
+ */
+export function updateVNodeStyle(vnode: VNode, styleKey: string, styleValue: string | number | boolean) {
+  // @ts-ignore
+  const styleRef = (vnode?.data?.style || {});
+  if (typeof styleRef === "string") {
+    if (vnode?.data?.style) {
+      // @ts-ignore
+      vnode.data.style = styleValue;
+    }
+  } else if (typeof styleRef === "object") {
+    Object.assign(styleRef, { [styleKey]: styleValue });
+  }
 }

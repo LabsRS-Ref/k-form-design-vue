@@ -14,8 +14,11 @@ const defaultDraggableResizableCell = {
     x: 0,
     y: 0,
     z: "auto",
-    width: 100,
-    height: 100,
+    w: 0,
+    h: 0,
+    minWidth: 10,
+    minHeight: 10,
+    lockAspectRatio: false,
     resizeScope: ["width", "height"],
   },
 };

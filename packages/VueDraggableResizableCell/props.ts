@@ -2,7 +2,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-28 10:26:57
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-21 21:57:24
+ * @LastEditTime : 2022-03-22 11:57:11
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/props.ts
  * @Description  : Created by sunzhifeng, Please coding something here
  */
@@ -89,6 +89,26 @@ const props = {
     default: "auto",
     validator: (val: number | string) =>
       typeof val === "string" ? val === "auto" : val >= 0,
+  },
+  /**
+   * @description: 初始化宽度
+   * @type: {Number}
+   * @default: 100
+   */
+  w: {
+    type: Number,
+    default: 0,
+    validator: (val: number) => val >= 0,
+  },
+  /**
+   * @description: 初始化高度
+   * @type: {Number}
+   * @default: 0
+   */
+  h: {
+    type: Number,
+    default: 0,
+    validator: (val: number) => val >= 0,
   },
   /**
    * @description: 设置Cell最小宽度

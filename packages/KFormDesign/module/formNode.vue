@@ -2,7 +2,7 @@
  * @Description: 将数据通过k-form-item组件解析，生成控件
  * @Author: kcz
  * @Date: 2019-12-30 00:37:05
- * @LastEditTime : 2022-03-21 16:58:08
+ * @LastEditTime : 2022-03-22 10:53:29
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/formNode.vue
  -->
@@ -92,8 +92,8 @@ export default {
     handleActivated(t) {
       this.$emit("handleSelectItem", this.record);
       this.updateVDRCellOptions({
-        width: t.width,
-        height: t.height,
+        w: t.width,
+        h: t.height,
       });
     },
     handleDeactivated() {},
@@ -111,12 +111,12 @@ export default {
       console.log("%c%s", "color: #aa00ff", "handleCellDragEnd");
     },
     handleCellResizeStart(_) {},
-    handleCellResizing(_, { left: x, top: y, width, height }) {
+    handleCellResizing(_, { left: x, top: y, width: w, height: h }) {
       this.updateVDRCellOptions({
         x,
         y,
-        width,
-        height,
+        w,
+        h,
       });
     },
     handleCellResizeEnd(_) {},

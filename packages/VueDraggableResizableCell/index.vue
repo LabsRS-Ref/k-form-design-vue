@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-21 22:17:09
+ * @LastEditTime : 2022-03-22 11:41:07
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/index.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -121,8 +121,8 @@ export default {
       right: null,
       bottom: null,
 
-      width: 10,
-      height: 10,
+      width: this.w,
+      height: this.h,
 
       cell: {
         parent: null,
@@ -210,6 +210,18 @@ export default {
         height: this.height,
       };
     },
+    xy() {
+      return {
+        x: this.x,
+        y: this.y,
+      };
+    },
+    wh() {
+      return {
+        w: this.w,
+        h: this.h,
+      };
+    },
   },
   watch: {
     size(val, oldVal) {
@@ -219,11 +231,16 @@ export default {
         consultHeight: val.height,
       });
     },
-    x(val) {
-      this.left = val;
+    xy(val) {
+      this.left = val.x;
+      this.top = val.y;
     },
-    y(val) {
-      this.top = val;
+    wh(val, oldVal) {
+      debug("watch", `[vid=${this._uid},parent=${this.cell.parent?._uid}] wh change`, val, oldVal);
+      this.computeAndUpdateLayout({
+        consultWidth: val.w,
+        consultHeight: val.h,
+      });
     },
   },
   created() {
@@ -299,14 +316,13 @@ export default {
       });
 
       // 计算边界
+      this.updateChildrenLayout(consultLeft, consultTop, w, h);
       this.changePosition(consultLeft, consultTop);
       this.changeSize(w, h);
 
       // 更新缓存数据
-      this.$nextTick(() => {
-        this.cacheCellLayoutData({ width: w, height: h });
-        this.cell.aspectRatioInitialized = true;
-      });
+      this.cacheCellLayoutData({ width: w, height: h });
+      this.cell.aspectRatioInitialized = true;
 
       // 调用钩子函数, 方便开发者自定义操作, 开发者可以修改实例的属性及状态
       // @example (self) => {self.width = 100; self.height = 100;}
@@ -589,11 +605,17 @@ export default {
         const fontSize = parseFloat(this.getHTMLElementComputedStyle(node, "font-size"));
         const lineHeight = parseFloat(this.getHTMLElementComputedStyle(node, "line-height"));
         const getDefaultFontSize = getDocumentElementFontSize;
+        const vnode = node?.__vue__?.$vnode ?? null;
+
+        if (!vnode) {
+          checkAssert(vnode, "vnode is null", { node });
+        }
 
         this.cell.cache[key] = this.cell.cache[key] ?? {};
 
         // 公共数据
         const common = {
+          vnode,
           // 关联的内联样式Style数据
           style: JSON.parse(JSON.stringify(node?.style ?? {})),
           // 关联的CSS样式类名
@@ -760,6 +782,10 @@ export default {
     getCellOriginalStyle() {
       return this.getCellRootNodeInitInfo().style;
     },
+    updateChildrenLayout(left, top, width, height) {
+      debug("updateChildrenLayout", `${this._uid}`, { left, top, width, height });
+      this.resizeCell(left, top, width, height);
+    },
     changePosition(left = 0, top = 0) {
       this.left = assignNoNullValue(this.left, left);
       this.top = assignNoNullValue(this.top, top);
@@ -785,6 +811,8 @@ export default {
      * (2) Vue Node
      */
     resizeCell(l, t, w, h, parent = null) {
+      debug("resizeCell", `${this._uid}`, { l, t, w, h, parent });
+
       const beforeHooks = [].concat(this.resizeHooks?.beforeResizeCell || []);
       const afterHooks = [].concat(this.resizeHooks?.afterResizeCell || []);
       const onHooks = [].concat(this.resizeHooks?.onResizeCellForEachNode || []);

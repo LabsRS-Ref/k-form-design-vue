@@ -22,7 +22,10 @@
           <p style="overflow-wrap: anywhere;">
             {{ JSON.stringify(vdrCellOptions, 2) }}
           </p>
-          <a-input-number v-model="vdrCellOptions.x" label="x" />
+          <a-input-number v-model="vdrCellOptions.x" />
+          <a-input-number v-model="vdrCellOptions.y" />
+          <a-input-number v-model="vdrCellOptions.w" />
+          <a-input-number v-model="vdrCellOptions.h" />
         </a-form-item>
 
         <a-form-item label="样式">
