@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-22 21:57:21
+ * @LastEditTime : 2022-03-23 10:01:41
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/index.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -60,6 +60,7 @@ import {
   debug as debugUtil,
   assignNoNullValue,
   checkAssert,
+  checkToDo,
   isFunction,
   splice,
   getBoundingClientRect,
@@ -631,12 +632,8 @@ export default {
 
         // FIXME: 如果是根元素，要考略传递过来的宽高，有可能计算后的包裹尺寸要大于根元素本身的尺寸
         if (key === -1) {
-          if (boundingClientRect.width < width) {
-            boundingClientRect.width = width;
-          }
-          if (boundingClientRect.height < height) {
-            boundingClientRect.height = height;
-          }
+          boundingClientRect.width = Math.max(boundingClientRect.width, width);
+          boundingClientRect.height = Math.max(boundingClientRect.height, height);
         }
 
         const fontSize = parseFloat(this.getHTMLElementComputedStyle(node, "font-size"));
@@ -645,7 +642,8 @@ export default {
         const vnode = node?.__vue__?.$vnode ?? null;
 
         if (!vnode) {
-          checkAssert(vnode, "vnode is null", { node });
+          // TODO: 验证VNode不存在的情况，是否正常
+          checkToDo(vnode, "vnode is null", { node });
         }
 
         this.cell.cache[key] = this.cell.cache[key] ?? {};

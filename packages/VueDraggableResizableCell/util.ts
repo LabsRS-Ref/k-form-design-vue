@@ -2,7 +2,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-03-01 10:24:28
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-22 14:35:29
+ * @LastEditTime : 2022-03-23 10:01:24
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/util.ts
  * @Description  : Created by sunzhifeng, Please coding something here
  */
@@ -473,6 +473,13 @@ export function splice(list: any[] = [], ele: any) {
 export function checkAssert(condition: boolean, ...args: any[]): void {
   // eslint-disable-next-line no-console
   console.assert(condition, ...args);
+}
+
+export function checkToDo(condition: boolean, ...args: any[]): void {
+  // eslint-disable-next-line no-console
+  if (!condition) {
+    console.warn("%c%s", "color:red", ...args);
+  }
 }
 
 /**
