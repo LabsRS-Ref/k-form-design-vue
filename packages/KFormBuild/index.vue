@@ -126,6 +126,7 @@ export default {
                   values[key] = `k-form-design#${type}#${String(values[key])}`;
                 }
               }
+
               resolve(values);
             } else {
               resolve(values);

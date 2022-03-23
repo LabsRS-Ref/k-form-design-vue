@@ -2,7 +2,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-28 10:25:12
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-20 15:59:25
+ * @LastEditTime : 2022-03-23 12:05:52
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/def.ts
  * @Description  : Created by sunzhifeng, Please coding something here
  */
@@ -121,10 +121,10 @@ const def = {
     "afterDragCell",
   ],
   /**
-   * @description: 实例的事件类型，用于外部组件监听
+   * @description: 内部事件类型，用于外部组件监听
    * @type: {Object}
    */
-  instanceEventType: {
+  internalEvent: {
     cellResizeEnd: "cellResizeEnd",
     cellResizeStart: "cellResizeStart",
     cellResizing: "cellResizing",
@@ -138,6 +138,14 @@ const def = {
     resizestop: "resizestop",
     activated: "activated",
     deactivated: "deactivated",
+    // Vue 组件生命周期事件
+    created: "created",
+    mounted: "mounted",
+    destroyed: "destroyed",
+    updated: "updated",
+    beforeCreate: "beforeCreate",
+    beforeMount: "beforeMount",
+    beforeDestroy: "beforeDestroy",
   },
 };
 export default def;

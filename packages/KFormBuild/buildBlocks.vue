@@ -93,7 +93,7 @@
     </tr>
   </table>
 
-  <VueDraggableResizableCell v-else-if="!record.options.hidden">
+  <!-- <VueDraggableResizableCell v-else-if="!record.options.hidden">
     <KFormItem
       ref="nestedComponents"
       @handleReset="$emit('handleReset')"
@@ -105,15 +105,27 @@
       :formConfig="formConfig"
       :config="config"
     />
-  </VueDraggableResizableCell>
+  </VueDraggableResizableCell> -->
+  <VDRFormItem
+    v-else-if="!record.options.hidden"
+    ref="nestedComponents"
+    @handleReset="$emit('handleReset')"
+    @change="handleChange"
+    :disabled="disabled"
+    :dynamicData="dynamicData"
+    :key="record.key"
+    :record="record"
+    :formConfig="formConfig"
+    :config="config"
+  />
 </template>
 <script>
 /*
  * author kcz
  * date 2019-11-20
  */
-import VueDraggableResizableCell from "../VueDraggableResizableCell/index";
 import KFormItem from "../KFormItem/index";
+import VDRFormItem from "../KFormItem/vdrItem";
 
 export default {
   name: "buildBlocks",
@@ -144,8 +156,8 @@ export default {
     },
   },
   components: {
-    VueDraggableResizableCell,
     KFormItem,
+    VDRFormItem,
   },
   data() {
     return {

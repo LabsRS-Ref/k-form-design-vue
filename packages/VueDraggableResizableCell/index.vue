@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-23 10:01:41
+ * @LastEditTime : 2022-03-23 14:45:37
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/index.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -20,7 +20,7 @@
     :min-height="minHeight"
     :max-width="maxWidth"
     :max-height="maxHeight"
-    :class="[className, { [className + '-tip']: tip.trim().length > 0 }]"
+    :class="classNamesForCell"
     :class-name="classNameVDR"
     :class-name-draggable="classNameDraggable"
     :class-name-dragging="classNameDragging"
@@ -121,8 +121,8 @@ export default {
       right: null,
       bottom: null,
 
-      width: this.w || 10,
-      height: this.h || 10,
+      width: 10,
+      height: 10,
 
       cell: {
         parent: null,
@@ -149,6 +149,16 @@ export default {
     };
   },
   computed: {
+    classNamesForCell() {
+      const cls = this.className;
+      return [
+        cls,
+        {
+          [`${cls}-tip`]: this.tip.trim().length > 0,
+          [`${cls}-hide-border`]: !(this.draggable || this.resizable),
+        },
+      ];
+    },
     isVueDraggableResizableCell() {
       return true;
     },
@@ -248,28 +258,31 @@ export default {
     },
   },
   created() {
+    debug("created", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`);
     this.updateHierarchy();
     store.cells.push(this);
+    this.$emit(DEF.internalEvent.created, this);
   },
   beforeMount() {
+    debug("beforeMount", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, this.xy, this.wh);
     this.initHooks();
+    this.$emit(DEF.internalEvent.beforeMount, this);
   },
   mounted() {
-    this.computeAndUpdateLayout({
-      consultLeft: this.left,
-      consultTop: this.top,
-      consultWidth: this.width,
-      consultHeight: this.height,
-      updateCache: true,
-    });
+    debug("mounted", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, this.$el);
+    this.computeAndUpdateLayout({ updateCache: true });
+    this.$emit(DEF.internalEvent.mounted, this);
   },
   updated() {
     debug("updated", this._uid);
+    this.$emit(DEF.internalEvent.updated, this);
   },
   destroyed() {
+    debug("destroyed", this._uid);
     splice(store.cells, this);
     const { parent } = this.cell;
     splice(parent?.cell?.children, this);
+    this.$emit(DEF.internalEvent.destroyed, this);
   },
   methods: {
     /** 更新层次结构 */
@@ -316,6 +329,7 @@ export default {
         consultTop,
         consultWidth,
         consultHeight,
+        updateCache,
       });
       // 自适应内部元素的大小(考虑line-height的影响)
       const { width: w, height: h } = this.getCellBestWrapperSize({
@@ -326,17 +340,15 @@ export default {
 
       // 计算边界
       if (!updateCache) {
-        this.updateChildrenLayout(consultLeft, consultTop, w, h);
+        this.updateChildrenLayout({ left: consultLeft, top: consultTop, width: w, height: h });
       }
       this.changePosition(consultLeft, consultTop);
       this.changeSize(w, h);
 
       // 更新缓存数据
       if (updateCache) {
-        this.$nextTick(() => {
-          this.cacheCellLayoutData({ width: w, height: h });
-          this.cell.aspectRatioInitialized = true;
-        });
+        this.cacheCellLayoutData({ width: this.width, height: this.height });
+        this.cell.aspectRatioInitialized = true;
       }
 
       // 调用钩子函数, 方便开发者自定义操作, 开发者可以修改实例的属性及状态
@@ -349,10 +361,10 @@ export default {
       }
     },
     /**
-     * 获取实例事件类型
+     * 获取内部事件类型
      */
-    getInstanceEventType() {
-      return DEF.instanceEventType;
+    getInternalEventType() {
+      return DEF.internalEvent;
     },
     /**
      * 获得内部单元的VNode
@@ -819,8 +831,7 @@ export default {
       return this.getCellRootNodeInitInfo().style;
     },
     /** 更新所有子节点布局 */
-    updateChildrenLayout(left, top, width, height) {
-      debug("updateChildrenLayout", `${this._uid}`, { left, top, width, height });
+    updateChildrenLayout({ left = -1, top = -1, width = 0, height = 0, force = false } = {}) {
       const willResize = [
         [this.left, left],
         [this.top, top],
@@ -830,7 +841,10 @@ export default {
         return origin !== target;
       });
 
-      if (willResize) {
+      // debug
+      debug("updateChildrenLayout", `${this._uid}`, { left, top, width, height, force, willResize });
+
+      if (willResize || force) {
         this.resizeCell(left, top, width, height);
         // 副作用启动
         this.activeAllResizeEffects();
@@ -994,7 +1008,7 @@ export default {
      */
     checkAllowDragStart(e) {
       // 不管是否允许，都转发事件
-      this.$emit(DEF.instanceEventType.dragStart, this, e);
+      this.$emit(DEF.internalEvent.dragStart, this, e);
 
       // check enable drag for event
       const mouseX = e.touches ? e.touches[0].pageX : e.pageX;
@@ -1003,7 +1017,7 @@ export default {
       // check the mouse is in the cell child node
       if (this.hasChildrenCellContainsPoint({ x: mouseX, y: mouseY })) return false;
 
-      this.$emit(DEF.instanceEventType.cellDragStart, this, e);
+      this.$emit(DEF.internalEvent.cellDragStart, this, e);
 
       return true;
     },
@@ -1025,7 +1039,7 @@ export default {
      * @param {object} parent 用于嵌套Cell的指明有谁引起的，直接穿透
      */
     onResizingEvent(left, top, width, height, parent = null) {
-      this.$emit(DEF.instanceEventType.resizing, this, {
+      this.$emit(DEF.internalEvent.resizing, this, {
         left,
         top,
         width,
@@ -1047,7 +1061,7 @@ export default {
       afterHooks.forEach((hook) => hook(this, left, top, width, height));
 
       // 发送事件
-      this.$emit(DEF.instanceEventType.cellResizing, this, {
+      this.$emit(DEF.internalEvent.cellResizing, this, {
         left,
         top,
         width,
@@ -1066,7 +1080,7 @@ export default {
      */
     onResizeStopEvent(left, top, width, height) {
       debug(`onResizeStopEvent`, `${this._uid}`, { left, top, width, height });
-      this.$emit(DEF.instanceEventType.resizestop, this, {
+      this.$emit(DEF.internalEvent.resizestop, this, {
         left,
         top,
         width,
@@ -1087,7 +1101,7 @@ export default {
       // 钩子函数
       afterHooks.forEach((hook) => hook(this, left, top, width, height));
 
-      this.$emit(DEF.instanceEventType.cellResizeEnd, this, {
+      this.$emit(DEF.internalEvent.cellResizeEnd, this, {
         left,
         top,
         width,
@@ -1101,7 +1115,7 @@ export default {
      * @param {number} top
      */
     onDraggingEvent(left, top) {
-      this.$emit(DEF.instanceEventType.dragging, this, { left, top });
+      this.$emit(DEF.internalEvent.dragging, this, { left, top });
 
       const params = JSON.stringify({ left, top });
       if (this.tempData.lastDraggingInfo === params) return;
@@ -1117,7 +1131,7 @@ export default {
       this.changePosition(left, top);
 
       afterHooks.forEach((hook) => hook(this, left, top));
-      this.$emit(DEF.instanceEventType.cellDragging, this, { left, top });
+      this.$emit(DEF.internalEvent.cellDragging, this, { left, top });
 
       // 记录最后一次的改变信息
       this.tempData.lastDraggingInfo = params;
@@ -1128,7 +1142,7 @@ export default {
      * @param {number} top
      */
     onDragEndEvent(left, top) {
-      this.$emit(DEF.instanceEventType.dragEnd, { left, top });
+      this.$emit(DEF.internalEvent.dragEnd, { left, top });
 
       const beforeHooks = [].concat(this.dragHooks?.beforeDragEnd || []);
       const afterHooks = [].concat(this.dragHooks?.afterDragEnd || []);
@@ -1138,7 +1152,7 @@ export default {
       this.changePosition(left, top);
 
       afterHooks.forEach((hook) => hook(this, left, top));
-      this.$emit(DEF.instanceEventType.cellDragEnd, this, { left, top });
+      this.$emit(DEF.internalEvent.cellDragEnd, this, { left, top });
 
       this.isDragging = false;
     },
@@ -1146,20 +1160,20 @@ export default {
      * 挂载激活事件
      */
     onActivatedEvent() {
-      this.$emit(DEF.instanceEventType.activated, this);
+      this.$emit(DEF.internalEvent.activated, this);
     },
     /**
      * 未激活选择事件
      */
     onDeactivatedEvent() {
-      this.$emit(DEF.instanceEventType.deactivated, this);
+      this.$emit(DEF.internalEvent.deactivated, this);
     },
   },
 };
 </script>
 <style lang="less" scoped>
-.cell {
-  // border: none;
+.cell-hide-border {
+  border: none;
 }
 
 .cell-tip {

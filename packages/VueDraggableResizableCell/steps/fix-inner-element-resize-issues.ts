@@ -3,7 +3,7 @@
  * @Date         : 2022-03-21 13:47:29
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/steps/fix-inner-element-resize-issues.ts
- * @LastEditTime : 2022-03-22 21:37:36
+ * @LastEditTime : 2022-03-23 17:27:01
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  */
 
@@ -19,13 +19,75 @@ import {
   updateVNodeStyle,
 } from "../util";
 
+const stepName = "fix-inner-ele-resize-issue";
+
+type TChangeFontSizeOptions = {
+  vdrCell: IVDRCell;
+  nodeInfo: any;
+  node: ParentNode | null;
+  nodeValue: string | null;
+  w: number;
+  h: number;
+}
+
+/** 通用改变字体大小的算法 */
+function changeFontSize(options: TChangeFontSizeOptions) {
+  const { nodeInfo, node, nodeValue, w, h, vdrCell } = options;
+  // 计算合适的字体大小
+  const {
+    // 使用初始化值，这样能保证整体字体大小符合常规模式
+    initial: {
+      fontSize: initialFontSize,
+      cell: { width = 1, height = 1 },
+    },
+  } = nodeInfo;
+
+  // 计算(勿要超过容器高度)
+  const fitFontSize = fitTextToBox.px(
+    nodeValue,
+    // @ts-ignore
+    node.clientWidth,
+    // @ts-ignore
+    node.clientHeight,
+    vdrCell.getHTMLElementComputedStyle(node, "font-family")
+  );
+  const ratioFontSize = Math.min(w / width, h / height) * initialFontSize;
+
+  const strategy = vdrCell.resizeFontStrategy;
+  const [_, fontSize] = [
+    [strategy === "ratio", ratioFontSize],
+    [strategy === "fit", fitFontSize],
+    [strategy === "auto", Math.min(ratioFontSize, fitFontSize)],
+  ].filter(([m]) => m)[0];
+
+  debug(`${stepName} ::${node?.nodeName}::begin`, `${vdrCell._uid}`, {
+    ratioFontSize,
+    fitFontSize,
+    initialFontSize,
+    width,
+    height,
+  });
+
+  // @ts-ignore
+  // eslint-disable-next-line no-param-reassign
+  node.style.fontSize = `${fontSize}px`;
+
+  // update vnode
+  const { vnode } = nodeInfo;
+  updateVNodeStyle(vnode, `fontSize`, `${fontSize}px`);
+
+  debug(`${stepName} ::${node?.nodeName}::end`, `${vdrCell._uid}`, {
+    fontSize,
+  });
+}
 
 export default {
   install: (vdrCell: IVDRCell, options: IResizeStepOptions = {}) => {
     const { widthOffset = 0, heightOffset = 0, widthChangeRatio = 1, heightChangeRatio = 1, changeRatio = 1, w = 0, h = 0, onHooks = [], parent = null } = options;
     const ele = vdrCell.getCellElement();
+
     // 注册resize步骤
-    vdrCell.registerResizeStep("fix-inner-ele-resize-issue", () => {
+    vdrCell.registerResizeStep(stepName, () => {
       // 方便函数
       const _getNodeInfo = (key: string, context = {}, instance: IVDRCell = vdrCell) => {
         const nodeInfo = instance.getCellChildNodeInitInfoByKey(key);
@@ -41,7 +103,7 @@ export default {
       // @ts-ignore
       forEachNode(ele, (htmlNode) => {
         const node = htmlNode as HTMLElement;
-        debug("resizeCell-inner-ele-resize-issue ::begin", `${vdrCell._uid} - {nodeName=${node?.nodeName}}`, node);
+        debug(`${stepName} ::begin`, `${vdrCell._uid} - {nodeName=${node?.nodeName}}`, node);
         // 检测是否为嵌套子Cell中的元素，
         // 如果是，根据处理策略是交由嵌套子Cell处理，还是直接不处理
         const nestingCell = vdrCell.getANestedLevel0ChildCell(node);
@@ -111,18 +173,25 @@ export default {
             const newWidth = Math.floor(oldWidth * widthChangeRatio + 0.5);
             const newHeight = Math.floor(oldHeight * heightChangeRatio + 0.5);
 
-            if (oldWidth === newWidth && oldHeight === newHeight) {
-              debug("resizeCell-inner-ele-resize-issue ::button::skip", `${vdrCell._uid} - {nodeName=${node?.nodeName}}`, node);
+            // 判断不处理的条件
+            const conditions = [
+              [oldWidth === newWidth, oldHeight === newHeight].every((m) => !!m), // 宽高没有变化
+              [newWidth === 0, newHeight === 0].some((m) => !!m), // 任何为0的都不处理
+            ]
+
+            if (conditions.some((m) => !!m)) {
+              debug(`${stepName} ::${node?.nodeName}::skip`, `${vdrCell._uid}`, node);
               return;
             }
 
-            debug("resizeCell-inner-ele-resize-issue ::button::begin", `${vdrCell._uid}`, {
+            debug(`${stepName} ::${node?.nodeName}::begin`, `${vdrCell._uid}`, {
               oldWidth,
               oldHeight,
               widthChangeRatio,
               heightChangeRatio,
               nodeInfo,
             })
+
 
             // eslint-disable-next-line no-param-reassign
             node.style.width = `${newWidth}px`;
@@ -133,7 +202,7 @@ export default {
             updateVNodeStyle(vnode, `width`, `${newWidth}px`);
             updateVNodeStyle(vnode, `height`, `${newHeight}px`);
 
-            debug("resizeCell-inner-ele-resize-issue ::button::end", `${vdrCell._uid}`, {
+            debug(`${stepName} ::${node?.nodeName}::end`, `${vdrCell._uid}`, {
               newWidth,
               newHeight,
               widthChangeRatio,
@@ -150,6 +219,24 @@ export default {
           const nodeInfo = _getNodeInfo(key, { node, key });
           if (!nodeInfo.isRootNode) {
             const newZoom = changeRatio * parseFloat(nodeInfo?.style?.zoom ?? 1.0);
+
+            // 判断不处理的条件
+            const conditions = [
+              [newZoom === 0].some((m) => !!m), // 任何为0的都不处理
+            ]
+
+            if (conditions.some((m) => !!m)) {
+              debug(`${stepName} ::${node?.nodeName}::skip`, `${vdrCell._uid}`, node);
+              return;
+            }
+
+            debug(`${stepName} ::${node?.nodeName}::begin`, `${vdrCell._uid}`, {
+              oldZoom: parseFloat(nodeInfo?.style?.zoom ?? 1.0),
+              newZoom,
+              changeRatio,
+              nodeInfo,
+            });
+
             // @ts-ignore
             // eslint-disable-next-line no-param-reassign
             node.style.zoom = newZoom;
@@ -157,81 +244,58 @@ export default {
             // update vnode
             const { vnode } = nodeInfo;
             updateVNodeStyle(vnode, `zoom`, newZoom);
+
+            debug(`${stepName} ::${node?.nodeName}::end`, `${vdrCell._uid}`, {
+              newZoom,
+              changeRatio,
+              nodeInfo,
+            });
           }
         }
   
         // 更新font-size
-        if (vdrCell.enableResizeFontSize) {
-          if (node?.nodeName === "#text") {
-            const { parentNode, nodeValue } = node;
-            // @ts-ignore
-            const key = parentNode[(parent ?? vdrCell).privateMarkPropertyName];
-            const nodeInfo = _getNodeInfo(key, { node, key, parentNode }, parent ?? vdrCell);
-            if (nodeInfo) {
-              // 计算合适的字体大小
-              const {
-                // 使用初始化值，这样能保证整体字体大小符合常规模式
-                initial: {
-                  fontSize: initialFontSize,
-                  cell: { width = 1, height = 1 },
-                },
-              } = nodeInfo;
-  
-              // 计算(勿要超过容器高度)
-              const fitFontSize = fitTextToBox.px(
-                nodeValue,
+        if (vdrCell.enableResizeFontSize && ["#text", "INPUT"].includes(node?.nodeName)) {
+          switch (node?.nodeName) {
+            case "#text":
+              {
+                const { parentNode, nodeValue } = node;
                 // @ts-ignore
-                parentNode.clientWidth,
+                const key = parentNode[(parent ?? vdrCell).privateMarkPropertyName];
+                const nodeInfo = _getNodeInfo(key, { node, key, parentNode }, parent ?? vdrCell);
+    
+                changeFontSize({
+                  nodeInfo,
+                  nodeValue,
+                  node: parentNode,
+                  vdrCell,
+                  w,
+                  h,
+                });
+              };
+              break;
+            case "INPUT":
+              {
                 // @ts-ignore
-                parentNode.clientHeight,
-                vdrCell.getHTMLElementComputedStyle(parentNode, "font-family")
-              );
-              const ratioFontSize = Math.min(w / width, h / height) * initialFontSize;
-  
-              const strategy = vdrCell.resizeFontStrategy;
-              const [_, fontSize] = [
-                [strategy === "ratio", ratioFontSize],
-                [strategy === "fit", fitFontSize],
-                [strategy === "auto", Math.min(ratioFontSize, fitFontSize)],
-              ].filter(([m]) => m)[0];
-  
-              debug(`update-font-size`, `${vdrCell._uid}`, {
-                fontSize,
-                ratioFontSize,
-                fitFontSize,
-                initialFontSize,
-                width,
-                height,
-              });
+                const key = node[(parent ?? vdrCell).privateMarkPropertyName];
+                const nodeInfo = _getNodeInfo(key, { node, key }, parent ?? vdrCell);
 
-              // update vnode
-              const { vnode } = nodeInfo;
-              updateVNodeStyle(vnode, `fontSize`, `${fontSize}px`);
+                changeFontSize({
+                  nodeInfo,
+                  nodeValue: node?.nodeValue,
+                  node,
+                  vdrCell,
+                  w,
+                  h,
+                });
+              };
+              break;
 
-              // @ts-ignore
-              // eslint-disable-next-line no-param-reassign
-              parentNode.style.fontSize = `${fontSize}px`;
-            }
-          }
-  
-          if (node?.nodeName === "INPUT") {
-            // @ts-ignore
-            const key = node[(parent ?? vdrCell).privateMarkPropertyName];
-            const nodeInfo = _getNodeInfo(key, { node, key }, parent ?? vdrCell);
-            if (nodeInfo) {
-              const newFontSize = `${changeRatio * parseFloat(nodeInfo.fontSize)}px`;
-
-              // update vnode
-              const { vnode } = nodeInfo;
-              updateVNodeStyle(vnode, `fontSize`, newFontSize);
-
-              // eslint-disable-next-line no-param-reassign
-              node.style.fontSize = newFontSize;
-            }
+            default:
+              break;
           }
         }
 
-        debug("resizeCell-inner-ele-resize-issue ::end", `${vdrCell._uid} - {nodeName=${node?.nodeName}}`, node);
+        debug(`${stepName} ::end`, `${vdrCell._uid} - {nodeName=${node?.nodeName}}`, node);
       });
 
       return () => {};
