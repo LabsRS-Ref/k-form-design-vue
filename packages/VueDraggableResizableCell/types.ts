@@ -3,7 +3,7 @@
  * @Date         : 2022-03-21 15:01:39
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/types.ts
- * @LastEditTime : 2022-03-21 15:03:46
+ * @LastEditTime : 2022-03-24 14:58:58
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  */
 
@@ -14,11 +14,17 @@ export interface IVDRCell extends Vue {
 }
 
 export interface IResizeStepOptions {
+  // resize calculate offset, change ratio ... params
+  leftOffset?: number;
+  topOffset?: number;
   widthOffset?: number;
   heightOffset?: number;
   widthChangeRatio?: number;
   heightChangeRatio?: number;
   changeRatio?: number;
+  // resize base params
+  l?: number;
+  t?: number;
   w?: number;
   h?: number;
   onHooks?: any[];

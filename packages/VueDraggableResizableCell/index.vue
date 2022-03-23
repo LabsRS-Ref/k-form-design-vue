@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-23 21:09:21
+ * @LastEditTime : 2022-03-24 22:24:56
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/index.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -80,7 +80,7 @@ const debug = (...args) => {
   const group = args[0];
   const filters = {
     cacheCellLayoutData: 0,
-    "resizeCell-offset": 1,
+    "resizeCell-offset": 0,
     onResizingEvent: 1,
   };
 
@@ -121,8 +121,8 @@ export default {
       right: null,
       bottom: null,
 
-      width: 10,
-      height: 10,
+      width: this.w || 10,
+      height: this.h || 10,
 
       cell: {
         parent: null,
@@ -184,22 +184,25 @@ export default {
       return this.resizable;
     },
     enableResizeWidth() {
-      return this.resizable && this.finalResizeScope.includes("width");
+      return this.finalResizeScope.includes("width");
     },
     enableResizeHeight() {
-      return this.resizable && this.finalResizeScope.includes("height");
+      return this.finalResizeScope.includes("height");
     },
     enableResizeSvgSize() {
-      return this.resizable && this.finalResizeScope.includes("svg-size");
+      return this.finalResizeScope.includes("svg-size");
     },
     enableResizeFontSize() {
-      return this.resizable && this.finalResizeScope.includes("font-size");
+      return this.finalResizeScope.includes("font-size");
     },
     enableResizeLineHeight() {
-      return this.resizable && this.finalResizeScope.includes("line-height");
+      return this.finalResizeScope.includes("line-height");
     },
     enableResizeNestingCell() {
-      return this.resizable && this.finalResizeScope.includes("nesting-cell");
+      return this.finalResizeScope.includes("nesting-cell");
+    },
+    enableResizeInnerElementSize() {
+      return this.finalResizeScope.includes("inner-element-size");
     },
     isLockAspectRatio() {
       return this.lockAspectRatio && this.cell.aspectRatioInitialized;
@@ -218,7 +221,7 @@ export default {
         .filter((item) => Object.values(item).includes(true))
         .map((item) => Object.keys(item)[0]);
     },
-    size() {
+    wrapperSize() {
       return {
         width: this.width,
         height: this.height,
@@ -238,23 +241,23 @@ export default {
     },
   },
   watch: {
-    size(val, oldVal) {
-      debug("watch", `[vid=${this._uid},parent=${this.cell.parent?._uid}] size change`, val, oldVal);
-      this.computeAndUpdateLayout({
-        consultWidth: val.width,
-        consultHeight: val.height,
+    wrapperSize(val, oldVal) {
+      debug("watch", `[vid=${this._uid},parent=${this.cell.parent?._uid}] wrapper size change`, val, oldVal);
+      this.updateChildrenLayout({
+        left: this.left,
+        top: this.top,
+        width: val.width,
+        height: val.height,
+        force: true,
       });
     },
-    xy(val) {
-      this.left = val.x;
-      this.top = val.y;
+    xy(val, oldVal) {
+      debug("watch", `[vid=${this._uid},parent=${this.cell.parent?._uid}] xy change`, val, oldVal);
+      this.changePosition(val.x, val.y);
     },
     wh(val, oldVal) {
-      debug("watch", `[vid=${this._uid},parent=${this.cell.parent?._uid}] wh change`, val, oldVal);
-      this.computeAndUpdateLayout({
-        consultWidth: val.w,
-        consultHeight: val.h,
-      });
+      debug("watch", `[vid=${this._uid},parent=${this.cell.parent?._uid}] xywh change`, val, oldVal);
+      this.changeSize(val.w, val.h);
     },
   },
   created() {
@@ -269,7 +272,7 @@ export default {
     this.sentEvent(DEF.internalEvent.beforeMount, this);
   },
   mounted() {
-    debug("mounted", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, this.$el);
+    debug("mounted", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, this.getWrapperElement());
     this.computeAndUpdateLayout({ updateCache: true });
     this.sentEvent(DEF.internalEvent.mounted, this);
   },
@@ -321,6 +324,7 @@ export default {
      * @param {number} consultWidth 参考宽度，默认0
      * @param {number} consultHeight 参考高度，默认0
      * @param {boolean} updateCache 是否更新缓存
+     * @param {boolean} forceUpdateChildrenLayout 是否强制更新所有子元素的布局
      */
     computeAndUpdateLayout({
       consultLeft = this.left,
@@ -328,6 +332,7 @@ export default {
       consultWidth = 0,
       consultHeight = 0,
       updateCache = false,
+      forceUpdateChildrenLayout = false,
     } = {}) {
       debug("computeAndUpdateLayout", `${this._uid}`, {
         consultLeft,
@@ -335,6 +340,7 @@ export default {
         consultWidth,
         consultHeight,
         updateCache,
+        forceUpdateChildrenLayout,
       });
       // 自适应内部元素的大小(考虑line-height的影响)
       const { width: w, height: h } = this.getCellBestWrapperSize({
@@ -345,7 +351,13 @@ export default {
 
       // 计算边界
       if (!updateCache) {
-        this.updateChildrenLayout({ left: consultLeft, top: consultTop, width: w, height: h });
+        this.updateChildrenLayout({
+          left: consultLeft,
+          top: consultTop,
+          width: w,
+          height: h,
+          force: !!forceUpdateChildrenLayout,
+        });
       } else {
         this.changePosition(consultLeft, consultTop);
         this.changeSize(w, h);
@@ -353,7 +365,12 @@ export default {
 
       // 更新缓存数据
       if (updateCache) {
-        this.cacheCellLayoutData({ width: this.width, height: this.height });
+        this.cacheCellLayoutData({
+          left: consultLeft,
+          top: consultTop,
+          width: this.width,
+          height: this.height,
+        });
         this.cell.aspectRatioInitialized = true;
       }
 
@@ -371,6 +388,12 @@ export default {
      */
     getInternalEventType() {
       return DEF.internalEvent;
+    },
+    /**
+     * 获得挂载后的元素，特指包裹元素
+     */
+    getWrapperElement() {
+      return this.$el;
     },
     /**
      * 获得内部单元的VNode
@@ -430,6 +453,11 @@ export default {
      * @returns {object} {width, height}
      */
     getCellBestWrapperSize({ consultWidth = 0, consultHeight = 0, recursiveCalcChildrenNodes = false } = {}) {
+      debug("getCellBestWrapperSize::begin", `${this._uid}`, {
+        consultWidth,
+        consultHeight,
+        recursiveCalcChildrenNodes,
+      });
       const rect = this.getCellBoundingClientRect();
       const { width: scrollWidth, height: scrollHeight } = this.getCellScrollSize();
       const { width: offsetWidth, height: offsetHeight } = this.getCellOffsetSize();
@@ -458,22 +486,44 @@ export default {
         useBest([rect.height, offsetHeight, consultHeight, this.minHeight, ...[useScrollSize ? scrollHeight : 0]]),
       ];
 
+      // 如果采用的子元素最大的尺寸，那么需要计算Cell的Border的尺寸，用以容纳子元素的边界
+      // 特别要注意，这里要计算的是Vue实例关联的元素，而为slot提供的元素
+      const { borderLeftWidth, borderRightWidth, borderTopWidth, borderBottomWidth } = this.getWrapperBorder();
+      // TODO: 是否要考略 padding 的影响
+      const wrapperWidth =
+        // eslint-disable-next-line no-constant-condition
+        childNodeMaxWidth >= calcWidth ? childNodeMaxWidth + borderLeftWidth + borderRightWidth : 0;
+      const wrapperHeight =
+        // eslint-disable-next-line no-constant-condition
+        childNodeMaxHeight >= calcHeight ? childNodeMaxHeight + borderTopWidth + borderBottomWidth : 0;
+
       // 计算最佳宽高
       const [finalWidth, finalHeight] = [
-        useBest([calcWidth, childNodeMaxWidth]),
-        useBest([calcHeight, childNodeMaxHeight]),
+        useBest([calcWidth, childNodeMaxWidth, wrapperWidth]),
+        useBest([calcHeight, childNodeMaxHeight, wrapperHeight]),
       ];
 
       // TODO: 补充针对maxWidth，maxHeight的处理
 
-      debug("getCellBestWrapperSize", `${this._uid}`, {
+      debug("getCellBestWrapperSize::end", `${this._uid}`, {
         finalWidth,
         finalHeight,
+        calcWidth,
+        calcHeight,
+        childNodeMaxWidth,
+        childNodeMaxHeight,
         offsetWidth,
         offsetHeight,
         scrollWidth,
         scrollHeight,
         rect,
+        border: {
+          left: borderLeftWidth,
+          right: borderRightWidth,
+          top: borderTopWidth,
+          bottom: borderBottomWidth,
+        },
+        ele,
       });
 
       return {
@@ -624,7 +674,7 @@ export default {
     /**
      * 预先处置, 缓存一些Cell的状态数据
      */
-    cacheCellLayoutData({ width, height }) {
+    cacheCellLayoutData({ left = 0, top = 0, width = 1, height = 1 }) {
       debug("cacheCellLayoutData", `${this._uid}`, { width, height });
       const ele = this.getCellElement();
       const beforeHooks = [].concat(this.cellChildNodeInitInfoHooks?.beforeInit || []);
@@ -638,76 +688,93 @@ export default {
 
       // 标记元素
       let key = -1;
-      forEachNode(ele, (node) => {
-        // eslint-disable-next-line no-param-reassign
-        node[this.privateMarkPropertyName] = key;
-        let extraInfo = {};
-        onCacheHooks.forEach(
-          // eslint-disable-next-line no-return-assign
-          (hook) => (extraInfo = Object.assign(extraInfo, hook(this, node, key, extraInfo) || {}))
-        );
-        const boundingClientRect = getBoundingClientRect(node);
+      forEachNode(
+        ele,
+        // callback
+        (node, index, list, level, parentNode) => {
+          // eslint-disable-next-line no-param-reassign
+          node[this.privateMarkPropertyName] = key;
+          let extraInfo = {};
+          onCacheHooks.forEach(
+            // eslint-disable-next-line no-return-assign
+            (hook) => (extraInfo = Object.assign(extraInfo, hook(this, node, key, extraInfo) || {}))
+          );
+          const boundingClientRect = getBoundingClientRect(node);
 
-        // FIXME: 如果是根元素，要考略传递过来的宽高，有可能计算后的包裹尺寸要大于根元素本身的尺寸
-        if (key === -1) {
-          boundingClientRect.width = Math.max(boundingClientRect.width, width);
-          boundingClientRect.height = Math.max(boundingClientRect.height, height);
-        }
+          // FIXME: 如果是根元素，要考略传递过来的宽高，有可能计算后的包裹尺寸要大于根元素本身的尺寸
+          if (key === -1) {
+            boundingClientRect.width = Math.max(boundingClientRect.width, width);
+            boundingClientRect.height = Math.max(boundingClientRect.height, height);
+          }
 
-        const fontSize = parseFloat(this.getHTMLElementComputedStyle(node, "font-size"));
-        const lineHeight = parseFloat(this.getHTMLElementComputedStyle(node, "line-height"));
-        const getDefaultFontSize = getDocumentElementFontSize;
-        const vnode = node?.__vue__?.$vnode ?? null;
+          const fontSize = parseFloat(this.getHTMLElementComputedStyle(node, "font-size"));
+          const lineHeight = parseFloat(this.getHTMLElementComputedStyle(node, "line-height"));
+          const getDefaultFontSize = getDocumentElementFontSize;
+          const vnode = node?.__vue__?.$vnode ?? null;
 
-        if (!vnode) {
-          // TODO: 验证VNode不存在的情况，是否正常
-          checkToDo(vnode, "vnode is null", { node });
-        }
+          if (!vnode) {
+            // TODO: 验证VNode不存在的情况，是否正常
+            checkToDo(vnode, "vnode is null", { node });
+          }
 
-        this.cell.cache[key] = this.cell.cache[key] ?? {};
+          this.cell.cache[key] = this.cell.cache[key] ?? {};
 
-        // 公共数据
-        const common = {
-          // 对应的VNode节点
-          vnode,
-          // 关联的内联样式Style数据
-          style: JSON.parse(JSON.stringify(node?.style ?? {})),
-          // 关联的CSS样式类名
-          class: node?.className || "",
-          // 相对于视口的矩形
-          boundingClientRect,
-          // 宽高比
-          aspectRatio,
-          // 字体大小，可能为NaN
-          fontSize: Number.isNaN(fontSize) ? getDefaultFontSize() : fontSize,
-          // 行高，可能为NaN
-          lineHeight: Number.isNaN(lineHeight) ? getDefaultFontSize() * 1.5 : lineHeight,
-        };
+          // 公共数据
+          const common = {
+            // 对应的VNode节点
+            vnode,
+            // 关联的ParentNode
+            parentNode,
+            // 关联的内联样式Style数据
+            style: JSON.parse(JSON.stringify(node?.style ?? {})),
+            // 关联的CSS样式类名
+            class: node?.className || "",
+            // 相对于视口的矩形
+            boundingClientRect,
+            // 宽高比
+            aspectRatio,
+            // 字体大小，可能为NaN
+            fontSize: Number.isNaN(fontSize) ? getDefaultFontSize() : fontSize,
+            // 行高，可能为NaN
+            lineHeight: Number.isNaN(lineHeight) ? getDefaultFontSize() * 1.5 : lineHeight,
+          };
 
-        // 初始化状态, 用于记录最初状态，不用频繁更新
-        const initial =
-          this.cell.cache[key]?.initial ||
-          Object.freeze({
+          // 初始化状态, 用于记录最初状态，不用频繁更新
+          const initial =
+            this.cell.cache[key]?.initial ||
+            Object.freeze({
+              ...common,
+              // wrapper = this.getWrapperElement()
+              wrapper: {
+                // 相对于Wrapper的相对位置
+                left,
+                top,
+                width,
+                height,
+                // 相对于视口的矩形
+                boundingClientRect: this.getWrapperElement().getBoundingClientRect(),
+              },
+            });
+
+          // 要缓存的属性
+          this.cell.cache[key] = Object.freeze({
+            // 扩展属性
+            ...extraInfo,
+            // 公共属性
             ...common,
-            cell: {
-              width,
-              height,
-            },
+            // 初始化状态
+            initial,
+            // HTML Node
+            node,
+            // 是否是Cell根节点，只有key === -1时才是
+            isRootNode: key === -1,
           });
 
-        // 要缓存的属性
-        this.cell.cache[key] = Object.freeze({
-          ...extraInfo,
-          ...common,
-          initial,
-          // HTML Node
-          node,
-          // 是否是Cell根节点，只有key === -1时才是
-          isRootNode: key === -1,
-        });
-
-        key += 1;
-      });
+          key += 1;
+        },
+        // context
+        { parent: this.getWrapperElement() }
+      );
 
       afterHooks.forEach((hook) => hook(this, ele));
     },
@@ -836,8 +903,33 @@ export default {
     getCellOriginalStyle() {
       return this.getCellRootNodeInitInfo().style;
     },
+    /**
+     * 获得挂载元素的Border信息
+     */
+    getWrapperBorder() {
+      const wrapperElement = this.getWrapperElement();
+      const [borderLeftWidth, borderRightWidth, borderTopWidth, borderBottomWidth] = [
+        parseFloat(window.getComputedStyle(wrapperElement).borderLeftWidth),
+        parseFloat(window.getComputedStyle(wrapperElement).borderRightWidth),
+        parseFloat(window.getComputedStyle(wrapperElement).borderTopWidth),
+        parseFloat(window.getComputedStyle(wrapperElement).borderBottomWidth),
+      ];
+      return {
+        borderLeftWidth,
+        borderRightWidth,
+        borderTopWidth,
+        borderBottomWidth,
+      };
+    },
+    /**
+     * 获得挂载元素的初始化数据
+     */
+    getWrapperInitialData() {
+      const rootNodeInitInfo = this.getCellRootNodeInitInfo();
+      return rootNodeInitInfo.initial.wrapper;
+    },
     /** 更新所有子节点布局 */
-    updateChildrenLayout({ left = -1, top = -1, width = 0, height = 0, force = false } = {}) {
+    updateChildrenLayout({ left = 0, top = 0, width = 0, height = 0, force = false } = {}) {
       const willResize = [
         [this.left, left],
         [this.top, top],
@@ -889,32 +981,37 @@ export default {
      * (2) Vue Node
      */
     resizeCell(l, t, w, h, parent = null) {
-      debug("resizeCell", `${this._uid}`, { l, t, w, h, parent });
+      debug("resizeCell ::begin", `${this._uid}`, { l, t, w, h, parent });
 
       const beforeHooks = [].concat(this.resizeHooks?.beforeResizeCell || []);
       const afterHooks = [].concat(this.resizeHooks?.afterResizeCell || []);
       const onHooks = [].concat(this.resizeHooks?.onResizeCellForEachNode || []);
       beforeHooks.forEach((hook) => hook(this, l, t, w, h));
 
-      const rootNodeInitInfo = this.getCellRootNodeInitInfo();
+      // 获得Cell的包裹节点（this.$el元素）的初始化尺寸
       const {
-        left: initLeft,
-        top: initTop,
-        width: initWidth,
-        height: initHeight,
-      } = rootNodeInitInfo.boundingClientRect;
+        left: wrapperInitialLeft,
+        top: wrapperInitialTop,
+        width: wrapperInitialWidth,
+        height: wrapperInitialHeight,
+      } = this.getWrapperInitialData();
+
+      // 获得Cell的包裹节点（this.$el元素）的Border大小
+      const { borderLeftWidth, borderTopWidth, borderRightWidth, borderBottomWidth } = this.getWrapperBorder();
+      const blr = borderLeftWidth + borderRightWidth;
+      const btb = borderTopWidth + borderBottomWidth;
 
       // 计算偏移量
-      const offsetLeft = l - initLeft;
-      const offsetTop = t - initTop;
-      debug("resizeCell-offset", `${this._uid}`, offsetLeft, offsetTop);
+      const offsetLeft = l - wrapperInitialLeft;
+      const offsetTop = t - wrapperInitialTop;
+      const widthOffset = w - wrapperInitialWidth;
+      const heightOffset = h - wrapperInitialHeight;
+      debug("resizeCell-offset", `${this._uid}`, { offsetLeft, offsetTop, widthOffset, heightOffset });
 
       // 宽度变化比例(精确)
-      const widthChangeRatio = w / initWidth;
-      const widthOffset = w - initWidth;
+      const widthChangeRatio = (w - blr) / (wrapperInitialWidth - blr);
       // 高度变化比例(精确)
-      const heightChangeRatio = h / initHeight;
-      const heightOffset = h - initHeight;
+      const heightChangeRatio = (h - btb) / (wrapperInitialHeight - btb);
 
       // TODO: 为组件使用者提供参数选择缩放插值算法
       // 获得矩形尺寸变化比例，采用的算法：最近邻插值
@@ -924,12 +1021,8 @@ export default {
       // 3. 双三次插值：
       const changeRatio = Math.min(widthChangeRatio, heightChangeRatio);
 
-      // 解决动画问题
-      fixTransitionResizeIssuesStep.install(this);
-      // 解决Cell自身缩放问题
-      cellSelfResizeStep.install(this);
-      // 解决内部元素变更的问题
-      fixInnerElementResizeIssuesStep.install(this, {
+      // 公共Options
+      const options = {
         w,
         h,
         offsetLeft,
@@ -941,13 +1034,24 @@ export default {
         heightOffset,
         onHooks,
         parent,
-      });
+      };
+
+      // 解决动画问题
+      fixTransitionResizeIssuesStep.install(this, options);
+      // 解决Cell自身缩放问题
+      cellSelfResizeStep.install(this, options);
+      // 解决内部元素变更的问题
+      if (this.enableResizeInnerElementSize) {
+        fixInnerElementResizeIssuesStep.install(this, options);
+      }
 
       // 运行所有的resizeStep
       this.runResizeSteps();
 
       // after hooks
       afterHooks.forEach((hook) => hook(this, w, h));
+
+      debug("resizeCell ::end", `${this._uid}`, { l, t, w, h, parent });
     },
     /**
      * 判断是否有子Cell包含点，
@@ -1051,26 +1155,27 @@ export default {
      * @param {object} parent 用于嵌套Cell的指明有谁引起的，直接穿透
      */
     onResizingEvent(left, top, width, height, parent = null) {
+      this.isResizing = true;
+      debug("onResizingEvent", `${this._uid} =`, { left, top, width, height, parent });
+
       this.sentEvent(DEF.internalEvent.resizing, this, {
         left,
         top,
         width,
         height,
+        parent,
       });
 
       const params = JSON.stringify({ left, top, width, height });
       if (this.tempData.lastResizeInfo === params) return;
 
-      this.isResizing = true;
-      debug("onResizingEvent", `${this._uid} =`, { left, top, width, height });
-
       const beforeHooks = [].concat(this.resizeHooks?.beforeResizing || []);
       const afterHooks = [].concat(this.resizeHooks?.afterResizing || []);
 
-      beforeHooks.forEach((hook) => hook(this, left, top, width, height));
+      beforeHooks.forEach((hook) => hook(this, left, top, width, height, parent));
       // 同步更新内部元素
       this.resizeCell(left, top, width, height, parent);
-      afterHooks.forEach((hook) => hook(this, left, top, width, height));
+      afterHooks.forEach((hook) => hook(this, left, top, width, height, parent));
 
       // 发送事件
       this.sentEvent(DEF.internalEvent.cellResizing, this, {
@@ -1078,6 +1183,7 @@ export default {
         top,
         width,
         height,
+        parent,
       });
 
       // 记录最后一次的改变信息
@@ -1089,19 +1195,24 @@ export default {
      * @param {number} top 新的top值
      * @param {number} width 新的宽度
      * @param {number} height 新的高度
+     * @param {object} parent 用于嵌套Cell的指明有谁引起的，直接穿透
      */
-    onResizeStopEvent(left, top, width, height) {
+    onResizeStopEvent(left, top, width, height, parent = null) {
       debug(`onResizeStopEvent`, `${this._uid}`, { left, top, width, height });
       this.sentEvent(DEF.internalEvent.resizestop, this, {
         left,
         top,
         width,
         height,
+        parent,
       });
 
       const beforeHooks = [].concat(this.resizeHooks?.beforeResizeStop || []);
       const afterHooks = [].concat(this.resizeHooks?.afterResizeStop || []);
-      beforeHooks.forEach((hook) => hook(this, left, top, width, height));
+      beforeHooks.forEach((hook) => hook(this, left, top, width, height, parent));
+
+      // 同步更新内部元素
+      this.resizeCell(left, top, width, height, parent);
 
       // 更新当前容器元素的属性值
       this.changePosition(left, top);
@@ -1111,15 +1222,17 @@ export default {
       this.activeAllResizeEffects();
 
       // 钩子函数
-      afterHooks.forEach((hook) => hook(this, left, top, width, height));
+      afterHooks.forEach((hook) => hook(this, left, top, width, height, parent));
 
       this.sentEvent(DEF.internalEvent.cellResizeEnd, this, {
         left,
         top,
         width,
         height,
+        parent,
       });
       this.isResizing = false;
+      this.tempData.lastResizeInfo = null;
     },
     /**
      * 拖拽的回调
@@ -1127,13 +1240,12 @@ export default {
      * @param {number} top
      */
     onDraggingEvent(left, top) {
+      this.isDragging = true;
+      debug(`onDraggingEvent`, `${this._uid}`);
       this.sentEvent(DEF.internalEvent.dragging, this, { left, top });
 
       const params = JSON.stringify({ left, top });
       if (this.tempData.lastDraggingInfo === params) return;
-
-      this.isDragging = true;
-      debug(`onDraggingEvent`, `${this._uid}`);
 
       const beforeHooks = [].concat(this.dragHooks?.beforeDragging || []);
       const afterHooks = [].concat(this.dragHooks?.afterDragging || []);
@@ -1154,6 +1266,7 @@ export default {
      * @param {number} top
      */
     onDragEndEvent(left, top) {
+      debug(`onDragEndEvent`, `${this._uid}`);
       this.sentEvent(DEF.internalEvent.dragEnd, { left, top });
 
       const beforeHooks = [].concat(this.dragHooks?.beforeDragEnd || []);
@@ -1167,6 +1280,7 @@ export default {
       this.sentEvent(DEF.internalEvent.cellDragEnd, this, { left, top });
 
       this.isDragging = false;
+      this.tempData.lastDraggingInfo = null;
     },
     /**
      * 挂载激活事件

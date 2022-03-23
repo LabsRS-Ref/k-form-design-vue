@@ -3,7 +3,7 @@
  * @Date         : 2022-03-21 13:47:29
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/steps/fix-inner-element-resize-issues.ts
- * @LastEditTime : 2022-03-23 17:27:01
+ * @LastEditTime : 2022-03-24 21:29:30
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  */
 
@@ -17,6 +17,7 @@ import {
   forEachNode,
   fitTextToBox,
   updateVNodeStyle,
+  updateHTMLNodeStyle,
 } from "../util";
 
 const stepName = "fix-inner-ele-resize-issue";
@@ -83,8 +84,16 @@ function changeFontSize(options: TChangeFontSizeOptions) {
 
 export default {
   install: (vdrCell: IVDRCell, options: IResizeStepOptions = {}) => {
-    const { widthOffset = 0, heightOffset = 0, widthChangeRatio = 1, heightChangeRatio = 1, changeRatio = 1, w = 0, h = 0, onHooks = [], parent = null } = options;
+    const { leftOffset = 0, topOffset = 0, widthOffset = 0, heightOffset = 0, widthChangeRatio = 1, heightChangeRatio = 1, changeRatio = 1, w = 0, h = 0, onHooks = [], parent = null } = options;
     const ele = vdrCell.getCellElement();
+    const {
+      left: wrapperInitialLeft,
+      top: wrapperInitialTop,
+      width: wrapperInitialWidth,
+      height: wrapperInitialHeight,
+      boundingClientRect: wrapperInitialClientRect,
+    } = vdrCell.getWrapperInitialData();
+
 
     // 注册resize步骤
     vdrCell.registerResizeStep(stepName, () => {
@@ -169,45 +178,62 @@ export default {
           const key = node[(parent ?? vdrCell).privateMarkPropertyName];
           const nodeInfo = _getNodeInfo(key, { node, key }, parent ?? vdrCell);
           if (nodeInfo) {
-            const { width: oldWidth, height: oldHeight } = nodeInfo.boundingClientRect;
-            const newWidth = Math.floor(oldWidth * widthChangeRatio + 0.5);
-            const newHeight = Math.floor(oldHeight * heightChangeRatio + 0.5);
+            const { left: initialLeft, top: initialTop, width: initialWidth, height: initialHeight } = nodeInfo.boundingClientRect;
+
+            const { left: wrapperBoundClientLeft, top: wrapperBoundClientTop } = wrapperInitialClientRect;
+            const { borderLeftWidth, borderTopWidth, borderRightWidth, borderBottomWidth } = vdrCell.getWrapperBorder();
+
+            // TODO：位置偏移计算
+            const newLeft = Math.floor(initialLeft - wrapperBoundClientLeft + leftOffset - borderLeftWidth);
+            const newTop = Math.floor(initialTop - wrapperBoundClientTop + topOffset - borderTopWidth);
+            const newWidth = Math.floor(widthOffset + initialWidth);
+            const newHeight = Math.floor(heightOffset + initialHeight);
 
             // 判断不处理的条件
-            const conditions = [
-              [oldWidth === newWidth, oldHeight === newHeight].every((m) => !!m), // 宽高没有变化
-              [newWidth === 0, newHeight === 0].some((m) => !!m), // 任何为0的都不处理
-            ]
+            // TODO: 需要考虑left top 的条件
+            // const conditions = [
+            //   [initialWidth === newWidth, initialHeight === newHeight].every((m) => !!m), // 宽高没有变化
+            //   [newWidth === 0, newHeight === 0].some((m) => !!m), // 任何为0的都不处理
+            // ]
 
-            if (conditions.some((m) => !!m)) {
-              debug(`${stepName} ::${node?.nodeName}::skip`, `${vdrCell._uid}`, node);
-              return;
-            }
+            // if (conditions.some((m) => !!m)) {
+            //   debug(`${stepName} ::${node?.nodeName}::skip`, `${vdrCell._uid}`, node);
+            //   return;
+            // }
 
             debug(`${stepName} ::${node?.nodeName}::begin`, `${vdrCell._uid}`, {
-              oldWidth,
-              oldHeight,
-              widthChangeRatio,
-              heightChangeRatio,
+              initialLeft,
+              initialTop,
+              initialWidth,
+              initialHeight,
+              leftOffset,
+              topOffset,
+              widthOffset,
+              heightOffset,
               nodeInfo,
-            })
-
+              node,
+            });
 
             // eslint-disable-next-line no-param-reassign
-            node.style.width = `${newWidth}px`;
-            node.style.height = `${newHeight}px`;
+            updateHTMLNodeStyle(node, `left`, `${newLeft}px`);
+            updateHTMLNodeStyle(node, `top`, `${newTop}px`);
+            updateHTMLNodeStyle(node, `width`, `${newWidth}px`);
+            updateHTMLNodeStyle(node, `height`, `${newHeight}px`);
 
             // update vnode
             const { vnode } = nodeInfo;
+            updateVNodeStyle(vnode, `left`, `${newLeft}px`);
+            updateVNodeStyle(vnode, `top`, `${newTop}px`);
             updateVNodeStyle(vnode, `width`, `${newWidth}px`);
             updateVNodeStyle(vnode, `height`, `${newHeight}px`);
 
             debug(`${stepName} ::${node?.nodeName}::end`, `${vdrCell._uid}`, {
+              newLeft,
+              newTop,
               newWidth,
               newHeight,
-              widthChangeRatio,
-              heightChangeRatio,
               nodeInfo,
+              node,
             })
           }
         }

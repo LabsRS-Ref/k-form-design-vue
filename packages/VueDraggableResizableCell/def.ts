@@ -2,7 +2,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-28 10:25:12
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-23 12:05:52
+ * @LastEditTime : 2022-03-24 21:47:08
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/def.ts
  * @Description  : Created by sunzhifeng, Please coding something here
  */
@@ -16,6 +16,7 @@ export type TResizeScope =
   | "svg-size"
   | "font-size"
   | "line-height"
+  | "inner-element-size"
   | "nesting-cell";
 
 /**
@@ -57,6 +58,7 @@ const def = {
     "svg-size",
     "font-size",
     "line-height",
+    "inner-element-size",
     "nesting-cell", // 嵌套单元同时可以resize
   ] as TResizeScope[],
   /** @description: 默认改变大小的应用范围 */

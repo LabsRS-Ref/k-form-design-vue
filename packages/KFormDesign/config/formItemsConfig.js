@@ -556,6 +556,7 @@ export const basicsList = [
     vdrCellOptions: {
       width: 200,
       height: 100,
+      resizeScope: ["width", "height", "inner-element-size"],
     },
     type: "button", // 表单类型
     label: "按钮", // 标题文字
