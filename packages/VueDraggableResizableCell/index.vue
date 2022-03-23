@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-23 14:45:37
+ * @LastEditTime : 2022-03-23 21:09:21
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/index.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -261,30 +261,35 @@ export default {
     debug("created", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`);
     this.updateHierarchy();
     store.cells.push(this);
-    this.$emit(DEF.internalEvent.created, this);
+    this.sentEvent(DEF.internalEvent.created, this);
   },
   beforeMount() {
     debug("beforeMount", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, this.xy, this.wh);
     this.initHooks();
-    this.$emit(DEF.internalEvent.beforeMount, this);
+    this.sentEvent(DEF.internalEvent.beforeMount, this);
   },
   mounted() {
     debug("mounted", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, this.$el);
     this.computeAndUpdateLayout({ updateCache: true });
-    this.$emit(DEF.internalEvent.mounted, this);
+    this.sentEvent(DEF.internalEvent.mounted, this);
   },
   updated() {
     debug("updated", this._uid);
-    this.$emit(DEF.internalEvent.updated, this);
+    this.sentEvent(DEF.internalEvent.updated, this);
   },
   destroyed() {
     debug("destroyed", this._uid);
     splice(store.cells, this);
     const { parent } = this.cell;
     splice(parent?.cell?.children, this);
-    this.$emit(DEF.internalEvent.destroyed, this);
+    this.sentEvent(DEF.internalEvent.destroyed, this);
   },
   methods: {
+    /** 统一由函数发送事件 */
+    sentEvent(eventName, ...args) {
+      debug("sentEvent", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, eventName, ...args);
+      this.$emit(eventName, ...args);
+    },
     /** 更新层次结构 */
     updateHierarchy() {
       let parentCell = null;
@@ -341,9 +346,10 @@ export default {
       // 计算边界
       if (!updateCache) {
         this.updateChildrenLayout({ left: consultLeft, top: consultTop, width: w, height: h });
+      } else {
+        this.changePosition(consultLeft, consultTop);
+        this.changeSize(w, h);
       }
-      this.changePosition(consultLeft, consultTop);
-      this.changeSize(w, h);
 
       // 更新缓存数据
       if (updateCache) {
@@ -845,18 +851,24 @@ export default {
       debug("updateChildrenLayout", `${this._uid}`, { left, top, width, height, force, willResize });
 
       if (willResize || force) {
+        // 重新调整Cell的布局
         this.resizeCell(left, top, width, height);
         // 副作用启动
         this.activeAllResizeEffects();
+        // 更新Cell的位置及尺寸
+        this.changePosition(left, top);
+        this.changeSize(width, height);
       }
     },
     /** 变更位置 */
     changePosition(left = 0, top = 0) {
+      debug("changePosition", `${this._uid}`, { left, top });
       this.left = assignNoNullValue(this.left, left);
       this.top = assignNoNullValue(this.top, top);
     },
     /** 变更大小 */
     changeSize(width = 0, height = 0) {
+      debug("changeSize", `${this._uid}`, { width, height });
       checkAssert(width >= 0, `width is not available [${width}], must be greater than 0`);
       checkAssert(height >= 0, `"height is not available [${height}], must be greater than 0`);
 
@@ -1008,7 +1020,7 @@ export default {
      */
     checkAllowDragStart(e) {
       // 不管是否允许，都转发事件
-      this.$emit(DEF.internalEvent.dragStart, this, e);
+      this.sentEvent(DEF.internalEvent.dragStart, this, e);
 
       // check enable drag for event
       const mouseX = e.touches ? e.touches[0].pageX : e.pageX;
@@ -1017,7 +1029,7 @@ export default {
       // check the mouse is in the cell child node
       if (this.hasChildrenCellContainsPoint({ x: mouseX, y: mouseY })) return false;
 
-      this.$emit(DEF.internalEvent.cellDragStart, this, e);
+      this.sentEvent(DEF.internalEvent.cellDragStart, this, e);
 
       return true;
     },
@@ -1039,7 +1051,7 @@ export default {
      * @param {object} parent 用于嵌套Cell的指明有谁引起的，直接穿透
      */
     onResizingEvent(left, top, width, height, parent = null) {
-      this.$emit(DEF.internalEvent.resizing, this, {
+      this.sentEvent(DEF.internalEvent.resizing, this, {
         left,
         top,
         width,
@@ -1061,7 +1073,7 @@ export default {
       afterHooks.forEach((hook) => hook(this, left, top, width, height));
 
       // 发送事件
-      this.$emit(DEF.internalEvent.cellResizing, this, {
+      this.sentEvent(DEF.internalEvent.cellResizing, this, {
         left,
         top,
         width,
@@ -1080,7 +1092,7 @@ export default {
      */
     onResizeStopEvent(left, top, width, height) {
       debug(`onResizeStopEvent`, `${this._uid}`, { left, top, width, height });
-      this.$emit(DEF.internalEvent.resizestop, this, {
+      this.sentEvent(DEF.internalEvent.resizestop, this, {
         left,
         top,
         width,
@@ -1101,7 +1113,7 @@ export default {
       // 钩子函数
       afterHooks.forEach((hook) => hook(this, left, top, width, height));
 
-      this.$emit(DEF.internalEvent.cellResizeEnd, this, {
+      this.sentEvent(DEF.internalEvent.cellResizeEnd, this, {
         left,
         top,
         width,
@@ -1115,7 +1127,7 @@ export default {
      * @param {number} top
      */
     onDraggingEvent(left, top) {
-      this.$emit(DEF.internalEvent.dragging, this, { left, top });
+      this.sentEvent(DEF.internalEvent.dragging, this, { left, top });
 
       const params = JSON.stringify({ left, top });
       if (this.tempData.lastDraggingInfo === params) return;
@@ -1131,7 +1143,7 @@ export default {
       this.changePosition(left, top);
 
       afterHooks.forEach((hook) => hook(this, left, top));
-      this.$emit(DEF.internalEvent.cellDragging, this, { left, top });
+      this.sentEvent(DEF.internalEvent.cellDragging, this, { left, top });
 
       // 记录最后一次的改变信息
       this.tempData.lastDraggingInfo = params;
@@ -1142,7 +1154,7 @@ export default {
      * @param {number} top
      */
     onDragEndEvent(left, top) {
-      this.$emit(DEF.internalEvent.dragEnd, { left, top });
+      this.sentEvent(DEF.internalEvent.dragEnd, { left, top });
 
       const beforeHooks = [].concat(this.dragHooks?.beforeDragEnd || []);
       const afterHooks = [].concat(this.dragHooks?.afterDragEnd || []);
@@ -1152,7 +1164,7 @@ export default {
       this.changePosition(left, top);
 
       afterHooks.forEach((hook) => hook(this, left, top));
-      this.$emit(DEF.internalEvent.cellDragEnd, this, { left, top });
+      this.sentEvent(DEF.internalEvent.cellDragEnd, this, { left, top });
 
       this.isDragging = false;
     },
@@ -1160,13 +1172,13 @@ export default {
      * 挂载激活事件
      */
     onActivatedEvent() {
-      this.$emit(DEF.internalEvent.activated, this);
+      this.sentEvent(DEF.internalEvent.activated, this);
     },
     /**
      * 未激活选择事件
      */
     onDeactivatedEvent() {
-      this.$emit(DEF.internalEvent.deactivated, this);
+      this.sentEvent(DEF.internalEvent.deactivated, this);
     },
   },
 };
