@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-25 08:59:02
+ * @LastEditTime : 2022-03-25 09:25:00
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/index.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -711,14 +711,8 @@ export default {
             // eslint-disable-next-line no-return-assign
             (hook) => (extraInfo = Object.assign(extraInfo, hook(this, node, key, extraInfo) || {}))
           );
+
           const boundingClientRect = getBoundingClientRect(node);
-
-          // FIXME: 如果是根元素，要考略传递过来的宽高，有可能计算后的包裹尺寸要大于根元素本身的尺寸
-          if (key === -1) {
-            boundingClientRect.width = Math.max(boundingClientRect.width, width);
-            boundingClientRect.height = Math.max(boundingClientRect.height, height);
-          }
-
           const fontSize = parseFloat(this.getHTMLElementComputedStyle(node, "font-size"));
           const lineHeight = parseFloat(this.getHTMLElementComputedStyle(node, "line-height"));
           const getDefaultFontSize = getDocumentElementFontSize;
