@@ -3,13 +3,13 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-03-04 16:48:38
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-25 14:17:34
+ * @LastEditTime : 2022-03-25 19:00:22
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/index.ts
  * @Description  : Created by sunzhifeng, Please coding something here
  */
 import { createLazyLoadDirective } from "./directives";
 // @ts-ignore
-import Cell from "./index.vue";
+import Cell from "./Cell.vue";
 import * as util from "./util";
 
 export function install(Vue: any) {

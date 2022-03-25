@@ -3,7 +3,7 @@
  * @Date         : 2022-03-18 15:50:49
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layoutItems/layout/free.vue
- * @LastEditTime : 2022-03-21 10:56:24
+ * @LastEditTime : 2022-03-25 16:47:05
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 
@@ -23,28 +23,22 @@
       @add="$emit('handleColAdd', $event, record.list)"
     >
       <transition-group tag="div" name="list" class="list-main" style="height: 100vh;">
-        <vue-draggable-resizable-cell
+        <layoutItem
           v-for="item in record.list"
           :key="item.key"
-          :resizeScope="['svg-size', 'font-size']"
-          :resizeScopeManipulation="'union'"
-          :parent="true"
-        >
-          <layoutItem
-            :class="{ 'drag-move': false }"
-            :selectItem.sync="selectItem"
-            :startType="startType"
-            :insertAllowedType="insertAllowedType"
-            :record="item"
-            :hideModel="hideModel"
-            :config="config"
-            @handleSelectItem="handleSelectItem"
-            @handleColAdd="handleColAdd"
-            @handleCopy="$emit('handleCopy')"
-            @handleShowRightMenu="handleShowRightMenu"
-            @handleDelete="$emit('handleDelete')"
-          />
-        </vue-draggable-resizable-cell>
+          :class="{ 'drag-move': false }"
+          :selectItem.sync="selectItem"
+          :startType="startType"
+          :insertAllowedType="insertAllowedType"
+          :record="wrapperVdrRecord(item)"
+          :hideModel="hideModel"
+          :config="config"
+          @handleSelectItem="handleSelectItem"
+          @handleColAdd="handleColAdd"
+          @handleCopy="$emit('handleCopy')"
+          @handleShowRightMenu="handleShowRightMenu"
+          @handleDelete="$emit('handleDelete')"
+        />
       </transition-group>
     </draggable>
 
@@ -58,5 +52,12 @@ import base from "./base";
 export default {
   name: "freeLayoutItem",
   extends: base,
+  methods: {
+    wrapperVdrRecord(record) {
+      // eslint-disable-next-line no-param-reassign
+      record.vdrCellOptions.enable = true;
+      return record;
+    },
+  },
 };
 </script>

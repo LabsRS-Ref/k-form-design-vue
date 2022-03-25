@@ -3,7 +3,7 @@
  * @Date         : 2022-03-19 09:41:46
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layoutItems/node/base.vue
- * @LastEditTime : 2022-03-19 12:39:56
+ * @LastEditTime : 2022-03-25 16:47:20
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 
@@ -14,7 +14,7 @@
     :record="record"
     :config="config"
     :hideModel="hideModel"
-    @handleSelectItem="handleSelectItem"
+    @handleSelectItem="handleSelectItem(record)"
     @handleCopy="$emit('handleCopy')"
     @handleDelete="$emit('handleDelete')"
     @handleShowRightMenu="$emit('handleShowRightMenu')"
