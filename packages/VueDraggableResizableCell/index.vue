@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-24 22:24:56
+ * @LastEditTime : 2022-03-25 08:59:02
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/index.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -109,7 +109,7 @@ export default {
         const ctx = vnode.context;
         // Case1: 图片是延迟加载出来的，所以直接计算BoundingClientRect不准确
         // Case2: 视频延迟加载，需要等待视频加载完成后，计算视频真实的宽度和高度
-        ctx.computeAndUpdateLayout(data);
+        ctx.computeAndUpdateLayout({ ...data, updateCache: true });
       }
     }),
   },
@@ -273,7 +273,19 @@ export default {
   },
   mounted() {
     debug("mounted", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, this.getWrapperElement());
+    // 初始化最原始的计算布局状态, 其他部分的计算布局状态都是基于这个状态的
     this.computeAndUpdateLayout({ updateCache: true });
+    // 根据外部配置强制更新子元素布局 (尺寸有效，才强制更新)
+    if (this.w > 0 && this.h > 0) {
+      this.updateChildrenLayout({
+        left: this.x,
+        top: this.y,
+        width: this.w,
+        height: this.h,
+        force: true,
+      });
+    }
+
     this.sentEvent(DEF.internalEvent.mounted, this);
   },
   updated() {

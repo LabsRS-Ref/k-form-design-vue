@@ -3,7 +3,7 @@
  * @Date         : 2022-03-23 10:20:44
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/KFormItem/vdrItem.vue
- * @LastEditTime : 2022-03-23 21:32:35
+ * @LastEditTime : 2022-03-25 08:48:00
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 <template>
@@ -75,13 +75,13 @@ export default {
       Object.assign(this.vdrCellOptions, options);
     },
     handleVDRCellMounted(t) {
-      t.updateChildrenLayout({
-        left: t.x,
-        top: t.y,
-        width: t.w,
-        height: t.h,
-        force: true,
-      });
+      // t.updateChildrenLayout({
+      //   left: t.x,
+      //   top: t.y,
+      //   width: t.w,
+      //   height: t.h,
+      //   force: true,
+      // });
     },
     handleActivated(t) {
       this.$emit("handleSelectItem", this.props.record);
