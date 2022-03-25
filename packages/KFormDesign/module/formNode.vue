@@ -2,36 +2,27 @@
  * @Description: 将数据通过k-form-item组件解析，生成控件
  * @Author: kcz
  * @Date: 2019-12-30 00:37:05
- * @LastEditTime : 2022-03-23 10:14:42
+ * @LastEditTime : 2022-03-25 21:19:24
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/formNode.vue
  -->
 <template>
   <!-- <component :is="wrapper" v-bind="wrapperProps" @cellDragging="handleCellDragging"> -->
   <Fragment>
-    <component :is="wrapper" v-bind="wrapperProps" v-on="{ ...$listeners, ...wrapperListeners }">
+    <component v-if="isVDRCellEnable" :is="wrapper" v-bind="wrapperProps" v-on="{ ...$listeners, ...wrapperListeners }">
       <kFormItem :formConfig="config" :record="record" />
     </component>
-    <!-- 工具栏：可以在这里挂载 -->
-    <div class="drag-move-box" :class="{ active: record.key === selectItem.key }" style="display: none;">
+    <div
+      v-else
+      class="drag-move-box"
+      :class="{ active: record.key === selectItem.key }"
+      @click.stop="sentEventMessage('handleSelectItem', record)"
+    >
       <div class="form-item-box">
         <kFormItem :formConfig="config" :record="record" />
       </div>
       <div v-if="!hideModel" class="show-key-box" v-text="record.label + (record.model ? '/' + record.model : '')" />
-      <div
-        class="copy"
-        :class="record.key === selectItem.key ? 'active' : 'unactivated'"
-        @click.stop="$emit('handleCopy')"
-      >
-        <a-icon type="copy" />
-      </div>
-      <div
-        class="delete"
-        :class="record.key === selectItem.key ? 'active' : 'unactivated'"
-        @click.stop="$emit('handleDelete')"
-      >
-        <a-icon type="delete" />
-      </div>
+      <tool-bar v-bind="$props" v-on="{ ...$listeners }" />
     </div>
   </Fragment>
 </template>
@@ -45,6 +36,9 @@
 import { Fragment } from "vue-fragment";
 import VueDraggableResizableCell from "../../VueDraggableResizableCell/index";
 import kFormItem from "../../KFormItem/index";
+import { components } from "./layoutItems";
+
+const { toolBar: ToolBar } = components;
 
 export default {
   props: {
@@ -105,13 +99,19 @@ export default {
     VueDraggableResizableCell,
     Fragment,
     kFormItem,
+    ToolBar,
   },
   methods: {
+    sentEventMessage(eventName, ...args) {
+      console.log("%c%s", "color: #22e633", "sentEventMessage", eventName, ...args);
+      this.$emit(eventName, ...args);
+    },
     updateVDRCellOptions(options = {}) {
       Object.assign(this.vdrCellOptions, options);
     },
     handleActivated(t) {
-      this.$emit("handleSelectItem", this.record);
+      console.log("%c%s", "color: #84e600", "handleActivated");
+      this.sentEventMessage("handleSelectItem", this.record);
       this.updateVDRCellOptions({
         w: t.width,
         h: t.height,

@@ -3,7 +3,7 @@
  * @Date         : 2022-03-19 09:01:22
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layoutItems/node/selectInputList.vue
- * @LastEditTime : 2022-03-19 10:44:15
+ * @LastEditTime : 2022-03-25 19:59:32
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 <template>
@@ -83,7 +83,7 @@
 import base from "./base";
 
 export default {
-  name: "selectInputListNodeItem",
+  name: "SelectInputListNodeItem",
   extends: base,
 };
 </script>

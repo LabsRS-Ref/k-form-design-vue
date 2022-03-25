@@ -3,7 +3,7 @@
  * @Date         : 2022-03-19 09:41:46
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layoutItems/node/base.vue
- * @LastEditTime : 2022-03-25 16:47:20
+ * @LastEditTime : 2022-03-25 19:59:09
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 
@@ -25,7 +25,7 @@
 import base from "../baseItem.vue";
 
 export default {
-  name: "batchNodeItem",
+  name: "BaseNodeItem",
   extends: base,
   components: {
     // eslint-disable-next-line vue/no-unused-components

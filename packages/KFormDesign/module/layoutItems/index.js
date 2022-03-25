@@ -3,7 +3,7 @@
  * @Date         : 2022-03-19 10:12:32
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layoutItems/index.js
- * @LastEditTime : 2022-03-19 12:30:41
+ * @LastEditTime : 2022-03-25 21:09:05
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  */
 
@@ -19,21 +19,30 @@ import tabsLayout from "./layout/tabs";
 import baseNode from "./node/base";
 import batchNode from "./node/batch";
 import selectInputListNode from "./node/selectInputList";
+// components
+import toolBar from "./components/toolBar.vue";
 
-export const layoutItems = {
-  baseClass,
-  layouts: {
-    cardLayout,
-    freeLayout,
-    gridLayout,
-    tableLayout,
-    tabsLayout,
-  },
-  nodes: {
-    baseNode,
-    batchNode,
-    selectInputListNode,
-  },
+export const layouts = {
+  cardLayout,
+  freeLayout,
+  gridLayout,
+  tableLayout,
+  tabsLayout,
 };
 
-export default layoutItems;
+export const nodes = {
+  baseNode,
+  batchNode,
+  selectInputListNode,
+};
+
+export const components = {
+  toolBar,
+};
+
+export default {
+  baseClass,
+  layouts,
+  nodes,
+  components,
+};

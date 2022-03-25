@@ -3,7 +3,7 @@
  * @Date         : 2022-03-18 16:29:19
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layoutItems/layout/grid.vue
- * @LastEditTime : 2022-03-21 09:32:18
+ * @LastEditTime : 2022-03-25 20:43:59
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 <template>
@@ -31,7 +31,7 @@
               :selectItem.sync="selectItem"
               :startType="startType"
               :insertAllowedType="insertAllowedType"
-              :record="item"
+              :record="wrapRecord(item, false)"
               :hideModel="hideModel"
               :config="config"
               @handleSelectItem="handleSelectItem"
@@ -52,7 +52,7 @@
 import base from "./base";
 
 export default {
-  name: "gridLayoutItem",
+  name: "GridLayoutItem",
   extends: base,
 };
 </script>

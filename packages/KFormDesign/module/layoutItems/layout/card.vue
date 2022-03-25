@@ -3,7 +3,7 @@
  * @Date         : 2022-03-18 21:04:38
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layoutItems/layout/card.vue
- * @LastEditTime : 2022-03-19 10:45:03
+ * @LastEditTime : 2022-03-25 20:46:31
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 <template>
@@ -31,7 +31,7 @@
               :selectItem.sync="selectItem"
               :startType="startType"
               :insertAllowedType="insertAllowedType"
-              :record="item"
+              :record="wrapRecord(item, false)"
               :hideModel="hideModel"
               :config="config"
               @handleSelectItem="handleSelectItem"
@@ -52,7 +52,7 @@
 import base from "./base";
 
 export default {
-  name: "cardLayoutItem",
+  name: "CardLayoutItem",
   extends: base,
 };
 </script>

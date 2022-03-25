@@ -8,7 +8,7 @@
           <a-input v-model="selectItem.label" placeholder="请输入" />
         </a-form-item>
 
-        <a-form-item label="VDRCell属性">
+        <a-form-item v-if="vdrCellOptions.enable" label="VDRCell属性">
           <kCheckbox
             v-if="typeof vdrCellOptions.draggable !== 'undefined'"
             v-model="vdrCellOptions.draggable"
