@@ -3,7 +3,7 @@
  * @Date         : 2022-03-21 15:59:15
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/steps/fix-transition-resize-issues.ts
- * @LastEditTime : 2022-03-21 16:52:05
+ * @LastEditTime : 2022-03-25 16:12:42
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  */
 // types
@@ -14,7 +14,8 @@ import {
   debug,
   checkAssert,
   forEachNode,
-  fitTextToBox,
+  updateVNodeStyle,
+  updateHTMLNodeStyle,
 } from "../util";
 
 

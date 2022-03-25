@@ -3,11 +3,12 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-03-04 16:48:38
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-15 14:51:19
- * @FilePath     : \__nuxt2.15.2_del\components\Cell\index.ts
+ * @LastEditTime : 2022-03-25 14:17:34
+ * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/index.ts
  * @Description  : Created by sunzhifeng, Please coding something here
  */
 import { createLazyLoadDirective } from "./directives";
+// @ts-ignore
 import Cell from "./index.vue";
 import * as util from "./util";
 

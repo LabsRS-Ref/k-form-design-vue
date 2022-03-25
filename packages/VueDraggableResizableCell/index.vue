@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-25 09:41:15
+ * @LastEditTime : 2022-03-25 15:52:44
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/index.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -994,7 +994,7 @@ export default {
       const beforeHooks = [].concat(this.resizeHooks?.beforeResizeCell || []);
       const afterHooks = [].concat(this.resizeHooks?.afterResizeCell || []);
       const onHooks = [].concat(this.resizeHooks?.onResizeCellForEachNode || []);
-      beforeHooks.forEach((hook) => hook(this, l, t, w, h));
+      beforeHooks.forEach((hook) => hook(this, { l, t, w, h, parent }));
 
       // 获得Cell的包裹节点（this.$el元素）的初始化尺寸
       const {
@@ -1009,12 +1009,15 @@ export default {
       const blr = borderLeftWidth + borderRightWidth;
       const btb = borderTopWidth + borderBottomWidth;
 
-      // 计算偏移量
-      const offsetLeft = l - wrapperInitialLeft;
-      const offsetTop = t - wrapperInitialTop;
+      // 计算位置的偏移量 （由于包裹组件使用 translate css 样式解决位置变化，因此始终直接传入 (0,0) 就可以）
+      const leftOffset = 0; //  l - wrapperInitialLeft;
+      const topOffset = 0; // t - wrapperInitialTop;
+
+      // 计算宽高的偏移量
       const widthOffset = w - wrapperInitialWidth;
       const heightOffset = h - wrapperInitialHeight;
-      debug("resizeCell-offset", `${this._uid}`, { offsetLeft, offsetTop, widthOffset, heightOffset });
+
+      debug("resizeCell-offset", `${this._uid}`, { leftOffset, topOffset, widthOffset, heightOffset });
 
       // 宽度变化比例(精确)
       const widthChangeRatio = (w - blr) / (wrapperInitialWidth - blr);
@@ -1029,20 +1032,25 @@ export default {
       // 3. 双三次插值：
       const changeRatio = Math.min(widthChangeRatio, heightChangeRatio);
 
-      // 公共Options
+      // 公共Resize步骤Options
       const options = {
         w,
         h,
-        offsetLeft,
-        offsetTop,
+        leftOffset,
+        topOffset,
+        widthOffset,
+        heightOffset,
         widthChangeRatio,
         heightChangeRatio,
         changeRatio,
-        widthOffset,
-        heightOffset,
         onHooks,
         parent,
       };
+
+      // hooks
+      Array.from([])
+        .concat(this.resizeHooks?.beforeInternalResizeStepsRegister || [])
+        .forEach((hook) => hook(this, options, { l, t, w, h, parent }));
 
       // 解决动画问题
       fixTransitionResizeIssuesStep.install(this, options);
@@ -1053,11 +1061,16 @@ export default {
         fixInnerElementResizeIssuesStep.install(this, options);
       }
 
+      // hooks
+      Array.from([])
+        .concat(this.resizeHooks?.afterInternalResizeStepsRegister || [])
+        .forEach((hook) => hook(this, options, { l, t, w, h, parent }));
+
       // 运行所有的resizeStep
       this.runResizeSteps();
 
       // after hooks
-      afterHooks.forEach((hook) => hook(this, w, h));
+      afterHooks.forEach((hook) => hook(this, { l, t, w, h, parent }));
 
       debug("resizeCell ::end", `${this._uid}`, { l, t, w, h, parent });
     },

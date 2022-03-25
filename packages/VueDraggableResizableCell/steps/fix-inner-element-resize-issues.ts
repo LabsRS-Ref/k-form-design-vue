@@ -3,12 +3,11 @@
  * @Date         : 2022-03-21 13:47:29
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/steps/fix-inner-element-resize-issues.ts
- * @LastEditTime : 2022-03-24 21:29:30
+ * @LastEditTime : 2022-03-25 16:12:26
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  */
 
 // types
-import Vue, { VNode } from "vue";
 import { IVDRCell,  IResizeStepOptions } from "../types"
 
 import {
@@ -39,9 +38,9 @@ function changeFontSize(options: TChangeFontSizeOptions) {
     // 使用初始化值，这样能保证整体字体大小符合常规模式
     initial: {
       fontSize: initialFontSize,
-      cell: { width = 1, height = 1 },
     },
   } = nodeInfo;
+  const { width: wrapperInitialWidth = 1, height: wrapperInitialHeight = 1 } = vdrCell.getWrapperInitialData();
 
   // 计算(勿要超过容器高度)
   const fitFontSize = fitTextToBox.px(
@@ -52,7 +51,7 @@ function changeFontSize(options: TChangeFontSizeOptions) {
     node.clientHeight,
     vdrCell.getHTMLElementComputedStyle(node, "font-family")
   );
-  const ratioFontSize = Math.min(w / width, h / height) * initialFontSize;
+  const ratioFontSize = Math.min(w / wrapperInitialWidth, h / wrapperInitialHeight) * initialFontSize;
 
   const strategy = vdrCell.resizeFontStrategy;
   const [_, fontSize] = [
@@ -65,13 +64,12 @@ function changeFontSize(options: TChangeFontSizeOptions) {
     ratioFontSize,
     fitFontSize,
     initialFontSize,
-    width,
-    height,
+    wrapperInitialWidth,
+    wrapperInitialHeight,
   });
 
-  // @ts-ignore
-  // eslint-disable-next-line no-param-reassign
-  node.style.fontSize = `${fontSize}px`;
+  // update node style
+  updateHTMLNodeStyle(node as HTMLElement, `fontSize`, `${fontSize}px`);
 
   // update vnode
   const { vnode } = nodeInfo;
@@ -189,18 +187,6 @@ export default {
             const newWidth = Math.floor(widthOffset + initialWidth);
             const newHeight = Math.floor(heightOffset + initialHeight);
 
-            // 判断不处理的条件
-            // TODO: 需要考虑left top 的条件
-            // const conditions = [
-            //   [initialWidth === newWidth, initialHeight === newHeight].every((m) => !!m), // 宽高没有变化
-            //   [newWidth === 0, newHeight === 0].some((m) => !!m), // 任何为0的都不处理
-            // ]
-
-            // if (conditions.some((m) => !!m)) {
-            //   debug(`${stepName} ::${node?.nodeName}::skip`, `${vdrCell._uid}`, node);
-            //   return;
-            // }
-
             debug(`${stepName} ::${node?.nodeName}::begin`, `${vdrCell._uid}`, {
               initialLeft,
               initialTop,
@@ -263,9 +249,8 @@ export default {
               nodeInfo,
             });
 
-            // @ts-ignore
-            // eslint-disable-next-line no-param-reassign
-            node.style.zoom = newZoom;
+            // update html node
+            updateHTMLNodeStyle(node as HTMLElement, `zoom`, newZoom);
 
             // update vnode
             const { vnode } = nodeInfo;
