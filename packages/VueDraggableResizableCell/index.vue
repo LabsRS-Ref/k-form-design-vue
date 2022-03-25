@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-25 09:25:00
+ * @LastEditTime : 2022-03-25 09:41:15
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/index.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -759,6 +759,8 @@ export default {
                 height,
                 // 相对于视口的矩形
                 boundingClientRect: this.getWrapperElement().getBoundingClientRect(),
+                // 边框
+                border: this.getWrapperBorder(),
               },
             });
 
