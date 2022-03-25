@@ -93,19 +93,23 @@
     </tr>
   </table>
 
-  <!-- <VueDraggableResizableCell v-else-if="!record.options.hidden">
-    <KFormItem
+  <!-- 自由布局 -->
+  <div v-else-if="record.type === 'free-layout'" class="grid-row" :style="record.options.customStyle">
+    <buildBlocks
       ref="nestedComponents"
       @handleReset="$emit('handleReset')"
       @change="handleChange"
+      v-for="item in record.list"
       :disabled="disabled"
       :dynamicData="dynamicData"
-      :key="record.key"
-      :record="record"
+      :key="item.key"
+      :record="item"
       :formConfig="formConfig"
       :config="config"
     />
-  </VueDraggableResizableCell> -->
+  </div>
+
+  <!-- Node -->
   <VDRFormItem
     v-else-if="!record.options.hidden"
     ref="nestedComponents"

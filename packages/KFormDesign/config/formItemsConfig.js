@@ -674,7 +674,9 @@ export const layoutList = [
     type: "free-layout", // record.type 记录类型
     label: "自由布局", // 标题文字
     icon: "icon-chaifen", // 图标
-    options: {},
+    options: {
+      height: 500,
+    },
     list: [], // 子项,明确指明自己是容器
     key: "", // 唯一标识
     model: "", // 值

@@ -3,11 +3,12 @@
  * @Date         : 2022-03-18 09:03:05
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layoutItem.vue
- * @LastEditTime : 2022-03-20 09:33:34
+ * @LastEditTime : 2022-03-25 22:12:10
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 <template>
   <div
+    data-name="layoutItem"
     :class="{
       'layout-width': enableUseLayoutWidth,
     }"
