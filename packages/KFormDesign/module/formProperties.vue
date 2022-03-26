@@ -75,8 +75,9 @@
             </div>
           </div>
         </a-form-item>
-        <a-form-item label="预览模态框宽度">
+        <a-form-item label="预览模态窗口宽度">
           <a-input-number style="width:100%;" v-model="previewOptions.width" />
+          <!-- TODO：这里放置对预览模态对话框的属性设置 -->
         </a-form-item>
         <a-form-item label="表单CSS">
           <a-textarea v-model="config.customStyle" />

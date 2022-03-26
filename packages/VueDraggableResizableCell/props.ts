@@ -2,7 +2,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-28 10:26:57
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-22 11:57:11
+ * @LastEditTime : 2022-03-26 18:02:03
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/props.ts
  * @Description  : Created by sunzhifeng, Please coding something here
  */
@@ -149,6 +149,15 @@ const props = {
     type: Number,
     default: null,
     validator: (val: number) => val >= 0,
+  },
+  /**
+   * @description: 是否默认激活
+   * @type: {Boolean}
+   * @default: false
+   */
+  active: {
+    type: Boolean,
+    default: false
   },
   /**
    * @description: 是否可以拖拽

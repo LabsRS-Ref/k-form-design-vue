@@ -3,8 +3,8 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-25 15:52:44
- * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/index.vue
+ * @LastEditTime : 2022-03-26 21:13:08
+ * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/Cell-debug.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
 <template>
@@ -30,6 +30,7 @@
     :class-name-handle="classNameHandle"
     :data-tip="tip"
     :handles="handlesSet"
+    :active="active"
     :draggable="draggable"
     :resizable="enableResize"
     :lock-aspect-ratio="isLockAspectRatio"
@@ -135,6 +136,7 @@ export default {
         },
       },
 
+      isActive: false,
       isResizing: false,
       isDragging: false,
 
@@ -1263,7 +1265,9 @@ export default {
     onDraggingEvent(left, top) {
       this.isDragging = true;
       debug(`onDraggingEvent`, `${this._uid}`);
-      this.sentEvent(DEF.internalEvent.dragging, this, { left, top });
+      const { width, height } = this;
+
+      this.sentEvent(DEF.internalEvent.dragging, this, { left, top, width, height });
 
       const params = JSON.stringify({ left, top });
       if (this.tempData.lastDraggingInfo === params) return;
@@ -1276,7 +1280,7 @@ export default {
       this.changePosition(left, top);
 
       afterHooks.forEach((hook) => hook(this, left, top));
-      this.sentEvent(DEF.internalEvent.cellDragging, this, { left, top });
+      this.sentEvent(DEF.internalEvent.cellDragging, this, { left, top, width, height });
 
       // 记录最后一次的改变信息
       this.tempData.lastDraggingInfo = params;
@@ -1288,7 +1292,9 @@ export default {
      */
     onDragEndEvent(left, top) {
       debug(`onDragEndEvent`, `${this._uid}`);
-      this.sentEvent(DEF.internalEvent.dragEnd, { left, top });
+      const { width, height } = this;
+
+      this.sentEvent(DEF.internalEvent.dragEnd, { left, top, width, height });
 
       const beforeHooks = [].concat(this.dragHooks?.beforeDragEnd || []);
       const afterHooks = [].concat(this.dragHooks?.afterDragEnd || []);
@@ -1298,7 +1304,7 @@ export default {
       this.changePosition(left, top);
 
       afterHooks.forEach((hook) => hook(this, left, top));
-      this.sentEvent(DEF.internalEvent.cellDragEnd, this, { left, top });
+      this.sentEvent(DEF.internalEvent.cellDragEnd, this, { left, top, width, height });
 
       this.isDragging = false;
       this.tempData.lastDraggingInfo = null;
@@ -1307,12 +1313,14 @@ export default {
      * 挂载激活事件
      */
     onActivatedEvent() {
+      this.isActive = true;
       this.sentEvent(DEF.internalEvent.activated, this);
     },
     /**
      * 未激活选择事件
      */
     onDeactivatedEvent() {
+      this.isActive = false;
       this.sentEvent(DEF.internalEvent.deactivated, this);
     },
   },

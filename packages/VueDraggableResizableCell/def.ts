@@ -2,7 +2,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-28 10:25:12
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-25 15:44:52
+ * @LastEditTime : 2022-03-26 21:13:18
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/def.ts
  * @Description  : Created by sunzhifeng, Please coding something here
  */

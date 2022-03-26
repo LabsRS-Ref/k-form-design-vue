@@ -252,8 +252,11 @@ export default {
           customStyle: "",
         },
       },
+      // see: packages/KFormPreview/index.vue
       previewOptions: {
         width: 850,
+        dialogStyle: {},
+        bodyStyle: {},
       },
       selectItem: {
         key: "",
@@ -362,6 +365,14 @@ export default {
       // 打开预览模态框
       this.$refs.previewModal.jsonData = this.data;
       this.$refs.previewModal.previewWidth = this.previewOptions.width;
+      this.$refs.previewModal.dialogStyle = Object.assign(
+        this.$refs.previewModal.dialogStyle,
+        this.previewOptions.dialogStyle
+      );
+      this.$refs.previewModal.bodyStyle = Object.assign(
+        this.$refs.previewModal.bodyStyle,
+        this.previewOptions.bodyStyle
+      );
       this.$refs.previewModal.visible = true;
     },
     handleReset() {

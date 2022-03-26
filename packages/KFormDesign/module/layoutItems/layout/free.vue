@@ -3,7 +3,7 @@
  * @Date         : 2022-03-18 15:50:49
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layoutItems/layout/free.vue
- * @LastEditTime : 2022-03-25 22:10:13
+ * @LastEditTime : 2022-03-26 21:01:38
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 
@@ -23,7 +23,7 @@
       @add="$emit('handleColAdd', $event, record.list)"
     >
       <transition-group tag="div" name="list" class="list-main" :style="{ height: `${record.options.height}px` }">
-        <div v-for="item in record.list" :key="item.key" @click.stop="void 0" :style="{ height: '100%' }">
+        <div v-for="item in record.list" :key="item.key" @click.stop="void 0">
           <layoutItem
             :class="{ 'drag-move': false }"
             :selectItem.sync="selectItem"
@@ -38,7 +38,6 @@
             @handleShowRightMenu="handleShowRightMenu"
             @handleDelete="$emit('handleDelete')"
           />
-          <span>item.key</span>
         </div>
       </transition-group>
     </draggable>

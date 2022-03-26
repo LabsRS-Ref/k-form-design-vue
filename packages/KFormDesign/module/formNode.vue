@@ -2,16 +2,23 @@
  * @Description: 将数据通过k-form-item组件解析，生成控件
  * @Author: kcz
  * @Date: 2019-12-30 00:37:05
- * @LastEditTime : 2022-03-25 21:19:24
+ * @LastEditTime : 2022-03-26 21:05:02
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/formNode.vue
  -->
 <template>
   <!-- <component :is="wrapper" v-bind="wrapperProps" @cellDragging="handleCellDragging"> -->
   <Fragment>
-    <component v-if="isVDRCellEnable" :is="wrapper" v-bind="wrapperProps" v-on="{ ...$listeners, ...wrapperListeners }">
-      <kFormItem :formConfig="config" :record="record" />
-    </component>
+    <Fragment v-if="isVDRCellEnable">
+      <component ref="wrapper" :is="wrapper" v-bind="wrapperProps" v-on="{ ...$listeners, ...wrapperListeners }">
+        <kFormItem :formConfig="config" :record="record" />
+      </component>
+      <div ref="wrapper-toolbar" class="vdr-item-toolbar" :class="{ active: record.key === selectItem.key }">
+        <tool-bar v-bind="$props" v-on="{ ...$listeners }" />
+      </div>
+    </Fragment>
+
+    <!-- 非VDRCell模式（旧模式） -->
     <div
       v-else
       class="drag-move-box"
@@ -34,6 +41,9 @@
  */
 
 import { Fragment } from "vue-fragment";
+import { computePosition, shift, flip, inline, offset } from "@floating-ui/dom";
+
+// projects
 import VueDraggableResizableCell from "../../VueDraggableResizableCell/index";
 import kFormItem from "../../KFormItem/index";
 import { components } from "./layoutItems";
@@ -101,46 +111,92 @@ export default {
     kFormItem,
     ToolBar,
   },
+  mounted() {
+    if (this.isVDRCellEnable) {
+      this.updateVDRCellLayout();
+    }
+  },
+  updated() {
+    if (this.isVDRCellEnable) {
+      this.updateVDRToolbar();
+    }
+  },
   methods: {
     sentEventMessage(eventName, ...args) {
       console.log("%c%s", "color: #22e633", "sentEventMessage", eventName, ...args);
       this.$emit(eventName, ...args);
     },
     updateVDRCellOptions(options = {}) {
-      Object.assign(this.vdrCellOptions, options);
+      if (this.isVDRCellEnable) {
+        Object.assign(this.vdrCellOptions, options);
+      }
+    },
+    updateVDRToolbar(options = {}) {
+      this.updateToolbarPosition(this.$refs.wrapper, this.$refs[`wrapper-toolbar`], options);
+    },
+    updateToolbarPosition(wrapper, toolbar, options = {}) {
+      const wrapperEle = wrapper?.$el || wrapper;
+      const wrapperToolbarEle = toolbar?.$el || toolbar;
+      console.log("%c%s", "color: #22e633", "updateToolbarPosition ::begin", wrapperEle, wrapperToolbarEle);
+
+      computePosition(wrapperEle, wrapperToolbarEle, {
+        placement: "top-end",
+        middleware: [shift(), flip(), inline(), offset(4)],
+      }).then(({ x, y }) => {
+        Object.assign(wrapperToolbarEle.style, {
+          left: `${x}px`,
+          top: `${y}px`,
+        });
+        console.log("%c%s", "color: #22dd43", "updateToolbarPosition ::end", wrapperEle, wrapperToolbarEle);
+      });
+    },
+    updateVDRCellLayout(options = {}) {
+      this.updateVDRCellOptions(options);
+      this.updateVDRToolbar(options);
     },
     handleActivated(t) {
       console.log("%c%s", "color: #84e600", "handleActivated");
       this.sentEventMessage("handleSelectItem", this.record);
-      this.updateVDRCellOptions({
-        w: t.width,
-        h: t.height,
-      });
+      const { left: x, top: y } = t;
+      this.updateVDRCellLayout({ x, y });
     },
     handleDeactivated() {},
     handleCellDragStart(_) {
       console.log("%c%s", "color: #44e600", "handleCellDragStart");
     },
-    handleCellDragging(_, { left, top }) {
+    handleCellDragging(_, { left: x, top: y }) {
       console.log("%c%s", "color: #00a3cc", "handleCellDragging");
-      this.updateVDRCellOptions({
-        x: left,
-        y: top,
-      });
+      this.updateVDRCellLayout({ x, y });
     },
-    handleCellDragEnd(_) {
+    handleCellDragEnd(_, { left: x, top: y }) {
       console.log("%c%s", "color: #aa00ff", "handleCellDragEnd");
+      this.updateVDRCellLayout({ x, y });
     },
     handleCellResizeStart(_) {},
     handleCellResizing(_, { left: x, top: y, width: w, height: h }) {
-      this.updateVDRCellOptions({
-        x,
-        y,
-        w,
-        h,
-      });
+      this.updateVDRCellLayout({ x, y, w, h });
     },
-    handleCellResizeEnd(_) {},
+    handleCellResizeEnd(_, { left: x, top: y, width: w, height: h }) {
+      this.updateVDRCellLayout({ x, y, w, h });
+    },
   },
 };
 </script>
+
+<style scoped>
+.vdr-item-toolbar {
+  display: none;
+  position: absolute;
+  background: #555;
+  color: white;
+  font-weight: bold;
+  padding: 0px 4px;
+  font-size: 90%;
+}
+
+.active {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-column-gap: 10px;
+}
+</style>
