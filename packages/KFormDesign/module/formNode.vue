@@ -2,12 +2,11 @@
  * @Description: 将数据通过k-form-item组件解析，生成控件
  * @Author: kcz
  * @Date: 2019-12-30 00:37:05
- * @LastEditTime : 2022-03-26 21:05:02
+ * @LastEditTime : 2022-03-27 11:43:02
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/formNode.vue
  -->
 <template>
-  <!-- <component :is="wrapper" v-bind="wrapperProps" @cellDragging="handleCellDragging"> -->
   <Fragment>
     <Fragment v-if="isVDRCellEnable">
       <component ref="wrapper" :is="wrapper" v-bind="wrapperProps" v-on="{ ...$listeners, ...wrapperListeners }">
@@ -112,14 +111,7 @@ export default {
     ToolBar,
   },
   mounted() {
-    if (this.isVDRCellEnable) {
-      this.updateVDRCellLayout();
-    }
-  },
-  updated() {
-    if (this.isVDRCellEnable) {
-      this.updateVDRToolbar();
-    }
+    this.updateVDRCellLayout();
   },
   methods: {
     sentEventMessage(eventName, ...args) {
@@ -132,7 +124,9 @@ export default {
       }
     },
     updateVDRToolbar(options = {}) {
-      this.updateToolbarPosition(this.$refs.wrapper, this.$refs[`wrapper-toolbar`], options);
+      if (this.isVDRCellEnable) {
+        this.updateToolbarPosition(this.$refs.wrapper, this.$refs[`wrapper-toolbar`], options);
+      }
     },
     updateToolbarPosition(wrapper, toolbar, options = {}) {
       const wrapperEle = wrapper?.$el || wrapper;
@@ -150,15 +144,23 @@ export default {
         console.log("%c%s", "color: #22dd43", "updateToolbarPosition ::end", wrapperEle, wrapperToolbarEle);
       });
     },
-    updateVDRCellLayout(options = {}) {
-      this.updateVDRCellOptions(options);
-      this.updateVDRToolbar(options);
+    updateVDRCellLayout() {
+      if (this.isVDRCellEnable) {
+        const { wrapper } = this.$refs;
+        const options = {
+          x: wrapper.left,
+          y: wrapper.top,
+          w: wrapper.width,
+          h: wrapper.height,
+        };
+        this.updateVDRCellOptions(options);
+        this.updateVDRToolbar(options);
+      }
     },
     handleActivated(t) {
       console.log("%c%s", "color: #84e600", "handleActivated");
       this.sentEventMessage("handleSelectItem", this.record);
-      const { left: x, top: y } = t;
-      this.updateVDRCellLayout({ x, y });
+      this.updateVDRCellLayout();
     },
     handleDeactivated() {},
     handleCellDragStart(_) {
@@ -166,18 +168,18 @@ export default {
     },
     handleCellDragging(_, { left: x, top: y }) {
       console.log("%c%s", "color: #00a3cc", "handleCellDragging");
-      this.updateVDRCellLayout({ x, y });
+      this.updateVDRCellLayout();
     },
     handleCellDragEnd(_, { left: x, top: y }) {
       console.log("%c%s", "color: #aa00ff", "handleCellDragEnd");
-      this.updateVDRCellLayout({ x, y });
+      this.updateVDRCellLayout();
     },
     handleCellResizeStart(_) {},
     handleCellResizing(_, { left: x, top: y, width: w, height: h }) {
-      this.updateVDRCellLayout({ x, y, w, h });
+      this.updateVDRCellLayout();
     },
     handleCellResizeEnd(_, { left: x, top: y, width: w, height: h }) {
-      this.updateVDRCellLayout({ x, y, w, h });
+      this.updateVDRCellLayout();
     },
   },
 };
