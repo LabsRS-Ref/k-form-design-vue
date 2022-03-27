@@ -4,7 +4,7 @@
  * @Author: kcz
  * @Date: 2019-12-31 19:39:48
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-27 10:50:47
+ * @LastEditTime : 2022-03-27 11:17:11
  -->
 <template>
   <div class="form-panel">
@@ -225,7 +225,7 @@ export default {
             element.columns.forEach((item) => {
               traverse(item.list);
             });
-          } else if (element.type === "card") {
+          } else if (["free-layout", "card"].includes(element.type)) {
             // 卡片布局
             traverse(element.list);
           } else if (element.type === "batch") {
