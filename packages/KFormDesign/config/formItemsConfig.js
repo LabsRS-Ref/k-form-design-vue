@@ -779,4 +779,16 @@ export const layoutList = [
     key: "",
     model: "",
   },
-];
+].map((item) => {
+  return {
+    ...item,
+    options: {
+      ...item.options,
+      ...commonStyles,
+    },
+    vdrCellOptions: {
+      ...(defaultDraggableResizableCell.vdrCellOptions ?? {}),
+      ...(item.vdrCellOptions ?? {}),
+    },
+  };
+});

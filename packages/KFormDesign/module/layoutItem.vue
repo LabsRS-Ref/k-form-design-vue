@@ -3,7 +3,7 @@
  * @Date         : 2022-03-18 09:03:05
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layoutItem.vue
- * @LastEditTime : 2022-03-25 22:12:10
+ * @LastEditTime : 2022-03-27 09:48:27
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 <template>
@@ -15,7 +15,10 @@
   >
     <component
       :is="layoutComponent || nodeComponent"
-      v-bind="$props"
+      v-bind="{
+        ...$props,
+        ...$attrs,
+      }"
       v-on="{
         ...$listeners,
       }"

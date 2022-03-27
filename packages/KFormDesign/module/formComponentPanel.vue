@@ -4,7 +4,7 @@
  * @Author: kcz
  * @Date: 2019-12-31 19:39:48
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-19 14:49:49
+ * @LastEditTime : 2022-03-27 10:50:47
  -->
 <template>
   <div class="form-panel">
@@ -249,20 +249,19 @@ export default {
       traverse(this.data.list);
     },
     handleDelete() {
+      console.log("删除");
       // 删除已选择
       const traverse = (array) => {
         array = array.filter((element, index) => {
+          // 栅格布局，卡片布局，动态表格
           if (["grid", "tabs", "selectInputList"].includes(element.type)) {
-            // 栅格布局
             element.columns.forEach((item) => {
               item.list = traverse(item.list);
             });
-          }
-          if (element.type === "card" || element.type === "batch") {
-            // 卡片布局
+          } else if (["free-layout", "card", "batch"].includes(element.type)) {
+            // 卡片布局,自由布局，
             element.list = traverse(element.list);
-          }
-          if (element.type === "table") {
+          } else if (element.type === "table") {
             // 表格布局
             element.trs.forEach((item) => {
               item.tds.forEach((val) => {
@@ -285,6 +284,7 @@ export default {
         return array;
       };
 
+      // eslint-disable-next-line vue/no-mutating-props
       this.data.list = traverse(this.data.list);
     },
     handleDownMerge() {
