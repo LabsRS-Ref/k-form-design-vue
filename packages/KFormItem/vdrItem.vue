@@ -32,16 +32,16 @@ export default {
       return vdrCellOptions;
     },
     /** 判断是否启用了 VDRCell */
-    isVDRCellEnable() {
+    vdrCellEnabled() {
       const { enable = false } = this.vdrCellOptions;
       return enable;
     },
     wrapper() {
-      return this.isVDRCellEnable ? VDRCell : Fragment;
+      return this.vdrCellEnabled ? VDRCell : Fragment;
     },
     wrapperProps() {
       // const vdrCellPropsKeyNames = Object.keys(VDRCellProps);
-      return this.isVDRCellEnable
+      return this.vdrCellEnabled
         ? {
             ...this.vdrCellOptions,
             draggable: false,
@@ -50,7 +50,7 @@ export default {
         : {};
     },
     wrapperListeners() {
-      return this.isVDRCellEnable
+      return this.vdrCellEnabled
         ? {
             mounted: this.handleVDRCellMounted,
             // activated: this.handleActivated,

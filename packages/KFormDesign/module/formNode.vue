@@ -2,13 +2,13 @@
  * @Description: 将数据通过k-form-item组件解析，生成控件
  * @Author: kcz
  * @Date: 2019-12-30 00:37:05
- * @LastEditTime : 2022-03-27 11:43:02
+ * @LastEditTime : 2022-03-28 10:23:55
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/formNode.vue
  -->
 <template>
   <Fragment>
-    <Fragment v-if="isVDRCellEnable">
+    <Fragment v-if="vdrCellEnabled">
       <component ref="wrapper" :is="wrapper" v-bind="wrapperProps" v-on="{ ...$listeners, ...wrapperListeners }">
         <kFormItem :formConfig="config" :record="record" />
       </component>
@@ -45,9 +45,9 @@ import { computePosition, shift, flip, inline, offset } from "@floating-ui/dom";
 // projects
 import VueDraggableResizableCell from "../../VueDraggableResizableCell/index";
 import kFormItem from "../../KFormItem/index";
-import { components } from "./layoutItems";
+import { widgets } from "./layoutItems/components";
 
-const { toolBar: ToolBar } = components;
+const { toolBar: ToolBar } = widgets;
 
 export default {
   props: {
@@ -75,22 +75,22 @@ export default {
       return vdrCellOptions;
     },
     /** 判断是否启用了 VueDraggableResizableCell */
-    isVDRCellEnable() {
+    vdrCellEnabled() {
       const { enable = false } = this.vdrCellOptions;
       return enable;
     },
     wrapper() {
-      return this.isVDRCellEnable ? VueDraggableResizableCell : Fragment;
+      return this.vdrCellEnabled ? VueDraggableResizableCell : Fragment;
     },
     wrapperProps() {
-      return this.isVDRCellEnable
+      return this.vdrCellEnabled
         ? {
             ...this.vdrCellOptions,
           }
         : {};
     },
     wrapperListeners() {
-      return this.isVDRCellEnable
+      return this.vdrCellEnabled
         ? {
             activated: this.handleActivated,
             deactivated: this.handleDeactivated,
@@ -119,12 +119,12 @@ export default {
       this.$emit(eventName, ...args);
     },
     updateVDRCellOptions(options = {}) {
-      if (this.isVDRCellEnable) {
+      if (this.vdrCellEnabled) {
         Object.assign(this.vdrCellOptions, options);
       }
     },
     updateVDRToolbar(options = {}) {
-      if (this.isVDRCellEnable) {
+      if (this.vdrCellEnabled) {
         this.updateToolbarPosition(this.$refs.wrapper, this.$refs[`wrapper-toolbar`], options);
       }
     },
@@ -145,7 +145,7 @@ export default {
       });
     },
     updateVDRCellLayout() {
-      if (this.isVDRCellEnable) {
+      if (this.vdrCellEnabled) {
         const { wrapper } = this.$refs;
         const options = {
           x: wrapper.left,

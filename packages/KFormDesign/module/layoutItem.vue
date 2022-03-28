@@ -3,7 +3,7 @@
  * @Date         : 2022-03-18 09:03:05
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layoutItem.vue
- * @LastEditTime : 2022-03-27 09:48:27
+ * @LastEditTime : 2022-03-28 10:13:37
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 <template>
@@ -28,7 +28,7 @@
 <script>
 import LayoutItems from "./layoutItems";
 
-const { baseClass: base, layouts, nodes } = LayoutItems;
+const { baseClass: base } = LayoutItems;
 export default {
   name: "layoutItem",
   extends: base,
@@ -37,29 +37,6 @@ export default {
       const { type } = this.record;
       return !!this.layoutComponent || ["html", "divider"].includes(type);
     },
-    layoutComponent() {
-      const { type } = this.record;
-      return {
-        "free-layout": layouts.freeLayout,
-        table: layouts.tableLayout,
-        tabs: layouts.tabsLayout,
-        grid: layouts.gridLayout,
-        card: layouts.cardLayout,
-      }[type];
-    },
-    nodeComponent() {
-      const { type } = this.record;
-      return (
-        {
-          batch: nodes.batchNode,
-          selectInputList: nodes.selectInputListNode,
-        }[type] || nodes.baseNode
-      );
-    },
-  },
-  components: {
-    ...layouts,
-    ...nodes,
   },
 };
 </script>

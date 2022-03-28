@@ -788,7 +788,14 @@ export const layoutList = [
     },
     vdrCellOptions: {
       ...(defaultDraggableResizableCell.vdrCellOptions ?? {}),
+      ...{
+        w: 200,
+        h: 200,
+      },
       ...(item.vdrCellOptions ?? {}),
+
+      // 默认，所有布局控件是不激活VDRCell特性的。都是通过容器来变更其特性
+      enable: false,
     },
   };
 });
