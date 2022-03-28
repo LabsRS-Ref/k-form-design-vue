@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-26 21:13:08
+ * @LastEditTime : 2022-03-28 17:16:53
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/Cell-debug.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -50,6 +50,7 @@
   </VueDraggableResizable>
 </template>
 <script>
+import { ResizeObserver } from "resize-observer";
 import VueDraggableResizable from "vue-draggable-resizable";
 import "vue-draggable-resizable/dist/VueDraggableResizable.css";
 
@@ -148,6 +149,10 @@ export default {
         undo: [],
         redo: [],
       },
+
+      // 元素resize观察者
+      ro: null,
+      roObserveEleList: [],
     };
   },
   computed: {
@@ -288,11 +293,69 @@ export default {
       });
     }
 
+    // 初始化resize观察者
+    this.ro = new ResizeObserver((entries) => {
+      debug("ResizeObserver", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, entries);
+      if (this.isDragging || this.isResizing) {
+        return;
+      }
+
+      // 获取到最佳的，被要求的尺寸。(Note: consultWidth，consultHeight如果大于0且大于Wrapper的尺寸，会优先被使用)
+      const { width, height } = this.getCellBestWrapperSize({
+        consultLeft: this.left,
+        consultTop: this.top,
+        consultWidth: this.width,
+        consultHeight: this.height,
+        recursiveCalcChildrenNodes: true,
+      });
+
+      const willUpdate = [width !== this.width, height !== this.height].some(Boolean);
+      if (willUpdate) {
+        // 更新所有子节点布局
+        this.updateChildrenLayout({
+          left: this.left,
+          top: this.top,
+          width,
+          height,
+          force: true,
+        });
+      }
+    });
+
+    // 发送挂载事件
     this.sentEvent(DEF.internalEvent.mounted, this);
   },
   updated() {
     debug("updated", this._uid);
+
+    const cellEle = this.getCellElement();
+    if (this.checkEnableBeObserved(cellEle)) {
+      // 观察Cell的尺寸变化
+      this.ro.observe(cellEle);
+
+      // 将子孙元素也加入观察
+      forEachNode(cellEle, (item, index, list, level) => {
+        // FIXME: 有的组件子元素太多，都观察性能堪忧，应该提供主要观察的元素，更有效解决
+        if (this.checkEnableBeObserved(item) && level < 5) {
+          this.ro.observe(item);
+          this.roObserveEleList.push(item);
+        }
+      });
+
+      this.roObserveEleList.push(cellEle);
+    }
     this.sentEvent(DEF.internalEvent.updated, this);
+  },
+  beforeDestroy() {
+    debug("beforeDestroy", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`);
+
+    this.roObserveEleList.forEach((item) => {
+      this.ro.unobserve(item);
+    });
+    this.roObserveEleList = [];
+    this.ro = null;
+
+    this.sentEvent(DEF.internalEvent.beforeDestroy, this);
   },
   destroyed() {
     debug("destroyed", this._uid);
@@ -329,6 +392,10 @@ export default {
         this: this,
         parentCell,
       });
+    },
+    /** 检测是否支持被观察 */
+    checkEnableBeObserved(ele) {
+      return ele?.nodeType === window.Node.ELEMENT_NODE && !this.roObserveEleList.includes(ele);
     },
     /**
      * 独立方法：用于同一处理组件挂载后的整体操作
@@ -487,6 +554,7 @@ export default {
       let childNodeMaxWidth = 0;
       let childNodeMaxHeight = 0;
       if (recursiveCalcChildrenNodes) {
+        // FIXME: 如果子元素太多，会影响性能，应该提供一个配置项，只检测指定的元素大小及方法
         forEachNode(ele, (htmlNode) => {
           const { width, height } = getBoundingClientRect(htmlNode);
           // TODO: 是否考虑 offset 和 scrollSize
