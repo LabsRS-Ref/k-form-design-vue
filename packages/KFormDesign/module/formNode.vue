@@ -2,35 +2,33 @@
  * @Description: 将数据通过k-form-item组件解析，生成控件
  * @Author: kcz
  * @Date: 2019-12-30 00:37:05
- * @LastEditTime : 2022-03-28 10:23:55
+ * @LastEditTime : 2022-03-29 13:46:04
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/formNode.vue
  -->
 <template>
-  <Fragment>
-    <Fragment v-if="vdrCellEnabled">
-      <component ref="wrapper" :is="wrapper" v-bind="wrapperProps" v-on="{ ...$listeners, ...wrapperListeners }">
-        <kFormItem :formConfig="config" :record="record" />
-      </component>
-      <div ref="wrapper-toolbar" class="vdr-item-toolbar" :class="{ active: record.key === selectItem.key }">
-        <tool-bar v-bind="$props" v-on="{ ...$listeners }" />
-      </div>
-    </Fragment>
-
-    <!-- 非VDRCell模式（旧模式） -->
-    <div
-      v-else
-      class="drag-move-box"
-      :class="{ active: record.key === selectItem.key }"
-      @click.stop="sentEventMessage('handleSelectItem', record)"
-    >
-      <div class="form-item-box">
-        <kFormItem :formConfig="config" :record="record" />
-      </div>
-      <div v-if="!hideModel" class="show-key-box" v-text="record.label + (record.model ? '/' + record.model : '')" />
+  <Fragment v-if="vdrCellEnabled">
+    <component ref="wrapper" :is="wrapper" v-bind="wrapperProps" v-on="{ ...$listeners, ...wrapperListeners }">
+      <kFormItem :formConfig="config" :record="record" />
+    </component>
+    <div ref="wrapper-toolbar" class="vdr-item-toolbar" :class="{ active: record.key === selectItem.key }">
       <tool-bar v-bind="$props" v-on="{ ...$listeners }" />
     </div>
   </Fragment>
+
+  <!-- 非VDRCell模式（旧模式） -->
+  <div
+    v-else
+    class="drag-move-box"
+    :class="{ active: record.key === selectItem.key }"
+    @click.stop="sentEventMessage('handleSelectItem', record)"
+  >
+    <div class="form-item-box">
+      <kFormItem :formConfig="config" :record="record" />
+    </div>
+    <div v-if="!hideModel" class="show-key-box" v-text="record.label + (record.model ? '/' + record.model : '')" />
+    <tool-bar v-bind="$props" v-on="{ ...$listeners }" />
+  </div>
 </template>
 <script>
 /*
@@ -83,9 +81,19 @@ export default {
       return this.vdrCellEnabled ? VueDraggableResizableCell : Fragment;
     },
     wrapperProps() {
+      // TODO：根据每种组件的特性，提供不同的 props
+      // eg. 例如：这里针对 editor 组件，用于
+      let addonProps = {};
+      if (this.record.type === "editor") {
+        addonProps = {
+          wrapperSizeKIFOfCriticalChildElements: [".quill-editor"],
+        };
+      }
+
       return this.vdrCellEnabled
         ? {
             ...this.vdrCellOptions,
+            ...addonProps,
           }
         : {};
     },

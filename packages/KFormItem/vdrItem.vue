@@ -3,7 +3,7 @@
  * @Date         : 2022-03-23 10:20:44
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/KFormItem/vdrItem.vue
- * @LastEditTime : 2022-03-25 08:48:00
+ * @LastEditTime : 2022-03-29 13:39:01
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 <template>
@@ -41,9 +41,19 @@ export default {
     },
     wrapperProps() {
       // const vdrCellPropsKeyNames = Object.keys(VDRCellProps);
+
+      // TODO：根据每种组件的特性，提供不同的 props
+      const addonProps = {};
+      // if (this.record.type === "editor") {
+      //   addonProps = {
+      //     wrapperSizeKIFOfCriticalChildElements: [".quill-editor"],
+      //   };
+      // }
+
       return this.vdrCellEnabled
         ? {
             ...this.vdrCellOptions,
+            ...addonProps,
             draggable: false,
             resizable: false,
           }

@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-29 11:50:38
+ * @LastEditTime : 2022-03-29 13:50:21
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/Cell-debug.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -342,6 +342,10 @@ export default {
     if (this.checkEnableBeObserved(cellEle)) {
       this.roObserveEleList.push(cellEle);
 
+      // 问题: 有的组件子元素太多，都观察性能堪忧，应该提供主要观察的元素，更有效解决
+      // 解决方案：引入关键子元素因子
+      const kifElements = this.getKIFOfCriticalChildElements(cellEle, this);
+
       // 将子孙元素也加入观察
       forEachNode(cellEle, (htmlNode, index, list, level) => {
         const nestingCell = this.getANestedLevel0ChildCell(htmlNode);
@@ -354,9 +358,7 @@ export default {
           this.ro.observe(htmlNode);
         }
 
-        // 问题: 有的组件子元素太多，都观察性能堪忧，应该提供主要观察的元素，更有效解决
-        // 解决方案：引入关键子元素因子
-        const kifElements = this.getKIFOfCriticalChildElements(htmlNode, this);
+        // 是否存在关键子元素因子，如果存在，后续的子元素不再观察
         if (kifElements.includes(htmlNode)) {
           return false;
         }
@@ -552,10 +554,12 @@ export default {
     /**
      * 获得关键影响Wrapper尺寸的子元素数组
      */
-    getKIFOfCriticalChildElements(...args) {
+    getKIFOfCriticalChildElements(rootEle, ...args) {
       const kifElementList = [];
       const kif = this.wrapperSizeKIFOfCriticalChildElements;
-      const extractFnc = (data, ...options) => {
+
+      // 定义一个函数，用于获取子元素的约束
+      const extractFnc = (data, relativeEle, ...options) => {
         [].concat(data).forEach((item) => {
           const array = [];
           if (isFunction(item)) {
@@ -570,7 +574,7 @@ export default {
             } else if (o?.nodeType === window.Node.TEXT_NODE) {
               kifElementList.push(o.parentElement);
             } else if (typeof o === "string") {
-              kifElementList.push(document.querySelector(o));
+              kifElementList.push(relativeEle.querySelector(o));
             }
           });
         });
@@ -578,10 +582,17 @@ export default {
 
       if (isFunction(kif)) {
         const array = [].concat(kif(...args));
-        extractFnc(array, ...args);
+        extractFnc(array, rootEle, ...args);
       } else if (Array.isArray(kif) || typeof kif === "string") {
-        extractFnc([].concat(kif), ...args);
+        extractFnc([].concat(kif), rootEle, ...args);
       }
+
+      debug("getKIFOfCriticalChildElements", `${this._uid}`, {
+        kifElementList,
+        kif,
+        args,
+      });
+
       return kifElementList;
     },
     /**
@@ -611,17 +622,33 @@ export default {
       // 有的时候，子元素的宽度和高度都超过了容器
       let childNodeMaxWidth = 0;
       let childNodeMaxHeight = 0;
-      if (recursiveCalcChildrenNodes) {
+
+      // 问题: 如果子元素太多，会影响性能，应该提供一个配置项，只检测指定的元素大小及方法
+      // 解决方案: 检测是否有设置关键影响因子. 配置项，可以指定检测的元素，以及检测的方法
+      const kifEleList = this.getKIFOfCriticalChildElements(ele, this);
+
+      if (!recursiveCalcChildrenNodes) {
+        // 计算关键影响子元素的最大宽高
+        kifEleList.forEach((kifEle) => {
+          const { width, height } = getBoundingClientRect(kifEle);
+          childNodeMaxWidth = useBest([childNodeMaxWidth, width]);
+          childNodeMaxHeight = useBest([childNodeMaxHeight, height]);
+        });
+      } else {
+        // 递归所有子节点
         forEachNode(ele, (htmlNode) => {
           const { width, height } = getBoundingClientRect(htmlNode);
           // TODO: 是否考虑 offset 和 scrollSize
           childNodeMaxWidth = Math.max(childNodeMaxWidth, width || 0);
           childNodeMaxHeight = Math.max(childNodeMaxHeight, height || 0);
 
-          // 问题: 如果子元素太多，会影响性能，应该提供一个配置项，只检测指定的元素大小及方法
-          // 解决方案: 检测是否有设置关键影响因子. 配置项，可以指定检测的元素，以及检测的方法
-          const kifEleList = this.getKIFOfCriticalChildElements(htmlNode, this);
+          // 如果有设置关键影响因子，则检测是否有超过容器的情况, 后续子元素的计算也会被忽略
           if (kifEleList.includes(htmlNode)) {
+            debug("getCellBestWrapperSize::kifEleList", `${this._uid}`, {
+              htmlNode,
+              width,
+              height,
+            });
             return false;
           }
 
@@ -871,7 +898,7 @@ export default {
 
           if (!vnode) {
             // TODO: 验证VNode不存在的情况，是否正常
-            checkToDo(vnode, "vnode is null", { node });
+            // checkToDo(vnode, "vnode is null", { node });
           }
 
           this.cell.cache[key] = this.cell.cache[key] ?? {};
