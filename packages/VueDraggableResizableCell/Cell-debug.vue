@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-29 14:31:58
+ * @LastEditTime : 2022-03-29 14:54:32
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/Cell-debug.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -16,6 +16,12 @@
     :z="z"
     :w="width"
     :h="height"
+    :axis="axis"
+    :grid="grid"
+    :scale="scale"
+    :prevent-deactivation="preventDeactivation"
+    :disable-user-select="disableUserSelect"
+    :enable-native-drag="enableNativeDrag"
     :min-width="minWidth"
     :min-height="minHeight"
     :max-width="maxWidth"

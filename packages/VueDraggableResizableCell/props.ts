@@ -2,7 +2,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-28 10:26:57
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-29 10:36:59
+ * @LastEditTime : 2022-03-29 14:55:48
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/props.ts
  * @Description  : Created by sunzhifeng, Please coding something here
  */
@@ -111,6 +111,41 @@ const props = {
     validator: (val: number) => val >= 0,
   },
   /**
+   * @description: 坐标轴
+   * @type: {String}
+   * @default: "both"
+   */
+  axis: {
+    type: String,
+    default: 'both',
+    validator: (val: string) => ['x', 'y', 'both'].includes(val),
+  },
+  /**
+    * @description: 对齐网格尺寸
+    * @type: {Array}
+    * @default: [1, 1]
+    */
+  grid: {
+    type: Array,
+    default: () => [1, 1],
+  },
+  /**
+   * @description: 比例
+    * @type: {Number}
+    * @default: 1
+    */
+  scale: {
+    type: [Number, Array],
+    default: 1,
+    validator: (val: number | number []) => {
+      if (typeof val === 'number') {
+        return val > 0
+      }
+
+      return val.length === 2 && val[0] > 0 && val[1] > 0
+    }
+  },
+  /**
    * @description: 设置Cell最小宽度
    * @type: {Number}
    * @default: 0
@@ -158,6 +193,33 @@ const props = {
   active: {
     type: Boolean,
     default: false
+  },
+  /**
+   * @description: 是否阻止被释放
+   * @type: {Boolean}
+   * @default: false
+   */
+  preventDeactivation: {
+    type: Boolean,
+    default: false
+  },
+  /**
+    * @description: 禁用用户选择
+    * @type: {Boolean}
+    * @default: true
+    */
+  disableUserSelect: {
+    type: Boolean,
+    default: true,
+  },
+  /**
+    * @description: 原生拖拽是否可用
+    * @type: {Boolean}
+    * @default: false
+    */
+  enableNativeDrag: {
+    type: Boolean,
+    default: false,
   },
   /**
    * @description: 是否可以拖拽
