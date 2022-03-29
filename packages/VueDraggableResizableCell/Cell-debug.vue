@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-29 15:24:59
+ * @LastEditTime : 2022-03-29 17:21:44
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/Cell-debug.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -56,7 +56,7 @@
   </VueDraggableResizable>
 </template>
 <script>
-import { ResizeObserver } from "resize-observer";
+import "mutationobserver-shim";
 import VueDraggableResizable from "vue-draggable-resizable";
 import "vue-draggable-resizable/dist/VueDraggableResizable.css";
 
@@ -299,102 +299,23 @@ export default {
       });
     }
 
-    // 初始化resize观察者
-    this.ro = new ResizeObserver((entries) => {
-      if (this.isDragging || this.isResizing) {
-        return;
-      }
-
-      const skip = entries.some((entry) => {
-        const rect = entry.contentRect;
-        // 对于resize的观察者，只有当其内部元素的尺寸发生变化时才会触发
-        return [rect.width, rect.height].some(Number.isNaN);
-      });
-
-      if (skip) {
-        return;
-      }
-
-      debug("ResizeObserver", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, entries);
-      // let childNodeMaxWidth = 0;
-      // let childNodeMaxHeight = 0;
-      // entries.forEach((entry) => {
-      //   const rect = entry.contentRect;
-      //   childNodeMaxWidth = Math.max(childNodeMaxWidth, rect.width);
-      //   childNodeMaxHeight = Math.max(childNodeMaxHeight, rect.height);
-      // });
-
-      // 获取到最佳的，被要求的尺寸。(Note: consultWidth，consultHeight如果大于0且大于Wrapper的尺寸，会优先被使用)
-      // FIXME: 问题时子元素放大尺寸，效果还可以接收，子元素缩小后，效果不理想。
-      const { width, height } = this.getCellBestWrapperSize({
-        consultLeft: this.left,
-        consultTop: this.top,
-        consultWidth: this.width,
-        consultHeight: this.height,
-        recursiveCalcChildrenNodes: true,
-      });
-
-      const willUpdate = [width !== this.width, height !== this.height].some(Boolean);
-      if (willUpdate) {
-        // 更新所有子节点布局
-        this.updateChildrenLayout({
-          left: this.left,
-          top: this.top,
-          width,
-          height,
-          force: true,
-        });
-      }
-    });
+    // 安装观察服务
+    this.installObserveService();
 
     // 发送挂载事件
     this.sentEvent(DEF.internalEvent.mounted, this);
   },
   updated() {
     debug("updated", this._uid);
-
-    const cellEle = this.getCellElement();
-    if (this.checkEnableBeObserved(cellEle)) {
-      this.roObserveEleList.push(cellEle);
-
-      // 问题: 有的组件子元素太多，都观察性能堪忧，应该提供主要观察的元素，更有效解决
-      // 解决方案：引入关键子元素因子
-      const kifElements = this.getKIFOfCriticalChildElements(cellEle, this);
-
-      // 将子孙元素也加入观察
-      forEachNode(cellEle, (htmlNode, index, list, level) => {
-        const nestingCell = this.getANestedLevel0ChildCell(htmlNode);
-        if (nestingCell) {
-          return false;
-        }
-
-        if (this.checkEnableBeObserved(htmlNode)) {
-          this.roObserveEleList.push(htmlNode);
-          this.ro.observe(htmlNode);
-        }
-
-        // 是否存在关键子元素因子，如果存在，后续的子元素不再观察
-        if (kifElements.includes(htmlNode)) {
-          return false;
-        }
-
-        return true;
-      });
-
-      // 观察Cell的尺寸变化
-      this.ro.observe(cellEle);
-    }
     this.sentEvent(DEF.internalEvent.updated, this);
   },
   beforeDestroy() {
     debug("beforeDestroy", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`);
 
-    this.roObserveEleList.forEach((item) => {
-      this.ro.unobserve(item);
-    });
-    this.roObserveEleList = [];
-    this.ro = null;
+    // 卸载观察服务
+    this.uninstallObserveService();
 
+    // 发送要销毁事件
     this.sentEvent(DEF.internalEvent.beforeDestroy, this);
   },
   destroyed() {
@@ -436,6 +357,112 @@ export default {
     /** 检测是否支持被观察 */
     checkEnableBeObserved(ele) {
       return ele?.nodeType === window.Node.ELEMENT_NODE && !this.roObserveEleList.includes(ele);
+    },
+    /** 安装观察服务 */
+    installObserveService() {
+      debug("installObserveService", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`);
+      // 声明要观察的属性
+      const observeAttributeNames = ["width", "height", "left", "top"];
+
+      // 初始化resize观察者
+      this.ro = new MutationObserver((mutationsList, observer) => {
+        const debugGroupName = "ObserveService::resize::callback";
+        debug(`${debugGroupName}::begin`, `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, mutationsList);
+
+        if (this.isDragging || this.isResizing) {
+          return;
+        }
+
+        let childNodeMaxWidth = -1;
+        let childNodeMaxHeight = -1;
+        mutationsList.forEach((record) => {
+          const { target, attributeName, addedNodes, removedNodes } = record;
+          const willCalc = [
+            observeAttributeNames.includes(attributeName),
+            addedNodes.length > 0,
+            removedNodes.length > 0,
+          ].some(Boolean);
+
+          // 需要重新计算
+          if (willCalc) {
+            const { width, height } = getBoundingClientRect(target);
+            childNodeMaxWidth = Math.max(childNodeMaxWidth, width);
+            childNodeMaxHeight = Math.max(childNodeMaxHeight, height);
+          }
+        });
+
+        debug(`${debugGroupName}::calc`, `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, mutationsList, {
+          childNodeMaxWidth,
+          childNodeMaxHeight,
+          width: this.width,
+          height: this.height,
+        });
+
+        // 获取到最佳的，被要求的尺寸。(Note: consultWidth，consultHeight如果大于0且大于Wrapper的尺寸，会优先被使用)
+        // FIXME: 问题时子元素放大尺寸，效果还可以接收，子元素缩小后，效果不理想。
+        const willUpdate = [
+          [childNodeMaxWidth !== this.width, childNodeMaxHeight !== this.height].some(Boolean),
+          childNodeMaxWidth !== -1,
+          childNodeMaxHeight !== -1,
+        ].every(Boolean);
+
+        if (willUpdate) {
+          // 更新所有子节点布局
+          this.updateChildrenLayout({
+            left: this.left,
+            top: this.top,
+            width: childNodeMaxWidth,
+            height: childNodeMaxHeight,
+            force: true,
+          });
+        }
+      });
+
+      const cellEle = this.getCellElement();
+      if (this.checkEnableBeObserved(cellEle)) {
+        this.roObserveEleList.push(cellEle);
+
+        // 问题: 有的组件子元素太多，都观察性能堪忧，应该提供主要观察的元素，更有效解决
+        // 解决方案：引入关键子元素因子
+        const kifElements = this.getKIFOfCriticalChildElements(cellEle, this);
+
+        // 将子孙元素也加入观察
+        const enableChildObserve = false;
+        if (enableChildObserve) {
+          forEachNode(cellEle, (htmlNode, index, list, level) => {
+            const nestingCell = this.getANestedLevel0ChildCell(htmlNode);
+            if (nestingCell) {
+              return false;
+            }
+
+            if (this.checkEnableBeObserved(htmlNode)) {
+              this.roObserveEleList.push(htmlNode);
+              this.ro.observe(htmlNode);
+            }
+
+            // 是否存在关键子元素因子，如果存在，后续的子元素不再观察
+            if (kifElements.includes(htmlNode)) {
+              return false;
+            }
+
+            return true;
+          });
+        }
+
+        // 观察Cell的尺寸变化
+        this.ro.observe(cellEle, {
+          childList: true,
+          attributes: true,
+          // attributeFilter: observeAttributeNames,
+          subtree: true,
+        });
+      }
+    },
+    /** 卸载观察服务 */
+    uninstallObserveService() {
+      this.roObserveEleList = [];
+      this.ro.disconnect();
+      this.ro = null;
     },
     /**
      * 独立方法：用于同一处理组件挂载后的整体操作
