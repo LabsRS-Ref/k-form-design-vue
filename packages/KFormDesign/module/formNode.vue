@@ -2,19 +2,19 @@
  * @Description: 将数据通过k-form-item组件解析，生成控件
  * @Author: kcz
  * @Date: 2019-12-30 00:37:05
- * @LastEditTime : 2022-03-29 13:46:04
+ * @LastEditTime : 2022-03-29 14:21:15
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/formNode.vue
  -->
 <template>
-  <Fragment v-if="vdrCellEnabled">
+  <div v-if="vdrCellEnabled">
     <component ref="wrapper" :is="wrapper" v-bind="wrapperProps" v-on="{ ...$listeners, ...wrapperListeners }">
       <kFormItem :formConfig="config" :record="record" />
     </component>
     <div ref="wrapper-toolbar" class="vdr-item-toolbar" :class="{ active: record.key === selectItem.key }">
       <tool-bar v-bind="$props" v-on="{ ...$listeners }" />
     </div>
-  </Fragment>
+  </div>
 
   <!-- 非VDRCell模式（旧模式） -->
   <div

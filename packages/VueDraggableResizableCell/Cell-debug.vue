@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-29 13:50:21
+ * @LastEditTime : 2022-03-29 14:31:58
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/Cell-debug.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -295,7 +295,6 @@ export default {
 
     // 初始化resize观察者
     this.ro = new ResizeObserver((entries) => {
-      // debug("ResizeObserver", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, entries);
       if (this.isDragging || this.isResizing) {
         return;
       }
@@ -310,7 +309,17 @@ export default {
         return;
       }
 
+      debug("ResizeObserver", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, entries);
+      // let childNodeMaxWidth = 0;
+      // let childNodeMaxHeight = 0;
+      // entries.forEach((entry) => {
+      //   const rect = entry.contentRect;
+      //   childNodeMaxWidth = Math.max(childNodeMaxWidth, rect.width);
+      //   childNodeMaxHeight = Math.max(childNodeMaxHeight, rect.height);
+      // });
+
       // 获取到最佳的，被要求的尺寸。(Note: consultWidth，consultHeight如果大于0且大于Wrapper的尺寸，会优先被使用)
+      // FIXME: 问题时子元素放大尺寸，效果还可以接收，子元素缩小后，效果不理想。
       const { width, height } = this.getCellBestWrapperSize({
         consultLeft: this.left,
         consultTop: this.top,
@@ -595,6 +604,28 @@ export default {
 
       return kifElementList;
     },
+    getKIFOfCriticalChildElementsMaxRect() {
+      const ele = this.getCellElement();
+      const kifEleList = this.getKIFOfCriticalChildElements(ele, this);
+
+      // 选择最优的数值
+      const useBest = (args) => Math.max(...args);
+
+      let maxWidth = -1;
+      let maxHeight = -1;
+
+      // 计算关键影响子元素的最大宽高
+      kifEleList.forEach((kifEle) => {
+        const { width, height } = getBoundingClientRect(kifEle);
+        maxWidth = useBest([maxWidth, width]);
+        maxHeight = useBest([maxHeight, height]);
+      });
+
+      return {
+        width: maxWidth,
+        height: maxHeight,
+      };
+    },
     /**
      * 获得Cell最佳的包裹宽高
      * @param {number} consultWidth 参考宽度
@@ -629,11 +660,9 @@ export default {
 
       if (!recursiveCalcChildrenNodes) {
         // 计算关键影响子元素的最大宽高
-        kifEleList.forEach((kifEle) => {
-          const { width, height } = getBoundingClientRect(kifEle);
-          childNodeMaxWidth = useBest([childNodeMaxWidth, width]);
-          childNodeMaxHeight = useBest([childNodeMaxHeight, height]);
-        });
+        const { width: kifEleMaxWidth, height: kifEleMaxHeight } = this.getKIFOfCriticalChildElementsMaxRect();
+        childNodeMaxWidth = kifEleMaxWidth;
+        childNodeMaxHeight = kifEleMaxHeight;
       } else {
         // 递归所有子节点
         forEachNode(ele, (htmlNode) => {
