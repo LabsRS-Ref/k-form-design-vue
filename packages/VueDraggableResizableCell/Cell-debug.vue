@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-29 14:54:32
+ * @LastEditTime : 2022-03-29 15:24:59
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/Cell-debug.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -1349,6 +1349,10 @@ export default {
           if (this.enableResizeHeight && Math.floor(height) < Math.floor(this.minHeight)) return false;
           return true;
         },
+        () => {
+          // 外部函数调用检查是否可以继续Resize
+          return this.checkEnableContinueResize(handle, left, top, width, height) && true;
+        },
       ];
 
       const resizable = checkFns.every((fn) => fn());
@@ -1381,7 +1385,10 @@ export default {
      * @returns {boolean} true, 允许，false，不允许
      */
     checkAllowContinueDrag(left = 0, top = 0) {
-      return true;
+      // check enable drag for left or top
+      // 外部函数检查是否可以继续拖拽
+      const beAllowed = this.checkEnableContinueDrag(left, top, this.width, this.height) && true;
+      return beAllowed;
     },
     /**
      * 改变大小事件的回调

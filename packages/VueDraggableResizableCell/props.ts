@@ -2,7 +2,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-28 10:26:57
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-29 14:55:48
+ * @LastEditTime : 2022-03-29 15:23:50
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/props.ts
  * @Description  : Created by sunzhifeng, Please coding something here
  */
@@ -327,6 +327,30 @@ const props = {
           DEF.supportDraggableHookNames.includes(key)
         );
       });
+    },
+  },
+  /**
+   * @description: 判断是否可用继续Resize
+   * @type: {Function}
+   * @default: () => true
+   */
+  checkEnableContinueResize: {
+    type: Function,
+    default: (handle: any, left: number, top: number, width: number, height: number) => () => true,
+    validator: (val: any) => {
+      return isFunction(val);
+    },
+  },
+  /**
+   * @description: 判断是否可用继续拖拽
+   * @type: {Function}
+   * @default: () => true
+   */
+  checkEnableContinueDrag: {
+    type: Function,
+    default: (left: number, top: number, width: number, height: number) => () => true,
+    validator: (val: any) => {
+      return isFunction(val);
     },
   },
   /**
