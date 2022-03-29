@@ -2,7 +2,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-28 10:26:57
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-26 18:02:03
+ * @LastEditTime : 2022-03-29 10:36:59
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/props.ts
  * @Description  : Created by sunzhifeng, Please coding something here
  */
@@ -356,6 +356,26 @@ const props = {
     },
   },
   /**
+   * @description: wrapper 包裹元素的尺寸关键影响因子（元素）
+   * 再计算最佳的包裹尺寸的时候，如果匹配到关键影响因子，则会计算关键影响因子的尺寸，并忽略其他元素的影响
+   * @note 优先级说明：最重要的因子，放到数组的最前端，探测到最先匹配到的元素。（主要是受到父元素按次序查找子元素的算法影响）
+   * @type {Array, Function}
+   * @default: []
+   */
+  wrapperSizeKIFOfCriticalChildElements: {
+    type: [Array, Function],
+    default: () => [],
+    validator: (val: any[]) => {
+      if (isFunction(val)) {
+        return true;
+      }
+
+      return Array.isArray(val) && val.every((item) => {
+        return typeof item === "string" || isFunction(item);
+      });
+    },
+  },
+  /**
    * @description: 计算及更新布局的钩子函数，用于主逻辑处理完后，再调用
    * @type: {Function}
    * @default: () => {}
@@ -364,7 +384,7 @@ const props = {
     type: Function,
     default: () => {},
     validator: (val: any) => {
-      return typeof val === "function";
+      return isFunction(val);
     },
   },
   /**

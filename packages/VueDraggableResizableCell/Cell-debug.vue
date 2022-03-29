@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-29 10:08:10
+ * @LastEditTime : 2022-03-29 11:50:38
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/Cell-debug.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -302,6 +302,7 @@ export default {
 
       const skip = entries.some((entry) => {
         const rect = entry.contentRect;
+        // 对于resize的观察者，只有当其内部元素的尺寸发生变化时才会触发
         return [rect.width, rect.height].some(Number.isNaN);
       });
 
@@ -348,10 +349,16 @@ export default {
           return false;
         }
 
-        // FIXME: 有的组件子元素太多，都观察性能堪忧，应该提供主要观察的元素，更有效解决
         if (this.checkEnableBeObserved(htmlNode)) {
           this.roObserveEleList.push(htmlNode);
           this.ro.observe(htmlNode);
+        }
+
+        // 问题: 有的组件子元素太多，都观察性能堪忧，应该提供主要观察的元素，更有效解决
+        // 解决方案：引入关键子元素因子
+        const kifElements = this.getKIFOfCriticalChildElements(htmlNode, this);
+        if (kifElements.includes(htmlNode)) {
+          return false;
         }
 
         return true;
@@ -543,6 +550,41 @@ export default {
       return new DOMRect(rect.left + scrollLeft, rect.top + scrollTop, rect.width, rect.height);
     },
     /**
+     * 获得关键影响Wrapper尺寸的子元素数组
+     */
+    getKIFOfCriticalChildElements(...args) {
+      const kifElementList = [];
+      const kif = this.wrapperSizeKIFOfCriticalChildElements;
+      const extractFnc = (data, ...options) => {
+        [].concat(data).forEach((item) => {
+          const array = [];
+          if (isFunction(item)) {
+            array.push(...[].concat(item(...options)));
+          } else {
+            array.push(...[].concat(item));
+          }
+
+          array.forEach((o) => {
+            if (o?.nodeType === window.Node.ELEMENT_NODE) {
+              kifElementList.push(o);
+            } else if (o?.nodeType === window.Node.TEXT_NODE) {
+              kifElementList.push(o.parentElement);
+            } else if (typeof o === "string") {
+              kifElementList.push(document.querySelector(o));
+            }
+          });
+        });
+      };
+
+      if (isFunction(kif)) {
+        const array = [].concat(kif(...args));
+        extractFnc(array, ...args);
+      } else if (Array.isArray(kif) || typeof kif === "string") {
+        extractFnc([].concat(kif), ...args);
+      }
+      return kifElementList;
+    },
+    /**
      * 获得Cell最佳的包裹宽高
      * @param {number} consultWidth 参考宽度
      * @param {number} consultHeight 参考高度
@@ -570,12 +612,18 @@ export default {
       let childNodeMaxWidth = 0;
       let childNodeMaxHeight = 0;
       if (recursiveCalcChildrenNodes) {
-        // FIXME: 如果子元素太多，会影响性能，应该提供一个配置项，只检测指定的元素大小及方法
         forEachNode(ele, (htmlNode) => {
           const { width, height } = getBoundingClientRect(htmlNode);
           // TODO: 是否考虑 offset 和 scrollSize
           childNodeMaxWidth = Math.max(childNodeMaxWidth, width || 0);
           childNodeMaxHeight = Math.max(childNodeMaxHeight, height || 0);
+
+          // 问题: 如果子元素太多，会影响性能，应该提供一个配置项，只检测指定的元素大小及方法
+          // 解决方案: 检测是否有设置关键影响因子. 配置项，可以指定检测的元素，以及检测的方法
+          const kifEleList = this.getKIFOfCriticalChildElements(htmlNode, this);
+          if (kifEleList.includes(htmlNode)) {
+            return false;
+          }
 
           // 检测是否为子Cell，如果是，则不需要再深入检测了。
           const nestingCell = this.getANestedLevel0ChildCell(htmlNode);
