@@ -3,7 +3,7 @@
  * @Date         : 2022-03-21 15:59:15
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/steps/fix-transition-resize-issues.ts
- * @LastEditTime : 2022-03-29 09:19:28
+ * @LastEditTime : 2022-03-29 09:56:09
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  */
 // types
@@ -14,6 +14,7 @@ import {
   debug,
   checkAssert,
   forEachNode,
+  TNodeOrVueInstance,
   updateVNodeStyle,
   updateHTMLNodeStyle,
 } from "../util";
@@ -50,7 +51,7 @@ export default {
           };
         };
         const allChildNodesHandle = () => {
-          forEachNode(ele, (htmlNode) => {
+          forEachNode(ele, (htmlNode: TNodeOrVueInstance) => {
             const node = htmlNode as HTMLElement;
             let transition = "";
             if (typeof vdrCell.reserveCellTransition === "boolean" && !vdrCell.reserveCellTransition) {
@@ -73,7 +74,7 @@ export default {
           });
 
           return () => {
-            forEachNode(ele, (htmlNode) => {
+            forEachNode(ele, (htmlNode: TNodeOrVueInstance) => {
               const node = htmlNode as HTMLElement;
               //@ts-ignore
               const key = node[vdrCell.privateMarkPropertyName];

@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-28 17:16:53
+ * @LastEditTime : 2022-03-29 10:08:10
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/Cell-debug.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -295,8 +295,17 @@ export default {
 
     // 初始化resize观察者
     this.ro = new ResizeObserver((entries) => {
-      debug("ResizeObserver", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, entries);
+      // debug("ResizeObserver", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, entries);
       if (this.isDragging || this.isResizing) {
+        return;
+      }
+
+      const skip = entries.some((entry) => {
+        const rect = entry.contentRect;
+        return [rect.width, rect.height].some(Number.isNaN);
+      });
+
+      if (skip) {
         return;
       }
 
@@ -330,19 +339,26 @@ export default {
 
     const cellEle = this.getCellElement();
     if (this.checkEnableBeObserved(cellEle)) {
-      // 观察Cell的尺寸变化
-      this.ro.observe(cellEle);
+      this.roObserveEleList.push(cellEle);
 
       // 将子孙元素也加入观察
-      forEachNode(cellEle, (item, index, list, level) => {
-        // FIXME: 有的组件子元素太多，都观察性能堪忧，应该提供主要观察的元素，更有效解决
-        if (this.checkEnableBeObserved(item) && level < 5) {
-          this.ro.observe(item);
-          this.roObserveEleList.push(item);
+      forEachNode(cellEle, (htmlNode, index, list, level) => {
+        const nestingCell = this.getANestedLevel0ChildCell(htmlNode);
+        if (nestingCell) {
+          return false;
         }
+
+        // FIXME: 有的组件子元素太多，都观察性能堪忧，应该提供主要观察的元素，更有效解决
+        if (this.checkEnableBeObserved(htmlNode)) {
+          this.roObserveEleList.push(htmlNode);
+          this.ro.observe(htmlNode);
+        }
+
+        return true;
       });
 
-      this.roObserveEleList.push(cellEle);
+      // 观察Cell的尺寸变化
+      this.ro.observe(cellEle);
     }
     this.sentEvent(DEF.internalEvent.updated, this);
   },
@@ -560,6 +576,14 @@ export default {
           // TODO: 是否考虑 offset 和 scrollSize
           childNodeMaxWidth = Math.max(childNodeMaxWidth, width || 0);
           childNodeMaxHeight = Math.max(childNodeMaxHeight, height || 0);
+
+          // 检测是否为子Cell，如果是，则不需要再深入检测了。
+          const nestingCell = this.getANestedLevel0ChildCell(htmlNode);
+          if (nestingCell) {
+            return false;
+          }
+
+          return true;
         });
       }
 
@@ -651,6 +675,7 @@ export default {
           };
         }
         levels.push(level);
+        return true;
       });
       return cells;
     },
@@ -776,11 +801,19 @@ export default {
         (node, index, list, level, parentNode) => {
           // eslint-disable-next-line no-param-reassign
           node[this.privateMarkPropertyName] = key;
+
+          // 定义扩展信息
           let extraInfo = {};
           onCacheHooks.forEach(
             // eslint-disable-next-line no-return-assign
             (hook) => (extraInfo = Object.assign(extraInfo, hook(this, node, key, extraInfo) || {}))
           );
+
+          // HACK: 出现嵌套子Cell的情况，是否需要处理, 直接放弃处理，交由子Cell自己处理
+          const nestingCell = this.getANestedLevel0ChildCell(node);
+          if (nestingCell) {
+            return false;
+          }
 
           const boundingClientRect = getBoundingClientRect(node);
           const fontSize = parseFloat(this.getHTMLElementComputedStyle(node, "font-size"));
@@ -828,7 +861,7 @@ export default {
                 width,
                 height,
                 // 相对于视口的矩形
-                boundingClientRect: this.getWrapperElement().getBoundingClientRect(),
+                boundingClientRect: getBoundingClientRect(this.getWrapperElement()),
                 // 边框
                 border: this.getWrapperBorder(),
               },
@@ -848,7 +881,10 @@ export default {
             isRootNode: key === -1,
           });
 
+          // key自增
           key += 1;
+
+          return true;
         },
         // context
         { parent: this.getWrapperElement() }

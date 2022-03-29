@@ -3,7 +3,7 @@
  * @Date         : 2022-03-21 13:47:29
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/steps/fix-inner-element-resize-issues.ts
- * @LastEditTime : 2022-03-29 09:19:05
+ * @LastEditTime : 2022-03-29 09:56:51
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  */
 
@@ -14,6 +14,7 @@ import {
   debug,
   checkAssert,
   forEachNode,
+  TNodeOrVueInstance,
   fitTextToBox,
   updateVNodeStyle,
   updateHTMLNodeStyle,
@@ -108,7 +109,7 @@ export default {
   
       // 遍历内部元素
       // @ts-ignore
-      forEachNode(ele, (htmlNode) => {
+      forEachNode(ele, (htmlNode: TNodeOrVueInstance) => {
         const node = htmlNode as HTMLElement;
         debug(`${stepName} ::begin`, `${vdrCell._uid} - {nodeName=${node?.nodeName}}`, node);
         // 检测是否为嵌套子Cell中的元素，

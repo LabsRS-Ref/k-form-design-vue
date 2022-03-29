@@ -2,7 +2,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-03-01 10:24:28
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-29 09:26:22
+ * @LastEditTime : 2022-03-29 09:55:18
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/util.ts
  * @Description  : Created by sunzhifeng, Please coding something here
  */
@@ -28,15 +28,28 @@ export function getBoundingClientRect(el: HTMLElement): DOMRect {
   return new DOMRect();
 }
 
-type TNodeOrVueInstance = Node | Vue | VNode | null;
-type TForEachNodeCallback = (
+export type TNodeOrVueInstance = Node | Vue | VNode | null;
+export type TForEachNodeCallback1 = (
   node: TNodeOrVueInstance,
   index?: number,
   list?: TNodeOrVueInstance[] | NodeList,
   level?: number,
   parentNode?: TNodeOrVueInstance | null
 ) => boolean;
-type TForEachNodeOptions = {
+
+export type TForEachNodeCallback2 = (
+  node: TNodeOrVueInstance,
+  options: {
+    index?: number,
+    list?: TNodeOrVueInstance[] | NodeList,
+    level?: number,
+    parentNode?: TNodeOrVueInstance | null
+  }
+) => boolean;
+
+export type TForEachNodeCallback = TForEachNodeCallback1 | TForEachNodeCallback2;
+
+export type TForEachNodeOptions = {
   deep?: boolean,
   levels?: any[],
   parent?: TNodeOrVueInstance,
@@ -48,7 +61,7 @@ type TForEachNodeOptions = {
  * @param {Object} options 选项
  */
 export function forEachNode(
-  currentNode: TNodeOrVueInstance,
+  currentNode: TNodeOrVueInstance = null,
   callback: TForEachNodeCallback = () => true,
   // options
   { deep = true, levels = [] as any[], parent = null }: TForEachNodeOptions = {}
