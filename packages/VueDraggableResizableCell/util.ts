@@ -2,7 +2,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-03-01 10:24:28
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-24 21:16:16
+ * @LastEditTime : 2022-03-29 09:26:22
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/util.ts
  * @Description  : Created by sunzhifeng, Please coding something here
  */
@@ -29,6 +29,18 @@ export function getBoundingClientRect(el: HTMLElement): DOMRect {
 }
 
 type TNodeOrVueInstance = Node | Vue | VNode | null;
+type TForEachNodeCallback = (
+  node: TNodeOrVueInstance,
+  index?: number,
+  list?: TNodeOrVueInstance[] | NodeList,
+  level?: number,
+  parentNode?: TNodeOrVueInstance | null
+) => boolean;
+type TForEachNodeOptions = {
+  deep?: boolean,
+  levels?: any[],
+  parent?: TNodeOrVueInstance,
+}
 /**
  * 方便函数：循环处理每一个节点(Node, Vue实例)
  * @param {Node | Vue} 节点对象，可以是标准的HTML Node节点，也可以是Vue实例
@@ -37,21 +49,19 @@ type TNodeOrVueInstance = Node | Vue | VNode | null;
  */
 export function forEachNode(
   currentNode: TNodeOrVueInstance,
-  callback: (
-    node: TNodeOrVueInstance,
-    index?: number,
-    list?: TNodeOrVueInstance[] | NodeList,
-    level?: number,
-    parentNode?: TNodeOrVueInstance | null
-  ) => void = () => {},
+  callback: TForEachNodeCallback = () => true,
   // options
-  { deep = true, levels = [] as any[], parent = null } = {}
+  { deep = true, levels = [] as any[], parent = null }: TForEachNodeOptions = {}
 ): void {
+  let canContinue = true;
   if (isFunction(callback)) {
-    callback(currentNode, 0, [currentNode], levels.length - 1, parent);
+    canContinue = callback(currentNode, 0, [currentNode], levels.length - 1, parent);
   }
 
-  if (!currentNode) return;
+  // 无效节点或者不能继续循环
+  if (!currentNode || !canContinue) return;
+
+  // 循环处理子节点
   let childNodes: TNodeOrVueInstance[] | NodeList = [];
   if (currentNode instanceof Vue) {
     if ((currentNode as Vue).$vnode) {

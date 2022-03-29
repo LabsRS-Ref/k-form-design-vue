@@ -3,7 +3,7 @@
  * @Date         : 2022-03-21 15:59:15
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/steps/fix-transition-resize-issues.ts
- * @LastEditTime : 2022-03-25 16:12:42
+ * @LastEditTime : 2022-03-29 09:19:28
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  */
 // types
@@ -68,6 +68,8 @@ export default {
               // eslint-disable-next-line no-param-reassign
               node.style.transition = transition;
             }
+
+            return true;
           });
 
           return () => {
@@ -81,6 +83,8 @@ export default {
                 // eslint-disable-next-line no-param-reassign
                 node.style.transition = nodeInfo?.style?.transition;
               }
+
+              return true;
             });
           };
         };

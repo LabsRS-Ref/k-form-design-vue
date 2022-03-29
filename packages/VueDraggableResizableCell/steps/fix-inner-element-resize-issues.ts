@@ -3,7 +3,7 @@
  * @Date         : 2022-03-21 13:47:29
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/steps/fix-inner-element-resize-issues.ts
- * @LastEditTime : 2022-03-25 16:12:26
+ * @LastEditTime : 2022-03-29 09:19:05
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  */
 
@@ -307,6 +307,8 @@ export default {
         }
 
         debug(`${stepName} ::end`, `${vdrCell._uid} - {nodeName=${node?.nodeName}}`, node);
+
+        return true;
       });
 
       return () => {};
