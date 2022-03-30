@@ -3,12 +3,11 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-29 17:21:44
+ * @LastEditTime : 2022-03-30 10:00:00
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/Cell-debug.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
 <template>
-  <!--  可拖拽的按钮，要自适应元素 -->
   <VueDraggableResizable
     v-lazy-load
     :x="left"
@@ -286,24 +285,8 @@ export default {
   },
   mounted() {
     debug("mounted", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, this.getWrapperElement());
-    // 初始化最原始的计算布局状态, 其他部分的计算布局状态都是基于这个状态的
-    this.computeAndUpdateLayout({ updateCache: true });
-    // 根据外部配置强制更新子元素布局 (尺寸有效，才强制更新)
-    if (this.w > 0 && this.h > 0) {
-      this.updateChildrenLayout({
-        left: this.x,
-        top: this.y,
-        width: this.w,
-        height: this.h,
-        force: true,
-      });
-    }
-
-    // 安装观察服务
-    this.installObserveService();
-
-    // 发送挂载事件
-    this.sentEvent(DEF.internalEvent.mounted, this);
+    // 元素挂载后的所有操作，统一调用
+    this._onMounted();
   },
   updated() {
     debug("updated", this._uid);
@@ -330,6 +313,38 @@ export default {
     sentEvent(eventName, ...args) {
       debug("sentEvent", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, eventName, ...args);
       this.$emit(eventName, ...args);
+    },
+    /** Vue 生命周期 onMounted 回调函数 */
+    _onMounted() {
+      // HACK: 因为在mounted之后，this.getWrapperElement()还没有初始化，所以需要延迟执行
+      // FIXME: 发现这个时候拿到的是的 #comment节点，而不是真正的 #wrapper节点
+      const init = () => {
+        // 初始化最原始的计算布局状态, 其他部分的计算布局状态都是基于这个状态的
+        this.computeAndUpdateLayout({ updateCache: true });
+        // 根据外部配置强制更新子元素布局 (尺寸有效，才强制更新)
+        if (this.w > 0 && this.h > 0) {
+          this.updateChildrenLayout({
+            left: this.x,
+            top: this.y,
+            width: this.w,
+            height: this.h,
+            force: true,
+          });
+        }
+
+        // 安装观察服务
+        this.installObserveService();
+
+        // 发送挂载事件
+        this.sentEvent(DEF.internalEvent.mounted, this);
+      };
+
+      // 检测挂载的元素不是comment节点, 必须是 Element 节点
+      if (this.getCellElement()?.nodeType === Node.ELEMENT_NODE) {
+        init();
+      } else {
+        this.$nextTick(this._onMounted);
+      }
     },
     /** 更新层次结构 */
     updateHierarchy() {
@@ -360,7 +375,7 @@ export default {
     },
     /** 安装观察服务 */
     installObserveService() {
-      debug("installObserveService", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`);
+      debug("installObserveService::begin", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`);
       // 声明要观察的属性
       const observeAttributeNames = ["width", "height", "left", "top"];
 
@@ -377,17 +392,26 @@ export default {
         let childNodeMaxHeight = -1;
         mutationsList.forEach((record) => {
           const { target, attributeName, addedNodes, removedNodes } = record;
-          const willCalc = [
+          const willReCalc = [
             observeAttributeNames.includes(attributeName),
             addedNodes.length > 0,
             removedNodes.length > 0,
           ].some(Boolean);
 
           // 需要重新计算
-          if (willCalc) {
-            const { width, height } = getBoundingClientRect(target);
+          if (willReCalc) {
+            // 元素本身
+            const { width = 0, height = 0 } = getBoundingClientRect(target);
             childNodeMaxWidth = Math.max(childNodeMaxWidth, width);
             childNodeMaxHeight = Math.max(childNodeMaxHeight, height);
+            // 参考元素的父元素
+            let { parentNode } = target;
+            while (parentNode && parentNode !== this.getCellElement()) {
+              const { width: parentWidth = 0, height: parentHeight = 0 } = getBoundingClientRect(parentNode);
+              childNodeMaxWidth = Math.max(childNodeMaxWidth, parentWidth);
+              childNodeMaxHeight = Math.max(childNodeMaxHeight, parentHeight);
+              parentNode = parentNode?.parentNode;
+            }
           }
         });
 
@@ -399,14 +423,15 @@ export default {
         });
 
         // 获取到最佳的，被要求的尺寸。(Note: consultWidth，consultHeight如果大于0且大于Wrapper的尺寸，会优先被使用)
-        // FIXME: 问题时子元素放大尺寸，效果还可以接收，子元素缩小后，效果不理想。
-        const willUpdate = [
+        // 问题: 子元素放大尺寸，效果还可以接收，子元素缩小后，效果不理想。
+        // 解决：通过设置边界， childNodeMaxWidth !== -1， childNodeMaxHeight !== -1 排除掉
+        const willUpdateLayout = [
           [childNodeMaxWidth !== this.width, childNodeMaxHeight !== this.height].some(Boolean),
           childNodeMaxWidth !== -1,
           childNodeMaxHeight !== -1,
         ].every(Boolean);
 
-        if (willUpdate) {
+        if (willUpdateLayout) {
           // 更新所有子节点布局
           this.updateChildrenLayout({
             left: this.left,
@@ -419,6 +444,7 @@ export default {
       });
 
       const cellEle = this.getCellElement();
+
       if (this.checkEnableBeObserved(cellEle)) {
         this.roObserveEleList.push(cellEle);
 
@@ -457,6 +483,10 @@ export default {
           subtree: true,
         });
       }
+      debug("installObserveService::end", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, {
+        roObserveEleList: this.roObserveEleList,
+        ro: this.ro,
+      });
     },
     /** 卸载观察服务 */
     uninstallObserveService() {
@@ -556,7 +586,12 @@ export default {
      * 获得内部单元
      */
     getCellElement() {
-      return this.getCellVNode().elm;
+      const { elm } = this.getCellVNode();
+      checkAssert(elm?.nodeType !== Node.ELEMENT_NODE, "The cell node is not available, must a element node", {
+        elm,
+        nodeType: elm?.nodeType,
+      });
+      return elm;
     },
     /**
      * 获得内部单元的边界矩形信息
