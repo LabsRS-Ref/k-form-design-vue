@@ -682,6 +682,10 @@ export const layoutList = [
     model: "", // 值
   },
   {
+    vdrCellOptions: {
+      w: 380,
+      h: 172,
+    },
     type: "card",
     label: "卡片布局",
     icon: "icon-qiapian",
@@ -690,6 +694,10 @@ export const layoutList = [
     model: "",
   },
   {
+    vdrCellOptions: {
+      w: 250,
+      h: 128,
+    },
     type: "tabs",
     label: "标签页布局",
     icon: "icon-tabs",
@@ -716,6 +724,10 @@ export const layoutList = [
     model: "",
   },
   {
+    vdrCellOptions: {
+      w: 196,
+      h: 74,
+    },
     type: "grid",
     label: "栅格布局",
     icon: "icon-zhage",
@@ -736,6 +748,10 @@ export const layoutList = [
     model: "",
   },
   {
+    vdrCellOptions: {
+      w: 198,
+      h: 172,
+    },
     type: "table",
     label: "表格布局",
     icon: "icon-biaoge",

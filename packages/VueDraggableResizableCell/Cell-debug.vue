@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-30 10:16:06
+ * @LastEditTime : 2022-03-30 11:03:45
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/Cell-debug.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -408,7 +408,7 @@ export default {
             childNodeMaxHeight = Math.max(childNodeMaxHeight, height);
             // 参考元素的父元素
             let { parentNode } = target;
-            while (parentNode && parentNode !== this.getCellElement()) {
+            while (parentNode && ![this.getCellElement(), this.getWrapperElement()].includes(parentNode)) {
               const { width: parentWidth = 0, height: parentHeight = 0 } = getBoundingClientRect(parentNode);
               childNodeMaxWidth = Math.max(childNodeMaxWidth, parentWidth);
               childNodeMaxHeight = Math.max(childNodeMaxHeight, parentHeight);
@@ -424,11 +424,19 @@ export default {
           height: this.height,
         });
 
+        // 如果采用的子元素最大的尺寸，那么需要计算Cell的Border的尺寸，用以容纳子元素的边界
+        // 特别要注意，这里要计算的是Vue实例关联的元素，而为slot提供的元素
+        const { borderLeftWidth, borderRightWidth, borderTopWidth, borderBottomWidth } = this.getWrapperBorder();
+        const [finalWidth, finalHeight] = [
+          childNodeMaxWidth + borderLeftWidth + borderRightWidth,
+          childNodeMaxHeight + borderTopWidth + borderBottomWidth,
+        ];
+
         // 获取到最佳的，被要求的尺寸。(Note: consultWidth，consultHeight如果大于0且大于Wrapper的尺寸，会优先被使用)
         // 问题: 子元素放大尺寸，效果还可以接收，子元素缩小后，效果不理想。
         // 解决：通过设置边界， childNodeMaxWidth !== -1， childNodeMaxHeight !== -1 排除掉
         const willUpdateLayout = [
-          [childNodeMaxWidth !== this.width, childNodeMaxHeight !== this.height].some(Boolean),
+          [finalWidth !== this.width, finalHeight !== this.height].some(Boolean),
           childNodeMaxWidth !== -1,
           childNodeMaxHeight !== -1,
         ].every(Boolean);
@@ -438,8 +446,8 @@ export default {
           this.updateChildrenLayout({
             left: this.left,
             top: this.top,
-            width: childNodeMaxWidth,
-            height: childNodeMaxHeight,
+            width: finalWidth,
+            height: finalHeight,
             force: true,
           });
         }
@@ -784,7 +792,6 @@ export default {
       ];
 
       // TODO: 补充针对maxWidth，maxHeight的处理
-
       debug("getCellBestWrapperSize::end", `${this._uid}`, {
         finalWidth,
         finalHeight,
