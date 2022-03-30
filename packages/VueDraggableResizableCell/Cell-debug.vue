@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-30 10:00:00
+ * @LastEditTime : 2022-03-30 10:16:06
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/Cell-debug.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -320,14 +320,16 @@ export default {
       // FIXME: 发现这个时候拿到的是的 #comment节点，而不是真正的 #wrapper节点
       const init = () => {
         // 初始化最原始的计算布局状态, 其他部分的计算布局状态都是基于这个状态的
+        debug("_onMounted::computeAndUpdateLayout", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`);
         this.computeAndUpdateLayout({ updateCache: true });
-        // 根据外部配置强制更新子元素布局 (尺寸有效，才强制更新)
+        // 根据外部配置强制更新子元素布局 (尺寸有效，才强制更新, 并使用自动计算的最佳尺寸中的最大值作为最终尺寸)
         if (this.w > 0 && this.h > 0) {
+          debug("_onMounted::updateChildrenLayout", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`);
           this.updateChildrenLayout({
             left: this.x,
             top: this.y,
-            width: this.w,
-            height: this.h,
+            width: Math.max(this.w, this.width),
+            height: Math.max(this.h, this.height),
             force: true,
           });
         }
@@ -376,8 +378,8 @@ export default {
     /** 安装观察服务 */
     installObserveService() {
       debug("installObserveService::begin", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`);
-      // 声明要观察的属性
-      const observeAttributeNames = ["width", "height", "left", "top"];
+      // 声明要观察的属性，影响size的属性还是比较多的，
+      const observeAttributeNames = ["width", "height", "left", "top"]; // no_use
 
       // 初始化resize观察者
       this.ro = new MutationObserver((mutationsList, observer) => {
@@ -400,7 +402,7 @@ export default {
 
           // 需要重新计算
           if (willReCalc) {
-            // 元素本身
+            // 参考元素本身内部的变化
             const { width = 0, height = 0 } = getBoundingClientRect(target);
             childNodeMaxWidth = Math.max(childNodeMaxWidth, width);
             childNodeMaxHeight = Math.max(childNodeMaxHeight, height);
@@ -479,7 +481,7 @@ export default {
         this.ro.observe(cellEle, {
           childList: true,
           attributes: true,
-          // attributeFilter: observeAttributeNames,
+          // attributeFilter: observeAttributeNames, // 影响size的属性还是比较多的，简单化暂时不做严格处理，直接把所有的属性都观察
           subtree: true,
         });
       }
