@@ -143,6 +143,8 @@
  * date 2019-11-20
  * description 表单设计器
  */
+import cloneDeep from "clone-deep";
+import serialize from "serialize-javascript";
 import zhCN from "ant-design-vue/lib/locale-provider/zh_CN";
 import kHeader from "./module/header";
 import operatingArea from "./module/operatingArea";
@@ -334,8 +336,8 @@ export default {
           // 删除不需要的model属性
           delete item.model;
         }
-        const itemString = JSON.stringify(item);
-        const record = JSON.parse(itemString);
+
+        const record = cloneDeep(item);
         // 删除icon及compoent属性
         delete record.icon;
         delete record.component;
@@ -529,7 +531,7 @@ export default {
 
     handleSave() {
       // 保存函数
-      this.$emit("save", JSON.stringify(this.data));
+      this.$emit("save", serialize(this.data));
     },
     getValue() {
       // 获取数据

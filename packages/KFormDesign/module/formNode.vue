@@ -86,7 +86,7 @@ export default {
       let addonProps = {};
       if (this.record.type === "editor") {
         addonProps = {
-          wrapperSizeKIFOfCriticalChildElements: [".quill-editor"],
+          wrapperSizeKIFOfElements: [".quill-editor"],
         };
       }
 

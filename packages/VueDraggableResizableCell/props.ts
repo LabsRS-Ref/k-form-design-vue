@@ -2,7 +2,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-28 10:26:57
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-31 08:54:09
+ * @LastEditTime : 2022-03-31 15:59:13
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/props.ts
  * @Description  : Created by sunzhifeng, Please coding something here
  */
@@ -448,7 +448,7 @@ const props = {
    * @type {Array, Function}
    * @default: []
    */
-  wrapperSizeKIFOfCriticalChildElements: {
+  wrapperSizeKIFOfElements: {
     type: [Array, Function],
     default: () => [],
     validator: (val: any[]) => {
@@ -471,6 +471,23 @@ const props = {
     default: () => {},
     validator: (val: any) => {
       return isFunction(val);
+    },
+  },
+  /**
+   * @description: 观察元素变化的钩子函数，用于观察对象的变化，可以在这里做一些逻辑处理
+   */
+  observeHooks: {
+    type: Object,
+    default: () => ({}),
+    validator: (val: { [x: string]: any }) => {
+      return Object.keys(val).every((key) => {
+        return (
+          (Array.isArray(val[key]) ||
+          isFunction(val[key])) &&
+          ["before", "on", "after"].includes(key)
+          // (key.startsWith("after") || key.startsWith("before"))
+        );
+      });
     },
   },
   /**

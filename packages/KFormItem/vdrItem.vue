@@ -46,7 +46,7 @@ export default {
       const addonProps = {};
       // if (this.record.type === "editor") {
       //   addonProps = {
-      //     wrapperSizeKIFOfCriticalChildElements: [".quill-editor"],
+      //     wrapperSizeKIFOfElements: [".quill-editor"],
       //   };
       // }
 
@@ -85,7 +85,7 @@ export default {
       Object.assign(this.vdrCellOptions, options);
     },
     handleVDRCellMounted(t) {
-      // t.updateChildrenLayout({
+      // t.updateChildLayout({
       //   left: t.x,
       //   top: t.y,
       //   width: t.w,

@@ -671,6 +671,9 @@ export const layoutList = [
     model: "",
   },
   {
+    vdrCellOptions: {
+      wrapperSizeKIFOfElements: [".draggable-box"],
+    },
     type: "free-layout", // record.type 记录类型
     label: "自由布局", // 标题文字
     icon: "icon-chaifen", // 图标
@@ -727,6 +730,20 @@ export const layoutList = [
     vdrCellOptions: {
       w: 196,
       h: 74,
+      observeHooks: {
+        on: [
+          (handler, options) => {
+            console.log("%c on", "color:red", { handler, options });
+            const { wrapperSize, borderSize, cell } = options;
+            const childEle = cell.querySelector(".grid-box");
+            const { width, height } = childEle.getBoundingClientRect();
+            wrapperSize.width = width + borderSize.width;
+            wrapperSize.height = height + borderSize.height;
+
+            return true;
+          },
+        ],
+      },
     },
     type: "grid",
     label: "栅格布局",

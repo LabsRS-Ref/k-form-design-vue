@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-31 08:58:05
+ * @LastEditTime : 2022-03-31 16:09:16
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/Cell-debug.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -70,6 +70,7 @@ import {
   checkAssert,
   checkToDo,
   isFunction,
+  tryRunHooks,
   splice,
   getBoundingClientRect,
   isPointInDOMRect,
@@ -117,9 +118,10 @@ export default {
         const ctx = vnode.context;
         // Case1: 图片是延迟加载出来的，所以直接计算BoundingClientRect不准确
         // Case2: 视频延迟加载，需要等待视频加载完成后，计算视频真实的宽度和高度
-        ctx.initDefaultLayout({ ...data });
-        // TODO: 需不需强制更新子元素的布局
-        // this.updateChildrenLayout()
+        const fn = ctx?.initDefaultLayout;
+        if (isFunction(fn)) {
+          fn({ ...data });
+        }
       }
     }),
   },
@@ -197,7 +199,7 @@ export default {
         { bm: this.enableResizeHeight },
         { br: this.enableResizeHeight },
       ]
-        .filter((item) => Object.values(item).includes(true))
+        .filter((item) => Object.values(item).some(Boolean))
         .map((item) => Object.keys(item)[0]);
     },
     wrapperSize() {
@@ -222,12 +224,11 @@ export default {
   watch: {
     wrapperSize(val, oldVal) {
       debug("watch", `[vid=${this._uid},parent=${this.cell.parent?._uid}] wrapper size change`, val, oldVal);
-      this.updateChildrenLayout({
+      this.updateChildLayout({
         left: this.left,
         top: this.top,
         width: val.width,
         height: val.height,
-        force: true,
       });
     },
     xy(val, oldVal) {
@@ -287,13 +288,12 @@ export default {
         this.initDefaultLayout();
         // 根据外部配置强制更新子元素布局 (尺寸有效，才强制更新, 并使用自动计算的最佳尺寸中的最大值作为最终尺寸)
         if (this.w >= 0 && this.h >= 0) {
-          debug("_onMounted::updateChildrenLayout", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`);
-          this.updateChildrenLayout({
+          debug("_onMounted::updateChildLayout", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`);
+          this.updateChildLayout({
             left: this.x,
             top: this.y,
             width: Math.max(this.w, this.width),
             height: Math.max(this.h, this.height),
-            force: true,
           });
         }
 
@@ -342,10 +342,19 @@ export default {
     installObserveService() {
       debug("installObserveService::begin", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`);
       // 声明要观察的属性，影响size的属性还是比较多的，
-      const observeAttributeNames = ["width", "height", "left", "top"]; // no_use
+      const observeAttributeNames = ["style"]; // no_use
 
       // 初始化resize观察者
       this.ro = new MutationObserver((mutationsList, observer) => {
+        const beforeHooks = [].concat(this.observeHooks?.before || []);
+        const onHooks = [].concat(this.observeHooks?.on || []);
+        const afterHooks = [].concat(this.observeHooks?.after || []);
+
+        // beforeHooks
+        if (!tryRunHooks(beforeHooks, [this, mutationsList, observer])) {
+          return;
+        }
+
         const debugGroupName = "ObserveService::resize::callback";
         debug(`${debugGroupName}::begin`, `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, mutationsList);
 
@@ -353,53 +362,27 @@ export default {
           return;
         }
 
-        let childNodeMaxWidth = -1;
-        let childNodeMaxHeight = -1;
+        const wrapperSize = this.getCellBestWrapperSize({
+          consultWidth: 0,
+          consultHeight: 0,
+          recursiveCalcChildrenNodes: true,
+        });
 
-        for (let i = 0; i < mutationsList.length; i += 1) {
-          const record = mutationsList[i];
-          const { target, attributeName, addedNodes, removedNodes } = record;
-
-          const willReCalc = [
-            observeAttributeNames.includes(attributeName),
-            addedNodes.length > 0,
-            removedNodes.length > 0,
-          ].some(Boolean);
-
-          // 需要重新计算
-          if (willReCalc) {
-            // 参考元素本身内部的变化
-            const { width = 0, height = 0 } = getBoundingClientRect(target);
-            childNodeMaxWidth = Math.max(childNodeMaxWidth, width);
-            childNodeMaxHeight = Math.max(childNodeMaxHeight, height);
-            // 参考元素的父元素
-            let { parentNode } = target;
-
-            // NOTE: 向上查找，需要排除 Cell 元素 和 Wrapper 元素
-            const excludeParentElementList = [this.getCellElement(), this.getWrapperElement()];
-            while (parentNode && !excludeParentElementList.includes(parentNode)) {
-              const { width: parentWidth = 0, height: parentHeight = 0 } = getBoundingClientRect(parentNode);
-              childNodeMaxWidth = Math.max(childNodeMaxWidth, parentWidth);
-              childNodeMaxHeight = Math.max(childNodeMaxHeight, parentHeight);
-              parentNode = parentNode?.parentNode;
-            }
-
-            // NOTE:
-          }
+        // Hooks: 更新wrapper的尺寸
+        if (
+          !tryRunHooks(onHooks, [this], {
+            wrapperSize,
+            mutationsList,
+            observer,
+            cell: this.getCellElement(),
+            borderSize: this.calcRectWithWrapperBorderEx(0, 0),
+          })
+        ) {
+          return;
         }
 
-        // NOTE: 如果采用的子元素最大的尺寸，那么需要计算Cell的Border的尺寸，用以容纳子元素的边界
-        // 特别要注意，这里要计算的是Vue实例关联的元素，而为slot提供的元素
-        const { width: finalWidth, height: finalHeight } = this.calcRectWithWrapperBorderEx(
-          childNodeMaxWidth,
-          childNodeMaxHeight
-        );
-
         debug(`${debugGroupName}::calc`, `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, {
-          finalWidth,
-          finalHeight,
-          childNodeMaxWidth,
-          childNodeMaxHeight,
+          wrapperSize,
           width: this.width,
           height: this.height,
         });
@@ -407,26 +390,31 @@ export default {
         // 获取到最佳的，被要求的尺寸。(Note: consultWidth，consultHeight如果大于0且大于Wrapper的尺寸，会优先被使用)
         // 问题: 子元素放大尺寸，效果还可以接收，子元素缩小后，效果不理想。
         // 解决：通过设置边界， childNodeMaxWidth !== -1， childNodeMaxHeight !== -1 排除掉
-        const willUpdateLayout = [
-          [finalWidth !== this.width, finalHeight !== this.height].some(Boolean),
-          childNodeMaxWidth !== -1,
-          childNodeMaxHeight !== -1,
-        ].every(Boolean);
+        const willUpdateLayout = [wrapperSize.width !== this.width, wrapperSize.height !== this.height].some(Boolean);
+
+        debug(
+          `${debugGroupName}::willUpdateLayout`,
+          `[vid=${this._uid},parent=${this.cell.parent?._uid}]`,
+          willUpdateLayout
+        );
 
         if (willUpdateLayout) {
           // 更新所有子节点布局
-          this.updateChildrenLayout({
+          this.updateChildLayout({
             left: this.left,
             top: this.top,
-            width: finalWidth,
-            height: finalHeight,
-            force: true,
+            width: wrapperSize.width,
+            height: wrapperSize.height,
           });
         }
 
         debug(`${debugGroupName}::end`, `[vid=${this._uid},parent=${this.cell.parent?._uid}]`);
+
+        // Hooks: 更新wrapper的尺寸
+        tryRunHooks(afterHooks, [this, mutationsList, observer]);
       });
 
+      // 哪些元素纳入观察队列
       const cellEle = this.getCellElement();
 
       if (this.checkEnableBeObserved(cellEle)) {
@@ -434,7 +422,7 @@ export default {
 
         // 问题: 有的组件子元素太多，都观察性能堪忧，应该提供主要观察的元素，更有效解决
         // 解决方案：引入关键子元素因子
-        const kifElements = this.getKIFOfCriticalChildElements(cellEle, this);
+        const kifElements = this.getKIFOfElements(cellEle, this);
 
         // 将子孙元素也加入观察
         const enableChildObserve = false;
@@ -463,7 +451,7 @@ export default {
         this.ro.observe(cellEle, {
           childList: true,
           attributes: true,
-          // attributeFilter: observeAttributeNames, // 影响size的属性还是比较多的，简单化暂时不做严格处理，直接把所有的属性都观察
+          attributeFilter: observeAttributeNames, // 影响size的属性还是比较多的，简单化暂时不做严格处理，直接把所有的属性都观察
           subtree: true,
         });
       }
@@ -500,6 +488,8 @@ export default {
         consultWidth,
         consultHeight,
       });
+      const [left, top] = [consultLeft, consultTop];
+
       // 自适应内部元素的大小(考虑line-height的影响)
       const { width, height } = this.getCellBestWrapperSize({
         consultWidth,
@@ -509,8 +499,8 @@ export default {
 
       // 缓存默认布局信息
       this.cacheDefaultLayout({
-        left: consultLeft,
-        top: consultTop,
+        left,
+        top,
         width,
         height,
       });
@@ -521,16 +511,12 @@ export default {
       this.initDefaultLayoutHook(this, { consultWidth, consultHeight });
 
       // 变更位置及尺寸
-      this.changePosition(consultLeft, consultTop);
-      this.changeSize(width, height);
-
-      // notice the parent cell to update layout
-      if (this.cell.parent) {
-        this.$nextTick(() => {
-          this.cell.parent.initDefaultLayout();
-          // this.cell.parent.updateLayout();
-        });
-      }
+      this.updateChildLayout({
+        left,
+        top,
+        width,
+        height,
+      });
     },
     /**
      * 获取内部事件类型
@@ -603,9 +589,9 @@ export default {
     /**
      * 获得关键影响Wrapper尺寸的子元素数组
      */
-    getKIFOfCriticalChildElements(rootEle, ...args) {
+    getKIFOfElements(rootEle, ...args) {
       const kifElementList = [];
-      const kif = this.wrapperSizeKIFOfCriticalChildElements;
+      const kif = this.wrapperSizeKIFOfElements;
 
       // 定义一个函数，用于获取子元素的约束
       const extractFnc = (data, relativeEle, ...options) => {
@@ -636,7 +622,7 @@ export default {
         extractFnc([].concat(kif), rootEle, ...args);
       }
 
-      debug("getKIFOfCriticalChildElements", `${this._uid}`, {
+      debug("getKIFOfElements", `${this._uid}`, {
         kifElementList,
         kif,
         args,
@@ -644,9 +630,9 @@ export default {
 
       return kifElementList;
     },
-    getKIFOfCriticalChildElementsMaxRect() {
+    getKIFOfElementsMaxRect() {
       const ele = this.getCellElement();
-      const kifEleList = this.getKIFOfCriticalChildElements(ele, this);
+      const kifEleList = this.getKIFOfElements(ele, this);
 
       // 选择最优的数值
       const useBest = (args) => Math.max(...args);
@@ -696,30 +682,19 @@ export default {
 
       // 问题: 如果子元素太多，会影响性能，应该提供一个配置项，只检测指定的元素大小及方法
       // 解决方案: 检测是否有设置关键影响因子. 配置项，可以指定检测的元素，以及检测的方法
-      const kifEleList = this.getKIFOfCriticalChildElements(ele, this);
+      // 计算关键影响子元素的最大宽高
+      const { width: kifEleMaxWidth, height: kifEleMaxHeight } = this.getKIFOfElementsMaxRect();
 
-      if (!recursiveCalcChildrenNodes) {
-        // 计算关键影响子元素的最大宽高
-        const { width: kifEleMaxWidth, height: kifEleMaxHeight } = this.getKIFOfCriticalChildElementsMaxRect();
+      if ([kifEleMaxWidth, kifEleMaxHeight].some((item) => item > 0)) {
         childNodeMaxWidth = kifEleMaxWidth;
         childNodeMaxHeight = kifEleMaxHeight;
-      } else {
+      } else if (recursiveCalcChildrenNodes) {
         // 递归所有子节点
         forEachNode(ele, (htmlNode) => {
           const { width, height } = getBoundingClientRect(htmlNode);
           // TODO: 是否考虑 offset 和 scrollSize
           childNodeMaxWidth = Math.max(childNodeMaxWidth, width || 0);
           childNodeMaxHeight = Math.max(childNodeMaxHeight, height || 0);
-
-          // 如果有设置关键影响因子，则检测是否有超过容器的情况, 后续子元素的计算也会被忽略
-          if (kifEleList.includes(htmlNode)) {
-            debug("getCellBestWrapperSize::kifEleList", `${this._uid}`, {
-              htmlNode,
-              width,
-              height,
-            });
-            return false;
-          }
 
           // 检测是否为子Cell，如果是，则不需要再深入检测了。
           const nestingCell = this.getANestedLevel0ChildCell(htmlNode);
@@ -737,24 +712,12 @@ export default {
       ];
 
       // 如果采用的子元素最大的尺寸，那么需要计算Cell的Border的尺寸，用以容纳子元素的边界
-      // 特别要注意，这里要计算的是Vue实例关联的元素，而为slot提供的元素
-      const { width: widthWithBorder, height: heightWithBorder } = this.calcRectWithWrapperBorderEx(
-        childNodeMaxWidth,
-        childNodeMaxHeight
-      );
-      // TODO: 是否要考略 padding 的影响
-      const wrapperWidth =
-        // eslint-disable-next-line no-constant-condition
-        childNodeMaxWidth >= calcWidth ? widthWithBorder : 0;
-      const wrapperHeight =
-        // eslint-disable-next-line no-constant-condition
-        childNodeMaxHeight >= calcHeight ? heightWithBorder : 0;
-
+      // NOTE: 特别要注意，这里要计算的是不是Vue实例关联的元素，而是slot提供的元素
       // 计算最佳宽高
-      const [finalWidth, finalHeight] = [
-        useBest([calcWidth, childNodeMaxWidth, wrapperWidth]),
-        useBest([calcHeight, childNodeMaxHeight, wrapperHeight]),
-      ];
+      const { width: finalWidth, height: finalHeight } = this.calcRectWithWrapperBorderEx(
+        useBest([calcWidth, childNodeMaxWidth]),
+        useBest([calcHeight, childNodeMaxHeight])
+      );
 
       // TODO: 补充针对maxWidth，maxHeight的处理
       debug("getCellBestWrapperSize::end", `${this._uid}`, {
@@ -1206,28 +1169,15 @@ export default {
       return rootNodeInitInfo.initial.wrapper;
     },
     /** 更新所有子节点布局 */
-    updateChildrenLayout({ left = 0, top = 0, width = 0, height = 0, force = false } = {}) {
-      const willResize = [
-        [this.left, left],
-        [this.top, top],
-        [this.width, width],
-        [this.height, height],
-      ].some(([origin, target]) => {
-        return origin !== target;
-      });
-
-      // debug
-      debug("updateChildrenLayout", `${this._uid}`, { left, top, width, height, force, willResize });
-
-      if (willResize || force) {
-        // 重新调整Cell的布局
-        this.resizeCell(left, top, width, height);
-        // 副作用启动
-        this.activeAllResizeEffects();
-        // 更新Cell的位置及尺寸
-        this.changePosition(left, top);
-        this.changeSize(width, height);
-      }
+    updateChildLayout({ left = 0, top = 0, width = 0, height = 0 } = {}) {
+      debug("updateChildLayout", `${this._uid}`, { left, top, width, height });
+      // 重新调整Cell的布局
+      this.resizeCell(left, top, width, height);
+      // 副作用启动
+      this.activeAllResizeEffects();
+      // 重新更新Cell的位置及尺寸
+      this.changePosition(left, top);
+      this.changeSize(width, height);
     },
     /** 变更位置 */
     changePosition(left = 0, top = 0) {

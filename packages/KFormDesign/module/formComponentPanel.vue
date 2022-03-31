@@ -4,7 +4,7 @@
  * @Author: kcz
  * @Date: 2019-12-31 19:39:48
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-27 11:17:11
+ * @LastEditTime : 2022-03-31 15:47:39
  -->
 <template>
   <div class="form-panel">
@@ -67,6 +67,8 @@
   </div>
 </template>
 <script>
+import serialize from "serialize-javascript";
+import cloneDeep from "clone-deep";
 import draggable from "vuedraggable";
 import layoutItem from "./layoutItem";
 import "codemirror/mode/javascript/javascript";
@@ -133,8 +135,7 @@ export default {
     deepClone(evt) {
       const { newIndex } = evt;
       // json深拷贝一次
-      const listString = JSON.stringify(this.data.list);
-      this.data.list = JSON.parse(listString);
+      this.data.list = cloneDeep(this.data.list);
       // 删除icon及compoent属性
       delete this.data.list[newIndex].icon;
       delete this.data.list[newIndex].component;
@@ -156,13 +157,11 @@ export default {
         }
         if (typeof columns[newIndex].options !== "undefined") {
           // 深拷贝options
-          const optionsStr = JSON.stringify(columns[newIndex].options);
-          columns[newIndex].options = JSON.parse(optionsStr);
+          columns[newIndex].options = cloneDeep(columns[newIndex].options);
         }
         if (typeof columns[newIndex].rules !== "undefined") {
           // 深拷贝rules
-          const rulesStr = JSON.stringify(columns[newIndex].rules);
-          columns[newIndex].rules = JSON.parse(rulesStr);
+          columns[newIndex].rules = cloneDeep(columns[newIndex].rules);
         }
         if (typeof columns[newIndex].list !== "undefined") {
           // 深拷贝list
@@ -170,8 +169,7 @@ export default {
         }
         if (typeof columns[newIndex].columns !== "undefined") {
           // 深拷贝columns
-          const columnsStr = JSON.stringify(columns[newIndex].columns);
-          columns[newIndex].columns = JSON.parse(columnsStr);
+          columns[newIndex].columns =cloneDeep(columns[newIndex].columns);
           // 复制时，清空数据
           columns[newIndex].columns.forEach((item) => {
             item.list = [];
@@ -179,8 +177,7 @@ export default {
         }
         if (columns[newIndex].type === "table") {
           // 深拷贝trs
-          const trsStr = JSON.stringify(columns[newIndex].trs);
-          columns[newIndex].trs = JSON.parse(trsStr);
+          columns[newIndex].trs = deepClone(columns[newIndex].trs);
           // 复制时，清空数据
           columns[newIndex].trs.forEach((item) => {
             item.tds.forEach((val) => {
@@ -190,8 +187,7 @@ export default {
         }
       }
       // 深拷贝数据
-      const listString = JSON.stringify(columns[newIndex]);
-      columns[newIndex] = JSON.parse(listString);
+      columns[newIndex] = cloneDeep(columns[newIndex]);
       this.$emit("handleSetSelectItem", columns[newIndex]);
     },
     dragStart(evt, list) {

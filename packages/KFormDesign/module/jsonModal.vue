@@ -1,3 +1,11 @@
+<!--
+ * @Author       : sunzhifeng <ian.sun@auodigitech.com>
+ * @Date         : 2022-03-18 08:59:35
+ * @Description  : Created by sunzhifeng, Please coding something here
+ * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/jsonModal.vue
+ * @LastEditTime : 2022-03-31 15:35:43
+ * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
+-->
 <template>
   <a-modal
     title="JSON数据"
@@ -18,6 +26,7 @@
  * date 2019-11-20
  * description 生成json Modal
  */
+import serialize from "serialize-javascript";
 import previewCode from "../../PreviewCode/index";
 
 export default {
@@ -32,7 +41,7 @@ export default {
   watch: {
     visible(val) {
       if (val) {
-        this.editorJson = JSON.stringify(this.jsonData, null, "\t");
+        this.editorJson = serialize(this.jsonData, { space: 2 });
       }
     },
   },

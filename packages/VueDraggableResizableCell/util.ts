@@ -2,7 +2,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-03-01 10:24:28
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-30 19:29:23
+ * @LastEditTime : 2022-03-31 14:08:03
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/util.ts
  * @Description  : Created by sunzhifeng, Please coding something here
  */
@@ -19,6 +19,27 @@ export function isFunction(func: any): boolean {
     typeof func === "function" ||
     Object.prototype.toString.call(func) === "[object Function]"
   );
+}
+
+export function tryRunHooks(
+  hooks: any[],
+  args: any[],
+  options: any
+): boolean {
+  const cloneHooks = Array.from(hooks);
+
+  if (cloneHooks.length === 0) {
+    return true;
+  }
+  const hook = cloneHooks.shift();
+  let res = true;
+  if (isFunction(hook)) {
+    res = hook(...args, options);
+    if (res === false) {
+      return false;
+    }
+  }
+  return tryRunHooks(cloneHooks, args, options);
 }
 
 export function getBoundingClientRect(el: HTMLElement): DOMRect {

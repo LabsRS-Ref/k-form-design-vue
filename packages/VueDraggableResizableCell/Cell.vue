@@ -117,7 +117,7 @@ export default {
         // Case2: 视频延迟加载，需要等待视频加载完成后，计算视频真实的宽度和高度
         ctx.initDefaultLayout({ ...data });
         // TODO: 需不需强制更新子元素的布局
-        // this.updateChildrenLayout()
+        // this.updateChildLayout()
       }
     }),
   },
@@ -255,7 +255,7 @@ export default {
   },
   watch: {
     wrapperSize(val, oldVal) {
-      this.updateChildrenLayout({
+      this.updateChildLayout({
         left: this.left,
         top: this.top,
         width: val.width,
@@ -310,7 +310,7 @@ export default {
         this.initDefaultLayout();
         // 根据外部配置强制更新子元素布局 (尺寸有效，才强制更新, 并使用自动计算的最佳尺寸中的最大值作为最终尺寸)
         if (this.w >= 0 && this.h >= 0) {
-          this.updateChildrenLayout({
+          this.updateChildLayout({
             left: this.x,
             top: this.y,
             width: Math.max(this.w, this.width),
@@ -434,7 +434,7 @@ export default {
 
         if (willUpdateLayout) {
           // 更新所有子节点布局
-          this.updateChildrenLayout({
+          this.updateChildLayout({
             left: this.left,
             top: this.top,
             width: finalWidth,
@@ -452,7 +452,7 @@ export default {
 
         // 问题: 有的组件子元素太多，都观察性能堪忧，应该提供主要观察的元素，更有效解决
         // 解决方案：引入关键子元素因子
-        const kifElements = this.getKIFOfCriticalChildElements(cellEle, this);
+        const kifElements = this.getKIFOfElements(cellEle, this);
 
         // 将子孙元素也加入观察
         const enableChildObserve = false;
@@ -617,9 +617,9 @@ export default {
     /**
      * 获得关键影响Wrapper尺寸的子元素数组
      */
-    getKIFOfCriticalChildElements(rootEle, ...args) {
+    getKIFOfElements(rootEle, ...args) {
       const kifElementList = [];
-      const kif = this.wrapperSizeKIFOfCriticalChildElements;
+      const kif = this.wrapperSizeKIFOfElements;
 
       // 定义一个函数，用于获取子元素的约束
       const extractFnc = (data, relativeEle, ...options) => {
@@ -650,7 +650,7 @@ export default {
         extractFnc([].concat(kif), rootEle, ...args);
       }
 
-      debug("getKIFOfCriticalChildElements", `${this._uid}`, {
+      debug("getKIFOfElements", `${this._uid}`, {
         kifElementList,
         kif,
         args,
@@ -658,9 +658,9 @@ export default {
 
       return kifElementList;
     },
-    getKIFOfCriticalChildElementsMaxRect() {
+    getKIFOfElementsMaxRect() {
       const ele = this.getCellElement();
-      const kifEleList = this.getKIFOfCriticalChildElements(ele, this);
+      const kifEleList = this.getKIFOfElements(ele, this);
 
       // 选择最优的数值
       const useBest = (args) => Math.max(...args);
@@ -710,11 +710,11 @@ export default {
 
       // 问题: 如果子元素太多，会影响性能，应该提供一个配置项，只检测指定的元素大小及方法
       // 解决方案: 检测是否有设置关键影响因子. 配置项，可以指定检测的元素，以及检测的方法
-      const kifEleList = this.getKIFOfCriticalChildElements(ele, this);
+      const kifEleList = this.getKIFOfElements(ele, this);
 
       if (!recursiveCalcChildrenNodes) {
         // 计算关键影响子元素的最大宽高
-        const { width: kifEleMaxWidth, height: kifEleMaxHeight } = this.getKIFOfCriticalChildElementsMaxRect();
+        const { width: kifEleMaxWidth, height: kifEleMaxHeight } = this.getKIFOfElementsMaxRect();
         childNodeMaxWidth = kifEleMaxWidth;
         childNodeMaxHeight = kifEleMaxHeight;
       } else {
@@ -1216,7 +1216,7 @@ export default {
       return rootNodeInitInfo.initial.wrapper;
     },
     /** 更新所有子节点布局 */
-    updateChildrenLayout({ left = 0, top = 0, width = 0, height = 0, force = false } = {}) {
+    updateChildLayout({ left = 0, top = 0, width = 0, height = 0, force = false } = {}) {
       const willResize = [
         [this.left, left],
         [this.top, top],
