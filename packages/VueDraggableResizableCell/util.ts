@@ -2,7 +2,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-03-01 10:24:28
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-31 14:08:03
+ * @LastEditTime : 2022-03-31 16:51:12
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/util.ts
  * @Description  : Created by sunzhifeng, Please coding something here
  */
@@ -21,10 +21,27 @@ export function isFunction(func: any): boolean {
   );
 }
 
+/**
+ * 以一种尝试方式执行Hook
+ * @param hooks Hook函数的数组
+ * @param args Hook函数的参数 未知数量
+ * @param options Hook函数参数，末尾参数
+ * @param config 执行Hook的配置
+ * @returns {boolean} 是否按要求执行了Hook，返回值用于其他用途
+ * // TODO: 查看哪些地方需要用到这个函数
+ */
 export function tryRunHooks(
   hooks: any[],
   args: any[],
-  options: any
+  options: any,
+  config: {
+    ignoreError?: boolean;
+    ignoreNoTrusted?: boolean;
+    ignoreReturn?: boolean;
+  } = {
+    ignoreError: true,
+    ignoreReturn: false,
+  }
 ): boolean {
   const cloneHooks = Array.from(hooks);
 
@@ -34,12 +51,18 @@ export function tryRunHooks(
   const hook = cloneHooks.shift();
   let res = true;
   if (isFunction(hook)) {
-    res = hook(...args, options);
-    if (res === false) {
+    try {
+      res = hook(...args, options);
+    } catch (e) {
+      if (!config.ignoreError) {
+        throw e;
+      }
+    }
+    if (res === false && !config.ignoreReturn) {
       return false;
     }
   }
-  return tryRunHooks(cloneHooks, args, options);
+  return tryRunHooks(cloneHooks, args, options, config);
 }
 
 export function getBoundingClientRect(el: HTMLElement): DOMRect {

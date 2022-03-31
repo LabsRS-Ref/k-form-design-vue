@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-31 16:09:16
+ * @LastEditTime : 2022-03-31 16:23:55
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/Cell-debug.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -891,7 +891,9 @@ export default {
       const onCacheHooks = [].concat(this.cellChildNodeInitInfoHooks?.onCacheEachNode || []);
       const afterHooks = [].concat(this.cellChildNodeInitInfoHooks?.afterInit || []);
 
-      beforeHooks.forEach((hook) => hook(this, ele));
+      if (!tryRunHooks(beforeHooks, [this], { ele, left, top, width, height })) {
+        return;
+      }
 
       // 原本的宽高比
       const aspectRatio = width / height;
@@ -993,7 +995,7 @@ export default {
         { parent: this.getWrapperElement() }
       );
 
-      afterHooks.forEach((hook) => hook(this, ele));
+      tryRunHooks(afterHooks, [this], { ele, left, top, width, height });
     },
     /**
      * 注册Resize步骤

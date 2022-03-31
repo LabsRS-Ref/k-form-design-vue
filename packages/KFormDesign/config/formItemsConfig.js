@@ -732,6 +732,7 @@ export const layoutList = [
       h: 74,
       observeHooks: {
         on: [
+          // 这种方式可以有效解决按使用者要求设置Wrapper的尺寸
           (handler, options) => {
             console.log("%c on", "color:red", { handler, options });
             const { wrapperSize, borderSize, cell } = options;
