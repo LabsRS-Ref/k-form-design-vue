@@ -29,6 +29,7 @@
     "clipboard": "^2.0.6",
     "moment": "^2.24.0",
     "mutationobserver-shim": "^0.3.7",
+    "serialize-javascript": "^6.0.0",
     "vcolorpicker": "^1.1.0",
     "vue": "^2.6.10",
     "vue-codemirror-lite": "^1.0.4",
