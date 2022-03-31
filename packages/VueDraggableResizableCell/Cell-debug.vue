@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-30 11:03:45
+ * @LastEditTime : 2022-03-31 08:58:05
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/Cell-debug.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -12,7 +12,7 @@
     v-lazy-load
     :x="left"
     :y="top"
-    :z="z"
+    :z="zIndex"
     :w="width"
     :h="height"
     :axis="axis"
@@ -62,6 +62,7 @@ import "vue-draggable-resizable/dist/VueDraggableResizable.css";
 // # 定义
 import DEF from "./def";
 import props from "./props";
+import createState from "./state";
 import { createLazyLoadDirective } from "./directives";
 import {
   debug as debugUtil,
@@ -86,7 +87,7 @@ import fixInnerElementResizeIssuesStep from "./steps/fix-inner-element-resize-is
 const debug = (...args) => {
   const group = args[0];
   const filters = {
-    cacheCellLayoutData: 0,
+    cacheDefaultLayout: 0,
     "resizeCell-offset": 0,
     onResizingEvent: 1,
   };
@@ -116,49 +117,15 @@ export default {
         const ctx = vnode.context;
         // Case1: 图片是延迟加载出来的，所以直接计算BoundingClientRect不准确
         // Case2: 视频延迟加载，需要等待视频加载完成后，计算视频真实的宽度和高度
-        ctx.computeAndUpdateLayout({ ...data, updateCache: true });
+        ctx.initDefaultLayout({ ...data });
+        // TODO: 需不需强制更新子元素的布局
+        // this.updateChildrenLayout()
       }
     }),
   },
   props,
   data() {
-    return {
-      left: this.x,
-      top: this.y,
-      right: null,
-      bottom: null,
-
-      width: this.w || 10,
-      height: this.h || 10,
-
-      cell: {
-        parent: null,
-        children: [],
-        cache: {},
-        aspectRatioInitialized: false,
-        resizeSteps: {},
-        effects: {
-          resize: {},
-        },
-      },
-
-      isActive: false,
-      isResizing: false,
-      isDragging: false,
-
-      tempData: {
-        lastResizeInfo: null,
-        lastDraggingInfo: null,
-      },
-      history: {
-        undo: [],
-        redo: [],
-      },
-
-      // 元素resize观察者
-      ro: null,
-      roObserveEleList: [],
-    };
+    return createState(this);
   },
   computed: {
     classNamesForCell() {
@@ -294,10 +261,6 @@ export default {
   },
   beforeDestroy() {
     debug("beforeDestroy", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`);
-
-    // 卸载观察服务
-    this.uninstallObserveService();
-
     // 发送要销毁事件
     this.sentEvent(DEF.internalEvent.beforeDestroy, this);
   },
@@ -317,13 +280,13 @@ export default {
     /** Vue 生命周期 onMounted 回调函数 */
     _onMounted() {
       // HACK: 因为在mounted之后，this.getWrapperElement()还没有初始化，所以需要延迟执行
-      // FIXME: 发现这个时候拿到的是的 #comment节点，而不是真正的 #wrapper节点
+      // STUB: 发现这个时候拿到的是的 #comment节点，而不是真正的 #wrapper节点
       const init = () => {
         // 初始化最原始的计算布局状态, 其他部分的计算布局状态都是基于这个状态的
-        debug("_onMounted::computeAndUpdateLayout", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`);
-        this.computeAndUpdateLayout({ updateCache: true });
+        debug("_onMounted::initDefaultLayout", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`);
+        this.initDefaultLayout();
         // 根据外部配置强制更新子元素布局 (尺寸有效，才强制更新, 并使用自动计算的最佳尺寸中的最大值作为最终尺寸)
-        if (this.w > 0 && this.h > 0) {
+        if (this.w >= 0 && this.h >= 0) {
           debug("_onMounted::updateChildrenLayout", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`);
           this.updateChildrenLayout({
             left: this.x,
@@ -386,14 +349,17 @@ export default {
         const debugGroupName = "ObserveService::resize::callback";
         debug(`${debugGroupName}::begin`, `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, mutationsList);
 
-        if (this.isDragging || this.isResizing) {
+        if (this.isDragging || this.isResizing || this.getCellElement()?.nodeType !== Node.ELEMENT_NODE) {
           return;
         }
 
         let childNodeMaxWidth = -1;
         let childNodeMaxHeight = -1;
-        mutationsList.forEach((record) => {
+
+        for (let i = 0; i < mutationsList.length; i += 1) {
+          const record = mutationsList[i];
           const { target, attributeName, addedNodes, removedNodes } = record;
+
           const willReCalc = [
             observeAttributeNames.includes(attributeName),
             addedNodes.length > 0,
@@ -408,29 +374,35 @@ export default {
             childNodeMaxHeight = Math.max(childNodeMaxHeight, height);
             // 参考元素的父元素
             let { parentNode } = target;
-            while (parentNode && ![this.getCellElement(), this.getWrapperElement()].includes(parentNode)) {
+
+            // NOTE: 向上查找，需要排除 Cell 元素 和 Wrapper 元素
+            const excludeParentElementList = [this.getCellElement(), this.getWrapperElement()];
+            while (parentNode && !excludeParentElementList.includes(parentNode)) {
               const { width: parentWidth = 0, height: parentHeight = 0 } = getBoundingClientRect(parentNode);
               childNodeMaxWidth = Math.max(childNodeMaxWidth, parentWidth);
               childNodeMaxHeight = Math.max(childNodeMaxHeight, parentHeight);
               parentNode = parentNode?.parentNode;
             }
-          }
-        });
 
-        debug(`${debugGroupName}::calc`, `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, mutationsList, {
+            // NOTE:
+          }
+        }
+
+        // NOTE: 如果采用的子元素最大的尺寸，那么需要计算Cell的Border的尺寸，用以容纳子元素的边界
+        // 特别要注意，这里要计算的是Vue实例关联的元素，而为slot提供的元素
+        const { width: finalWidth, height: finalHeight } = this.calcRectWithWrapperBorderEx(
+          childNodeMaxWidth,
+          childNodeMaxHeight
+        );
+
+        debug(`${debugGroupName}::calc`, `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, {
+          finalWidth,
+          finalHeight,
           childNodeMaxWidth,
           childNodeMaxHeight,
           width: this.width,
           height: this.height,
         });
-
-        // 如果采用的子元素最大的尺寸，那么需要计算Cell的Border的尺寸，用以容纳子元素的边界
-        // 特别要注意，这里要计算的是Vue实例关联的元素，而为slot提供的元素
-        const { borderLeftWidth, borderRightWidth, borderTopWidth, borderBottomWidth } = this.getWrapperBorder();
-        const [finalWidth, finalHeight] = [
-          childNodeMaxWidth + borderLeftWidth + borderRightWidth,
-          childNodeMaxHeight + borderTopWidth + borderBottomWidth,
-        ];
 
         // 获取到最佳的，被要求的尺寸。(Note: consultWidth，consultHeight如果大于0且大于Wrapper的尺寸，会优先被使用)
         // 问题: 子元素放大尺寸，效果还可以接收，子元素缩小后，效果不理想。
@@ -451,6 +423,8 @@ export default {
             force: true,
           });
         }
+
+        debug(`${debugGroupName}::end`, `[vid=${this._uid},parent=${this.cell.parent?._uid}]`);
       });
 
       const cellEle = this.getCellElement();
@@ -493,6 +467,12 @@ export default {
           subtree: true,
         });
       }
+
+      this.$once("hook:beforeDestroy", () => {
+        // 卸载观察服务
+        this.uninstallObserveService();
+      });
+
       debug("installObserveService::end", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, {
         roObserveEleList: this.roObserveEleList,
         ro: this.ro,
@@ -500,75 +480,56 @@ export default {
     },
     /** 卸载观察服务 */
     uninstallObserveService() {
+      debug("uninstallObserveService", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`);
       this.roObserveEleList = [];
       this.ro.disconnect();
-      this.ro = null;
+      delete this.ro;
     },
     /**
-     * 独立方法：用于同一处理组件挂载后的整体操作
-     * 计算及更新布局，包括子元素的布局
+     * 独立方法：用于统一处理组件挂载后的整体操作
+     * 初始化默认布局信息：计算及更新布局，包括子元素的布局
      * @param {number} consultLeft 参考左边距, 默认 null, 相对于父元素，用于平移transform特性
      * @param {number} consultTop 参考顶边距, 默认 null, 相对于父元素，用于平移transform特性
      * @param {number} consultWidth 参考宽度，默认0
      * @param {number} consultHeight 参考高度，默认0
-     * @param {boolean} updateCache 是否更新缓存
-     * @param {boolean} forceUpdateChildrenLayout 是否强制更新所有子元素的布局
      */
-    computeAndUpdateLayout({
-      consultLeft = this.left,
-      consultTop = this.top,
-      consultWidth = 0,
-      consultHeight = 0,
-      updateCache = false,
-      forceUpdateChildrenLayout = false,
-    } = {}) {
-      debug("computeAndUpdateLayout", `${this._uid}`, {
+    initDefaultLayout({ consultLeft = this.left, consultTop = this.top, consultWidth = 0, consultHeight = 0 } = {}) {
+      debug("initDefaultLayout", `${this._uid}`, {
         consultLeft,
         consultTop,
         consultWidth,
         consultHeight,
-        updateCache,
-        forceUpdateChildrenLayout,
       });
       // 自适应内部元素的大小(考虑line-height的影响)
-      const { width: w, height: h } = this.getCellBestWrapperSize({
+      const { width, height } = this.getCellBestWrapperSize({
         consultWidth,
         consultHeight,
-        recursiveCalcChildrenNodes: updateCache,
+        recursiveCalcChildrenNodes: true,
       });
 
-      // 计算边界
-      if (!updateCache) {
-        this.updateChildrenLayout({
-          left: consultLeft,
-          top: consultTop,
-          width: w,
-          height: h,
-          force: !!forceUpdateChildrenLayout,
-        });
-      } else {
-        this.changePosition(consultLeft, consultTop);
-        this.changeSize(w, h);
-      }
-
-      // 更新缓存数据
-      if (updateCache) {
-        this.cacheCellLayoutData({
-          left: consultLeft,
-          top: consultTop,
-          width: this.width,
-          height: this.height,
-        });
-        this.cell.aspectRatioInitialized = true;
-      }
+      // 缓存默认布局信息
+      this.cacheDefaultLayout({
+        left: consultLeft,
+        top: consultTop,
+        width,
+        height,
+      });
+      this.cell.aspectRatioInitialized = true;
 
       // 调用钩子函数, 方便开发者自定义操作, 开发者可以修改实例的属性及状态
       // @example (self) => {self.width = 100; self.height = 100;}
-      this.computeAndUpdateLayoutHook(this, { consultWidth, consultHeight });
+      this.initDefaultLayoutHook(this, { consultWidth, consultHeight });
+
+      // 变更位置及尺寸
+      this.changePosition(consultLeft, consultTop);
+      this.changeSize(width, height);
 
       // notice the parent cell to update layout
       if (this.cell.parent) {
-        this.cell.parent.computeAndUpdateLayout();
+        this.$nextTick(() => {
+          this.cell.parent.initDefaultLayout();
+          // this.cell.parent.updateLayout();
+        });
       }
     },
     /**
@@ -596,11 +557,12 @@ export default {
      * 获得内部单元
      */
     getCellElement() {
-      const { elm } = this.getCellVNode();
-      checkAssert(elm?.nodeType !== Node.ELEMENT_NODE, "The cell node is not available, must a element node", {
-        elm,
-        nodeType: elm?.nodeType,
-      });
+      const { elm = null } = this.getCellVNode();
+      // STUB: 如果没有elm，则返回null
+      // checkAssert(elm?.nodeType !== Node.ELEMENT_NODE, "The cell node is not available, must a element node", {
+      //   elm,
+      //   nodeType: elm?.nodeType,
+      // });
       return elm;
     },
     /**
@@ -776,14 +738,17 @@ export default {
 
       // 如果采用的子元素最大的尺寸，那么需要计算Cell的Border的尺寸，用以容纳子元素的边界
       // 特别要注意，这里要计算的是Vue实例关联的元素，而为slot提供的元素
-      const { borderLeftWidth, borderRightWidth, borderTopWidth, borderBottomWidth } = this.getWrapperBorder();
+      const { width: widthWithBorder, height: heightWithBorder } = this.calcRectWithWrapperBorderEx(
+        childNodeMaxWidth,
+        childNodeMaxHeight
+      );
       // TODO: 是否要考略 padding 的影响
       const wrapperWidth =
         // eslint-disable-next-line no-constant-condition
-        childNodeMaxWidth >= calcWidth ? childNodeMaxWidth + borderLeftWidth + borderRightWidth : 0;
+        childNodeMaxWidth >= calcWidth ? widthWithBorder : 0;
       const wrapperHeight =
         // eslint-disable-next-line no-constant-condition
-        childNodeMaxHeight >= calcHeight ? childNodeMaxHeight + borderTopWidth + borderBottomWidth : 0;
+        childNodeMaxHeight >= calcHeight ? heightWithBorder : 0;
 
       // 计算最佳宽高
       const [finalWidth, finalHeight] = [
@@ -804,12 +769,6 @@ export default {
         scrollWidth,
         scrollHeight,
         rect,
-        border: {
-          left: borderLeftWidth,
-          right: borderRightWidth,
-          top: borderTopWidth,
-          bottom: borderBottomWidth,
-        },
         ele,
       });
 
@@ -831,8 +790,8 @@ export default {
     /**
      * 判断是否为本组件实例
      */
-    isTypeOfCell(vueInstance) {
-      const { $options: options } = vueInstance;
+    isTypeOfCell(vueInstance = null) {
+      const { $options: options } = vueInstance ?? {};
       return !!(
         options?.computed?.isVueDraggableResizableCell &&
         [vueComponentName, `<${vueComponentName}>`].includes(options?.name)
@@ -962,8 +921,8 @@ export default {
     /**
      * 预先处置, 缓存一些Cell的状态数据
      */
-    cacheCellLayoutData({ left = 0, top = 0, width = 1, height = 1 }) {
-      debug("cacheCellLayoutData", `${this._uid}`, { width, height });
+    cacheDefaultLayout({ left = 0, top = 0, width = 1, height = 1 }) {
+      debug("cacheDefaultLayout", `${this._uid}`, { width, height });
       const ele = this.getCellElement();
       const beforeHooks = [].concat(this.cellChildNodeInitInfoHooks?.beforeInit || []);
       const onCacheHooks = [].concat(this.cellChildNodeInitInfoHooks?.onCacheEachNode || []);
@@ -1215,6 +1174,29 @@ export default {
         borderTopWidth,
         borderBottomWidth,
       };
+    },
+    /**
+     * 计算挂载元素的Border信息的矩形区域
+     */
+    calcRectWithWrapperBorder(rect) {
+      const { borderLeftWidth, borderRightWidth, borderTopWidth, borderBottomWidth } = this.getWrapperBorder();
+      return {
+        left: rect.left - borderLeftWidth,
+        top: rect.top - borderTopWidth,
+        width: rect.width + borderLeftWidth + borderRightWidth,
+        height: rect.height + borderTopWidth + borderBottomWidth,
+      };
+    },
+    /**
+     * 计算挂载元素的Border信息的矩形区域扩展函数
+     */
+    calcRectWithWrapperBorderEx(w, h) {
+      return this.calcRectWithWrapperBorder({
+        left: 0,
+        top: 0,
+        width: w,
+        height: h,
+      });
     },
     /**
      * 获得挂载元素的初始化数据

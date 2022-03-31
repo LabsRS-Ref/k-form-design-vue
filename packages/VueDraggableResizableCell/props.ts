@@ -2,7 +2,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-28 10:26:57
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-29 15:23:50
+ * @LastEditTime : 2022-03-31 08:54:09
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/props.ts
  * @Description  : Created by sunzhifeng, Please coding something here
  */
@@ -466,7 +466,7 @@ const props = {
    * @type: {Function}
    * @default: () => {}
    */
-  computeAndUpdateLayoutHook: {
+  initDefaultLayoutHook: {
     type: Function,
     default: () => {},
     validator: (val: any) => {

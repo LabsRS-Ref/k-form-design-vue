@@ -53,7 +53,7 @@
           <a-input-number style="width: 100%" v-model="options.maxRows" placeholder="最大高度" />
         </a-form-item>
         <a-form-item v-if="typeof options.width !== 'undefined'" label="宽度">
-          <a-input placeholder="请输入" v-model="options.width" />
+          <a-input-number placeholder="请输入" v-model="options.width" />
         </a-form-item>
         <a-form-item v-if="typeof options.height !== 'undefined'" label="高度">
           <a-input-number v-model="options.height" />

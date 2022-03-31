@@ -2,7 +2,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-03-01 10:24:28
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-29 16:40:10
+ * @LastEditTime : 2022-03-30 19:29:23
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/util.ts
  * @Description  : Created by sunzhifeng, Please coding something here
  */
@@ -25,7 +25,7 @@ export function getBoundingClientRect(el: HTMLElement): DOMRect {
   if (el && isFunction(el.getBoundingClientRect)) {
     return el.getBoundingClientRect();
   }
-  return new DOMRect();
+  return DOMRect.fromRect();
 }
 
 export type TNodeOrVueInstance = Node | Vue | VNode | null;

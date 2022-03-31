@@ -3,7 +3,7 @@
  * @Date         : 2022-03-18 15:50:49
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layoutItems/layout/free.vue
- * @LastEditTime : 2022-03-28 15:18:23
+ * @LastEditTime : 2022-03-30 21:42:39
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 
@@ -22,7 +22,7 @@
       @start="$emit('dragStart', $event, record.list)"
       @add="$emit('handleColAdd', $event, record.list)"
     >
-      <transition-group tag="div" name="list" class="list-main" :style="{ height: `${record.options.height}px` }">
+      <transition-group tag="div" name="list" class="list-main" :style="transitionGroupStyle">
         <div v-for="item in record.list" :key="item.key" @click.stop="void 0" :class="{ 'drag-move': false }">
           <component
             :key="item.key"
@@ -63,6 +63,14 @@ import base from "./base";
 export default {
   name: "FreeLayoutItem",
   extends: base,
+  computed: {
+    transitionGroupStyle() {
+      return {
+        width: `${this.record.options.width}px`,
+        height: `${this.record.options.height}px`,
+      };
+    },
+  },
   methods: {
     isLayoutItem(type) {
       return Object.keys(this.registeredLayoutTypeMap).includes(type);
