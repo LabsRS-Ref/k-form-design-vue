@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-04-01 10:37:35
+ * @LastEditTime : 2022-04-01 14:00:44
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/Cell-debug.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -829,26 +829,44 @@ export default {
           useBest([calcHeight, childNodeMaxHeight])
         );
 
+      const context = {
+        runtime: {
+          finalWidth,
+          finalHeight,
+          calcWidth,
+          calcHeight,
+          childNodeMaxWidth,
+          childNodeMaxHeight,
+          offsetWidth,
+          offsetHeight,
+          scrollWidth,
+          scrollHeight,
+          rect,
+          ele,
+        },
+        params: {
+          consultWidth,
+          consultHeight,
+          recursiveCalcChildrenNodes,
+        },
+      };
       // TODO: 补充针对maxWidth，maxHeight的处理
-      debug("getCellBestWrapperSize::end", `${this._uid}`, {
-        finalWidth,
-        finalHeight,
-        calcWidth,
-        calcHeight,
-        childNodeMaxWidth,
-        childNodeMaxHeight,
-        offsetWidth,
-        offsetHeight,
-        scrollWidth,
-        scrollHeight,
-        rect,
-        ele,
-      });
+      debug("getCellBestWrapperSize::end", `${this._uid}`, context);
 
-      return {
+      // 声明最佳的矩形
+      const bestRect = {
         width: finalWidth,
         height: finalHeight,
       };
+
+      // 调用hook，可以附加操作，允许组件使用者，自己控制最佳的矩形
+      tryRunHooks(
+        this.coreHooks?.getCellBestWrapperSize,
+        [this, bestRect],
+        context
+      );
+
+      return bestRect;
     },
     /**
      * 获得HTML元素的计算样式
@@ -918,7 +936,17 @@ export default {
         }
         return false;
       });
-      return nestingCell;
+
+      const ref = {
+        nestingCell,
+      };
+
+      // 调用hook，可以附加操作，允许组件使用者，自己控制
+      tryRunHooks(this.coreHooks?.getANestedLevel0ChildCell, [this, ref], {
+        node,
+      });
+
+      return ref.nestingCell;
     },
     /**
      * 判断点是否在元素内
@@ -1334,6 +1362,14 @@ export default {
       // 重新更新Cell的位置及尺寸
       this.changePosition(left, top);
       this.changeSize(width, height);
+
+      // 调用hook，可以附加操作，允许组件使用者，自己控制
+      tryRunHooks(this.coreHooks?.updateChildLayout, [this], {
+        left,
+        top,
+        width,
+        height,
+      });
     },
     /** 变更位置 */
     changePosition(left = 0, top = 0) {
@@ -1568,13 +1604,21 @@ export default {
       const mouseX = e.touches ? e.touches[0].pageX : e.pageX;
       const mouseY = e.touches ? e.touches[0].pageY : e.pageY;
 
+      let allow = true;
+
       // check the mouse is in the cell child node
-      if (this.hasChildrenCellContainsPoint({ x: mouseX, y: mouseY }))
-        return false;
+      if (this.hasChildrenCellContainsPoint({ x: mouseX, y: mouseY })) {
+        allow = false;
+      }
 
-      this.sentEvent(DEF.internalEvent.cellDragStart, this, e);
+      // 调用外部函数检查是否允许拖拽
+      if (isFunction(this?.checkEnableDragStart)) {
+        allow = this.checkEnableDragStart(this, e);
+      }
 
-      return true;
+      this.sentEvent(DEF.internalEvent.cellDragStart, this, e, allow);
+
+      return allow;
     },
     /**
      * 是否允许拖拽继续

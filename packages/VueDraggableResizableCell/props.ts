@@ -2,7 +2,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-28 10:26:57
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-31 15:59:13
+ * @LastEditTime : 2022-04-01 14:02:05
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/props.ts
  * @Description  : Created by sunzhifeng, Please coding something here
  */
@@ -330,31 +330,44 @@ const props = {
     },
   },
   /**
-   * @description: 判断是否可用继续Resize
+   * @description: 判断是否可以触发拖拽开始, 交由外部使用者自行判断.
+   * @note: 如果返回false, 则不会触发拖拽开始. 这个函数会直接破坏掉内部计算过程
+   * @type: {Function}
+   * @default: () => true
+   */
+  checkEnableDragStart: {
+    type: [Function, null],
+    default: null,
+    validator: (val: any) => {
+      return isFunction(val) || val === null;
+    },
+  },
+  /**
+   * @description: 判断是否可用继续Resize, 交由外部使用者自行判断
    * @type: {Function}
    * @default: () => true
    */
   checkEnableContinueResize: {
-    type: Function,
+    type: [Function, null],
     default:
       (handle: any, left: number, top: number, width: number, height: number) =>
       () =>
         true,
     validator: (val: any) => {
-      return isFunction(val);
+      return isFunction(val) || val === null;
     },
   },
   /**
-   * @description: 判断是否可用继续拖拽
+   * @description: 判断是否可用继续拖拽, 交由外部使用者自行判断
    * @type: {Function}
    * @default: () => true
    */
   checkEnableContinueDrag: {
-    type: Function,
+    type: [Function, null],
     default: (left: number, top: number, width: number, height: number) => () =>
       true,
     validator: (val: any) => {
-      return isFunction(val);
+      return isFunction(val) || val === null;
     },
   },
   /**
@@ -469,7 +482,7 @@ const props = {
     },
   },
   /**
-   * @description: 计算及更新布局的钩子函数，用于主逻辑处理完后，再调用
+   * @description: 初始化布局的钩子函数，用于主逻辑处理完后，再调用
    * @type: {Function}
    * @default: () => {}
    */
@@ -478,6 +491,19 @@ const props = {
     default: () => {},
     validator: (val: any) => {
       return isFunction(val);
+    },
+  },
+  /**
+   * @description: 组件核心内部方法的一些Hooks操作
+   * @example:
+   */
+  coreHooks: {
+    type: Object,
+    default: () => ({}),
+    validator: (val: any) => {
+      return Object.keys(val).every(
+        (key) => isFunction(val[key]) || Array.isArray(val[key])
+      );
     },
   },
   /**

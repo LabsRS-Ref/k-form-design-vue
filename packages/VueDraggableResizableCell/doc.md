@@ -2,8 +2,8 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-03-08 17:03:50
  * @Description  : Created by sunzhifeng, Please coding something here
- * @FilePath     : \__nuxt2.15.2_del\components\Cell\doc.md
- * @LastEditTime : 2022-03-16 14:54:46
+ * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/doc.md
+ * @LastEditTime : 2022-04-01 14:57:54
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 
@@ -31,7 +31,9 @@
 * [X] 嵌套Cell组件的resize，支持是否可以对嵌套Cell组件进行resize
 * [X] 嵌套Cell组件的resize，支持选择resize的方式，如按步进模式，按比例模式
 * [X] 支持字体大小的resize策略设置，默认是auto，选项包括：ratio，fit，auto
-* [ ] TODO: 嵌套Cell组件的resize，支持过滤掉不需要resize的子节点
+* [X] 嵌套Cell组件的resize，支持过滤掉不需要resize的子节点
+* [X] 支持自动监听Cell所有子孙节点的变化，并自动更新
+* [X] 支持提供更多的Hooks处理，交由组件使用者自行定制
 
 
 ## Issues

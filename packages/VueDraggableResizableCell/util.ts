@@ -2,7 +2,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-03-01 10:24:28
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-04-01 10:08:25
+ * @LastEditTime : 2022-04-01 11:57:34
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/util.ts
  * @Description  : Created by sunzhifeng, Please coding something here
  */
@@ -43,7 +43,7 @@ export function tryRunHooks(
     ignoreReturn: false,
   }
 ): boolean {
-  const cloneHooks = Array.from(hooks);
+  const cloneHooks = Array.from(hooks || []);
 
   if (cloneHooks.length === 0) {
     return true;
