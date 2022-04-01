@@ -1,24 +1,14 @@
-<!--
- * @Author       : sunzhifeng <ian.sun@auodigitech.com>
- * @Date         : 2022-03-23 10:20:44
- * @Description  : Created by sunzhifeng, Please coding something here
- * @FilePath     : /k-form-design-vue/packages/KFormItem/vdrItem.vue
- * @LastEditTime : 2022-03-29 13:39:01
- * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
--->
 <template>
-  <Fragment>
-    <component :is="wrapper" v-bind="wrapperProps" v-on="wrapperListeners">
-      <kFormItem v-bind="props" v-on="$listeners" />
-    </component>
-  </Fragment>
+  <component :is="wrapper" v-bind="wrapperProps" v-on="wrapperListeners">
+    <slot v-bind="$props" v-on="{ ...$listeners }"></slot>
+  </component>
 </template>
 <script>
 import { Fragment } from "vue-fragment";
 import VDRCell from "../VueDraggableResizableCell/index";
-import kFormItem from "./index";
 
 export default {
+  name: "vdrWrapper",
   computed: {
     /** 不指定组件默认的props，全部来自 $attrs 作为props内容 */
     props() {
@@ -78,7 +68,6 @@ export default {
   components: {
     VDRCell,
     Fragment,
-    kFormItem,
   },
   methods: {
     updateVDRCellOptions(options = {}) {

@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-04-01 14:00:44
+ * @LastEditTime : 2022-04-01 16:17:38
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/Cell-debug.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -340,7 +340,9 @@ export default {
         }
 
         // 安装观察服务
-        this.installObserveService();
+        if (this.resizable) {
+          this.installObserveService();
+        }
 
         // 发送挂载事件
         this.sentEvent(DEF.internalEvent.mounted, this);

@@ -1,118 +1,5 @@
 <template>
-  <!-- 标签页布局 -->
-  <a-tabs
-    v-if="record.type === 'tabs'"
-    class="grid-row"
-    :default-active-key="0"
-    :tabBarGutter="record.options.tabBarGutter"
-    :type="record.options.type"
-    :size="record.options.size"
-    :tabPosition="record.options.tabPosition"
-    :animated="record.options.animated"
-    v-model="activeKey"
-  >
-    <a-tab-pane v-for="(tabItem, index) in record.columns" :key="index" :tab="tabItem.label" :forceRender="true">
-      <buildBlocks
-        ref="nestedComponents"
-        @handleReset="$emit('handleReset')"
-        @change="handleChange"
-        v-for="item in tabItem.list"
-        :disabled="disabled"
-        :dynamicData="dynamicData"
-        :key="item.key"
-        :record="item"
-        :formConfig="formConfig"
-        :config="config"
-      />
-    </a-tab-pane>
-  </a-tabs>
-  <!-- 栅格布局 -->
-  <a-row v-else-if="record.type === 'grid'" class="grid-row" :gutter="record.options.gutter">
-    <a-col class="grid-col" v-for="(colItem, idnex) in record.columns" :key="idnex" :span="colItem.span || 0">
-      <buildBlocks
-        ref="nestedComponents"
-        @handleReset="$emit('handleReset')"
-        @change="handleChange"
-        v-for="item in colItem.list"
-        :disabled="disabled"
-        :dynamicData="dynamicData"
-        :key="item.key"
-        :record="item"
-        :formConfig="formConfig"
-        :config="config"
-      />
-    </a-col>
-  </a-row>
-  <!-- 卡片布局 -->
-  <a-card v-else-if="record.type === 'card'" class="grid-row" :title="record.label">
-    <buildBlocks
-      ref="nestedComponents"
-      @handleReset="$emit('handleReset')"
-      @change="handleChange"
-      v-for="item in record.list"
-      :disabled="disabled"
-      :dynamicData="dynamicData"
-      :key="item.key"
-      :record="item"
-      :formConfig="formConfig"
-      :config="config"
-    />
-  </a-card>
-  <!-- 表格布局 -->
-  <table
-    v-else-if="record.type === 'table'"
-    class="kk-table-9136076486841527"
-    :class="{
-      bright: record.options.bright,
-      small: record.options.small,
-      bordered: record.options.bordered,
-    }"
-    :style="record.options.customStyle"
-  >
-    <tr v-for="(trItem, trIndex) in record.trs" :key="trIndex">
-      <td
-        class="table-td"
-        v-for="(tdItem, tdIndex) in trItem.tds.filter((item) => item.colspan && item.rowspan)"
-        :key="tdIndex"
-        :colspan="tdItem.colspan"
-        :rowspan="tdItem.rowspan"
-      >
-        <buildBlocks
-          ref="nestedComponents"
-          @handleReset="$emit('handleReset')"
-          @change="handleChange"
-          v-for="item in tdItem.list"
-          :disabled="disabled"
-          :dynamicData="dynamicData"
-          :key="item.key"
-          :record="item"
-          :formConfig="formConfig"
-          :config="config"
-        />
-      </td>
-    </tr>
-  </table>
-
-  <!-- 自由布局 -->
-  <div v-else-if="record.type === 'free-layout'" class="grid-row" :style="record.options.customStyle">
-    <buildBlocks
-      ref="nestedComponents"
-      @handleReset="$emit('handleReset')"
-      @change="handleChange"
-      v-for="item in record.list"
-      :disabled="disabled"
-      :dynamicData="dynamicData"
-      :key="item.key"
-      :record="item"
-      :formConfig="formConfig"
-      :config="config"
-    />
-  </div>
-
-  <!-- Node -->
-  <VDRFormItem
-    v-else-if="!record.options.hidden"
-    ref="nestedComponents"
+  <vdr-wrapper
     @handleReset="$emit('handleReset')"
     @change="handleChange"
     :disabled="disabled"
@@ -121,7 +8,155 @@
     :record="record"
     :formConfig="formConfig"
     :config="config"
-  />
+  >
+    <!-- 标签页布局 -->
+    <a-tabs
+      v-if="record.type === 'tabs'"
+      class="grid-row"
+      :default-active-key="0"
+      :tabBarGutter="record.options.tabBarGutter"
+      :type="record.options.type"
+      :size="record.options.size"
+      :tabPosition="record.options.tabPosition"
+      :animated="record.options.animated"
+      v-model="activeKey"
+    >
+      <a-tab-pane
+        v-for="(tabItem, index) in record.columns"
+        :key="index"
+        :tab="tabItem.label"
+        :forceRender="true"
+      >
+        <buildBlocks
+          ref="nestedComponents"
+          @handleReset="$emit('handleReset')"
+          @change="handleChange"
+          v-for="item in tabItem.list"
+          :disabled="disabled"
+          :dynamicData="dynamicData"
+          :key="item.key"
+          :record="item"
+          :formConfig="formConfig"
+          :config="config"
+        />
+      </a-tab-pane>
+    </a-tabs>
+    <!-- 栅格布局 -->
+    <a-row
+      v-else-if="record.type === 'grid'"
+      class="grid-row"
+      :gutter="record.options.gutter"
+    >
+      <a-col
+        class="grid-col"
+        v-for="(colItem, idnex) in record.columns"
+        :key="idnex"
+        :span="colItem.span || 0"
+      >
+        <buildBlocks
+          ref="nestedComponents"
+          @handleReset="$emit('handleReset')"
+          @change="handleChange"
+          v-for="item in colItem.list"
+          :disabled="disabled"
+          :dynamicData="dynamicData"
+          :key="item.key"
+          :record="item"
+          :formConfig="formConfig"
+          :config="config"
+        />
+      </a-col>
+    </a-row>
+    <!-- 卡片布局 -->
+    <a-card
+      v-else-if="record.type === 'card'"
+      class="grid-row"
+      :title="record.label"
+    >
+      <buildBlocks
+        ref="nestedComponents"
+        @handleReset="$emit('handleReset')"
+        @change="handleChange"
+        v-for="item in record.list"
+        :disabled="disabled"
+        :dynamicData="dynamicData"
+        :key="item.key"
+        :record="item"
+        :formConfig="formConfig"
+        :config="config"
+      />
+    </a-card>
+    <!-- 表格布局 -->
+    <table
+      v-else-if="record.type === 'table'"
+      class="kk-table-9136076486841527"
+      :class="{
+        bright: record.options.bright,
+        small: record.options.small,
+        bordered: record.options.bordered,
+      }"
+      :style="record.options.customStyle"
+    >
+      <tr v-for="(trItem, trIndex) in record.trs" :key="trIndex">
+        <td
+          class="table-td"
+          v-for="(tdItem, tdIndex) in trItem.tds.filter(
+            (item) => item.colspan && item.rowspan
+          )"
+          :key="tdIndex"
+          :colspan="tdItem.colspan"
+          :rowspan="tdItem.rowspan"
+        >
+          <buildBlocks
+            ref="nestedComponents"
+            @handleReset="$emit('handleReset')"
+            @change="handleChange"
+            v-for="item in tdItem.list"
+            :disabled="disabled"
+            :dynamicData="dynamicData"
+            :key="item.key"
+            :record="item"
+            :formConfig="formConfig"
+            :config="config"
+          />
+        </td>
+      </tr>
+    </table>
+
+    <!-- 自由布局 -->
+    <div
+      v-else-if="record.type === 'free-layout'"
+      class="grid-row"
+      :style="record.options.customStyle"
+    >
+      <buildBlocks
+        ref="nestedComponents"
+        @handleReset="$emit('handleReset')"
+        @change="handleChange"
+        v-for="item in record.list"
+        :disabled="disabled"
+        :dynamicData="dynamicData"
+        :key="item.key"
+        :record="item"
+        :formConfig="formConfig"
+        :config="config"
+      />
+    </div>
+
+    <!-- Node -->
+    <KFormItem
+      v-else-if="!record.options.hidden"
+      ref="nestedComponents"
+      @handleReset="$emit('handleReset')"
+      @change="handleChange"
+      :disabled="disabled"
+      :dynamicData="dynamicData"
+      :key="record.key"
+      :record="record"
+      :formConfig="formConfig"
+      :config="config"
+    />
+  </vdr-wrapper>
 </template>
 <script>
 /*
@@ -129,7 +164,7 @@
  * date 2019-11-20
  */
 import KFormItem from "../KFormItem/index";
-import VDRFormItem from "../KFormItem/vdrItem";
+import vdrWrapper from "./vdrWrapper";
 
 export default {
   name: "buildBlocks",
@@ -161,7 +196,7 @@ export default {
   },
   components: {
     KFormItem,
-    VDRFormItem,
+    vdrWrapper,
   },
   data() {
     return {
@@ -172,7 +207,10 @@ export default {
     validationSubform() {
       // 验证动态表格
       const { nestedComponents } = this.$refs;
-      if (typeof nestedComponents === "object" && nestedComponents instanceof Array) {
+      if (
+        typeof nestedComponents === "object" &&
+        nestedComponents instanceof Array
+      ) {
         for (let i = 0; nestedComponents.length > i; i++) {
           if (!nestedComponents[i].validationSubform()) {
             return false;
@@ -201,7 +239,9 @@ export default {
         if (errorItems.length) {
           if (!this.record.columns) return false;
           for (let i = 0; i < this.record.columns.length; i++) {
-            const err = this.record.columns[i].list.filter((item) => errorItems.includes(item.model));
+            const err = this.record.columns[i].list.filter((item) =>
+              errorItems.includes(item.model)
+            );
             if (err.length) {
               this.activeKey = i;
               break;
