@@ -4,11 +4,11 @@
  * @Date         : 2022-03-18 11:42:28
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/.eslintrc.js
- * @LastEditTime : 2022-03-20 14:57:36
+ * @LastEditTime : 2022-04-01 10:40:10
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  */
 
-const def = (enable = 1, currentValue, restValue) => {
+const def = (enable, currentValue, restValue) => {
   const defaultValueMap = {
     Object: {},
     Array: [],
@@ -34,14 +34,14 @@ module.exports = {
   },
   extends: [
     /* 引入 eslint-config-airbnb-base 规则 */
+    /* 引入 eslint-config-airbnb-base 规则 */
     "airbnb-base",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:@typescript-eslint/eslint-recommended",
     "prettier",
     "plugin:prettier/recommended",
-    "prettier/vue",
     "plugin:vue/essential",
-    "@vue/prettier",
+    // "plugin:vue/vue3-essential", // 仅使用Vue3的规则
+    "@vue/eslint-config-prettier",
+    "@vue/eslint-config-typescript",
   ],
   plugins: ["prettier"],
   // add your custom rules here
@@ -104,7 +104,7 @@ module.exports = {
           // 换行符使用 lf
           endOfLine: "lf",
           // 设置最大的宽度
-          printWidth: 120,
+          printWidth: 80,
         },
         {
           usePrettierrc: false,

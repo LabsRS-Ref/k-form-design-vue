@@ -1,9 +1,10 @@
+/* eslint-disable no-use-before-define */
 /*
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-03-21 15:01:39
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/types.ts
- * @LastEditTime : 2022-03-31 08:57:00
+ * @LastEditTime : 2022-04-01 10:05:32
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  */
 
@@ -16,52 +17,50 @@ export interface IProps {
 }
 
 export interface IState {
-  left: number,
-  top: number,
-  right: number | null,
-  bottom: number | null,
-  width: "auto" | number,
-  height: "auto" | number,
-  zIndex: "auto" | number,
+  left: number;
+  top: number;
+  right: number | null;
+  bottom: number | null;
+  width: "auto" | number;
+  height: "auto" | number;
+  zIndex: "auto" | number;
 
   cell: {
-    parent: null | IVDRInstance,
-    children: IVDRInstance[],
+    parent: null | IVDRInstance;
+    children: IVDRInstance[];
     cache: {
-      [key: string]: any,
-    },
-    aspectRatioInitialized: boolean,
+      [key: string]: any;
+    };
+    aspectRatioInitialized: boolean;
     resizeSteps: {
-      [key: string]: IResizeStepOptions,
-    },
+      [key: string]: IResizeStepOptions;
+    };
     effects: {
       resize: {
-        [key: string]: IResizeEffectOptions,
-      },
-    },
-  },
+        [key: string]: IResizeEffectOptions;
+      };
+    };
+  };
 
-  isActive: boolean,
-  isResizing: boolean
-  isDragging: boolean,
+  isActive: boolean;
+  isResizing: boolean;
+  isDragging: boolean;
 
   tempData: {
-    lastResizeInfo: null | string,
-    lastDraggingInfo: null | string,
-  },
+    lastResizeInfo: null | string;
+    lastDraggingInfo: null | string;
+  };
   history: {
-    undo: any[],
-    redo: any[],
-  },
+    undo: any[];
+    redo: any[];
+  };
 
   // 元素resize观察者
-  ro: null | MutationObserver,
-  roObserveEleList: HTMLElement[],
+  ro: null | MutationObserver;
+  roObserveEleList: HTMLElement[];
 }
 
-export interface IVDRInstance extends Vue, IState, IProps {
-
-}
+export interface IVDRInstance extends Vue, IState, IProps {}
 
 export interface IVDRCell extends Vue {
   [key: string]: any;
@@ -83,6 +82,6 @@ export interface IResizeStepOptions {
   h?: number;
   onHooks?: any[];
   parent?: IVDRCell;
-};
+}
 
 export interface IResizeEffectOptions {}

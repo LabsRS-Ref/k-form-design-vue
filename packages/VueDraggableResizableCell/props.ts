@@ -117,33 +117,33 @@ const props = {
    */
   axis: {
     type: String,
-    default: 'both',
-    validator: (val: string) => ['x', 'y', 'both'].includes(val),
+    default: "both",
+    validator: (val: string) => ["x", "y", "both"].includes(val),
   },
   /**
-    * @description: 对齐网格尺寸
-    * @type: {Array}
-    * @default: [1, 1]
-    */
+   * @description: 对齐网格尺寸
+   * @type: {Array}
+   * @default: [1, 1]
+   */
   grid: {
     type: Array,
     default: () => [1, 1],
   },
   /**
    * @description: 比例
-    * @type: {Number}
-    * @default: 1
-    */
+   * @type: {Number}
+   * @default: 1
+   */
   scale: {
     type: [Number, Array],
     default: 1,
-    validator: (val: number | number []) => {
-      if (typeof val === 'number') {
-        return val > 0
+    validator: (val: number | number[]) => {
+      if (typeof val === "number") {
+        return val > 0;
       }
 
-      return val.length === 2 && val[0] > 0 && val[1] > 0
-    }
+      return val.length === 2 && val[0] > 0 && val[1] > 0;
+    },
   },
   /**
    * @description: 设置Cell最小宽度
@@ -192,7 +192,7 @@ const props = {
    */
   active: {
     type: Boolean,
-    default: false
+    default: false,
   },
   /**
    * @description: 是否阻止被释放
@@ -201,22 +201,22 @@ const props = {
    */
   preventDeactivation: {
     type: Boolean,
-    default: false
+    default: false,
   },
   /**
-    * @description: 禁用用户选择
-    * @type: {Boolean}
-    * @default: true
-    */
+   * @description: 禁用用户选择
+   * @type: {Boolean}
+   * @default: true
+   */
   disableUserSelect: {
     type: Boolean,
     default: true,
   },
   /**
-    * @description: 原生拖拽是否可用
-    * @type: {Boolean}
-    * @default: false
-    */
+   * @description: 原生拖拽是否可用
+   * @type: {Boolean}
+   * @default: false
+   */
   enableNativeDrag: {
     type: Boolean,
     default: false,
@@ -336,7 +336,10 @@ const props = {
    */
   checkEnableContinueResize: {
     type: Function,
-    default: (handle: any, left: number, top: number, width: number, height: number) => () => true,
+    default:
+      (handle: any, left: number, top: number, width: number, height: number) =>
+      () =>
+        true,
     validator: (val: any) => {
       return isFunction(val);
     },
@@ -348,7 +351,8 @@ const props = {
    */
   checkEnableContinueDrag: {
     type: Function,
-    default: (left: number, top: number, width: number, height: number) => () => true,
+    default: (left: number, top: number, width: number, height: number) => () =>
+      true,
     validator: (val: any) => {
       return isFunction(val);
     },
@@ -456,9 +460,12 @@ const props = {
         return true;
       }
 
-      return Array.isArray(val) && val.every((item) => {
-        return typeof item === "string" || isFunction(item);
-      });
+      return (
+        Array.isArray(val) &&
+        val.every((item) => {
+          return typeof item === "string" || isFunction(item);
+        })
+      );
     },
   },
   /**
@@ -482,8 +489,7 @@ const props = {
     validator: (val: { [x: string]: any }) => {
       return Object.keys(val).every((key) => {
         return (
-          (Array.isArray(val[key]) ||
-          isFunction(val[key])) &&
+          (Array.isArray(val[key]) || isFunction(val[key])) &&
           ["before", "on", "after"].includes(key)
           // (key.startsWith("after") || key.startsWith("before"))
         );

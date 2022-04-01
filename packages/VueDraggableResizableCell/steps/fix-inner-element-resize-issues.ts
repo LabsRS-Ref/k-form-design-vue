@@ -3,12 +3,12 @@
  * @Date         : 2022-03-21 13:47:29
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/steps/fix-inner-element-resize-issues.ts
- * @LastEditTime : 2022-03-29 09:56:51
+ * @LastEditTime : 2022-04-01 10:32:36
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  */
 
 // types
-import { IVDRCell,  IResizeStepOptions } from "../types"
+import { IVDRCell, IResizeStepOptions } from "../types";
 
 import {
   debug,
@@ -29,7 +29,7 @@ type TChangeFontSizeOptions = {
   nodeValue: string | null;
   w: number;
   h: number;
-}
+};
 
 /** 通用改变字体大小的算法 */
 function changeFontSize(options: TChangeFontSizeOptions) {
@@ -37,11 +37,10 @@ function changeFontSize(options: TChangeFontSizeOptions) {
   // 计算合适的字体大小
   const {
     // 使用初始化值，这样能保证整体字体大小符合常规模式
-    initial: {
-      fontSize: initialFontSize,
-    },
+    initial: { fontSize: initialFontSize },
   } = nodeInfo;
-  const { width: wrapperInitialWidth = 1, height: wrapperInitialHeight = 1 } = vdrCell.getWrapperInitialData();
+  const { width: wrapperInitialWidth = 1, height: wrapperInitialHeight = 1 } =
+    vdrCell.getWrapperInitialData();
 
   // 计算(勿要超过容器高度)
   const fitFontSize = fitTextToBox.px(
@@ -52,7 +51,9 @@ function changeFontSize(options: TChangeFontSizeOptions) {
     node.clientHeight,
     vdrCell.getHTMLElementComputedStyle(node, "font-family")
   );
-  const ratioFontSize = Math.min(w / wrapperInitialWidth, h / wrapperInitialHeight) * initialFontSize;
+  const ratioFontSize =
+    Math.min(w / wrapperInitialWidth, h / wrapperInitialHeight) *
+    initialFontSize;
 
   const strategy = vdrCell.resizeFontStrategy;
   const [_, fontSize] = [
@@ -83,7 +84,19 @@ function changeFontSize(options: TChangeFontSizeOptions) {
 
 export default {
   install: (vdrCell: IVDRCell, options: IResizeStepOptions = {}) => {
-    const { leftOffset = 0, topOffset = 0, widthOffset = 0, heightOffset = 0, widthChangeRatio = 1, heightChangeRatio = 1, changeRatio = 1, w = 0, h = 0, onHooks = [], parent = null } = options;
+    const {
+      leftOffset = 0,
+      topOffset = 0,
+      widthOffset = 0,
+      heightOffset = 0,
+      widthChangeRatio = 1,
+      heightChangeRatio = 1,
+      changeRatio = 1,
+      w = 0,
+      h = 0,
+      onHooks = [],
+      parent = null,
+    } = options;
     const ele = vdrCell.getCellElement();
     const {
       left: wrapperInitialLeft,
@@ -93,11 +106,15 @@ export default {
       boundingClientRect: wrapperInitialClientRect,
     } = vdrCell.getWrapperInitialData();
 
-
     // 注册resize步骤
     vdrCell.registerResizeStep(stepName, () => {
       // 方便函数
-      const _getNodeInfo = (key: string, context = {}, instance: IVDRCell = vdrCell) => {
+      const _getNodeInfo = (
+        key: string | undefined,
+        context = {},
+        instance: IVDRCell = vdrCell
+      ) => {
+        if (!key) return null;
         const nodeInfo = instance.getCellChildNodeInitInfoByKey(key);
         checkAssert(nodeInfo, "nodeInfo is not available", {
           context,
@@ -106,12 +123,16 @@ export default {
         debug("_getNodeInfo", `${instance._uid}`, { nodeInfo });
         return nodeInfo;
       };
-  
+
       // 遍历内部元素
       // @ts-ignore
       forEachNode(ele, (htmlNode: TNodeOrVueInstance) => {
         const node = htmlNode as HTMLElement;
-        debug(`${stepName} ::begin`, `${vdrCell._uid} - {nodeName=${node?.nodeName}}`, node);
+        debug(
+          `${stepName} ::begin`,
+          `${vdrCell._uid} - {nodeName=${node?.nodeName}}`,
+          node
+        );
         // 检测是否为嵌套子Cell中的元素，
         // 如果是，根据处理策略是交由嵌套子Cell处理，还是直接不处理
         const nestingCell = vdrCell.getANestedLevel0ChildCell(node);
@@ -120,7 +141,7 @@ export default {
           if (vdrCell.enableResizeNestingCell) {
             // T计算偏移，left, top 应该放到合适位置
             const { left, top } = nestingCell;
-  
+
             // 计算尺寸
             const strategy = vdrCell.nestingCellResizeStrategy;
             const widths = [
@@ -144,29 +165,37 @@ export default {
               [strategy === "resize-h-ratio", widths[1], heights[2]],
             ].filter(([m]) => m)[0];
 
-
             // 根据宽度和高度重新设位置及尺寸
             nestingCell.onResizingEvent(left, top, width, height, parent);
             // 注册自身子Cell的resize副作用事件
-            vdrCell.registerResizeEffect(`nesting-cell-resize-effect-${nestingCell._uid}-${vdrCell._uid}`, () => {
-              debug(`nesting-cell-resize-effect call`, `${nestingCell._uid}-${vdrCell._uid}`, {
-                left,
-                top,
-                width,
-                height,
-                widthChangeRatio,
-                heightChangeRatio,
-              });
-              // 计算新的left， top，width，height
-              nestingCell.onResizeStopEvent(left, top, width, height);
-            });
+            vdrCell.registerResizeEffect(
+              `nesting-cell-resize-effect-${nestingCell._uid}-${vdrCell._uid}`,
+              () => {
+                debug(
+                  `nesting-cell-resize-effect call`,
+                  `${nestingCell._uid}-${vdrCell._uid}`,
+                  {
+                    left,
+                    top,
+                    width,
+                    height,
+                    widthChangeRatio,
+                    heightChangeRatio,
+                  }
+                );
+                // 计算新的left， top，width，height
+                nestingCell.onResizeStopEvent(left, top, width, height);
+              }
+            );
           }
           return;
         }
 
         // 执行过程中，可以hook一些逻辑
         // @ts-ignore
-        const canContinue = onHooks.some((hook) => hook(vdrCell, node, options));
+        const canContinue = onHooks.some((hook) =>
+          hook(vdrCell, node, options)
+        );
         if (!canContinue) {
           // return;
         }
@@ -177,14 +206,32 @@ export default {
           const key = node[(parent ?? vdrCell).privateMarkPropertyName];
           const nodeInfo = _getNodeInfo(key, { node, key }, parent ?? vdrCell);
           if (nodeInfo) {
-            const { left: initialLeft, top: initialTop, width: initialWidth, height: initialHeight } = nodeInfo.boundingClientRect;
+            const {
+              left: initialLeft,
+              top: initialTop,
+              width: initialWidth,
+              height: initialHeight,
+            } = nodeInfo.boundingClientRect;
 
-            const { left: wrapperBoundClientLeft, top: wrapperBoundClientTop } = wrapperInitialClientRect;
-            const { borderLeftWidth, borderTopWidth, borderRightWidth, borderBottomWidth } = vdrCell.getWrapperBorder();
+            const { left: wrapperBoundClientLeft, top: wrapperBoundClientTop } =
+              wrapperInitialClientRect;
+            const {
+              borderLeftWidth,
+              borderTopWidth,
+              borderRightWidth,
+              borderBottomWidth,
+            } = vdrCell.getWrapperBorder();
 
             // TODO：位置偏移计算
-            const newLeft = Math.floor(initialLeft - wrapperBoundClientLeft + leftOffset - borderLeftWidth);
-            const newTop = Math.floor(initialTop - wrapperBoundClientTop + topOffset - borderTopWidth);
+            const newLeft = Math.floor(
+              initialLeft -
+                wrapperBoundClientLeft +
+                leftOffset -
+                borderLeftWidth
+            );
+            const newTop = Math.floor(
+              initialTop - wrapperBoundClientTop + topOffset - borderTopWidth
+            );
             const newWidth = Math.floor(widthOffset + initialWidth);
             const newHeight = Math.floor(heightOffset + initialHeight);
 
@@ -221,7 +268,7 @@ export default {
               newHeight,
               nodeInfo,
               node,
-            })
+            });
           }
         }
 
@@ -231,15 +278,20 @@ export default {
           const key = node[vdrCell.privateMarkPropertyName];
           const nodeInfo = _getNodeInfo(key, { node, key });
           if (!nodeInfo.isRootNode) {
-            const newZoom = changeRatio * parseFloat(nodeInfo?.style?.zoom ?? 1.0);
+            const newZoom =
+              changeRatio * parseFloat(nodeInfo?.style?.zoom ?? 1.0);
 
             // 判断不处理的条件
             const conditions = [
               [newZoom === 0].some((m) => !!m), // 任何为0的都不处理
-            ]
+            ];
 
             if (conditions.some((m) => !!m)) {
-              debug(`${stepName} ::${node?.nodeName}::skip`, `${vdrCell._uid}`, node);
+              debug(
+                `${stepName} ::${node?.nodeName}::skip`,
+                `${vdrCell._uid}`,
+                node
+              );
               return;
             }
 
@@ -264,17 +316,26 @@ export default {
             });
           }
         }
-  
+
         // 更新font-size
-        if (vdrCell.enableResizeFontSize && ["#text", "INPUT"].includes(node?.nodeName)) {
+        if (
+          vdrCell.enableResizeFontSize &&
+          ["#text", "INPUT"].includes(node?.nodeName)
+        ) {
+          const propertyName =
+            (parent ?? vdrCell)?.privateMarkPropertyName || "";
           switch (node?.nodeName) {
             case "#text":
               {
                 const { parentNode, nodeValue } = node;
                 // @ts-ignore
-                const key = parentNode[(parent ?? vdrCell).privateMarkPropertyName];
-                const nodeInfo = _getNodeInfo(key, { node, key, parentNode }, parent ?? vdrCell);
-    
+                const key = parentNode[propertyName];
+                const nodeInfo = _getNodeInfo(
+                  key,
+                  { node, key, parentNode },
+                  parent ?? vdrCell
+                );
+
                 changeFontSize({
                   nodeInfo,
                   nodeValue,
@@ -283,13 +344,17 @@ export default {
                   w,
                   h,
                 });
-              };
+              }
               break;
             case "INPUT":
               {
                 // @ts-ignore
-                const key = node[(parent ?? vdrCell).privateMarkPropertyName];
-                const nodeInfo = _getNodeInfo(key, { node, key }, parent ?? vdrCell);
+                const key = node[propertyName];
+                const nodeInfo = _getNodeInfo(
+                  key,
+                  { node, key },
+                  parent ?? vdrCell
+                );
 
                 changeFontSize({
                   nodeInfo,
@@ -299,7 +364,7 @@ export default {
                   w,
                   h,
                 });
-              };
+              }
               break;
 
             default:
@@ -307,12 +372,17 @@ export default {
           }
         }
 
-        debug(`${stepName} ::end`, `${vdrCell._uid} - {nodeName=${node?.nodeName}}`, node);
+        debug(
+          `${stepName} ::end`,
+          `${vdrCell._uid} - {nodeName=${node?.nodeName}}`,
+          node
+        );
 
+        // eslint-disable-next-line consistent-return
         return true;
       });
 
       return () => {};
     });
-  }
+  },
 };

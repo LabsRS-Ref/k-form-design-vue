@@ -3,12 +3,12 @@
  * @Date         : 2022-03-21 15:59:15
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/steps/fix-transition-resize-issues.ts
- * @LastEditTime : 2022-03-29 09:56:09
+ * @LastEditTime : 2022-04-01 10:34:05
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  */
 // types
 import Vue, { VNode } from "vue";
-import { IVDRCell,  IResizeStepOptions } from "../types"
+import { IVDRCell, IResizeStepOptions } from "../types";
 
 import {
   debug,
@@ -19,10 +19,19 @@ import {
   updateHTMLNodeStyle,
 } from "../util";
 
-
 export default {
   install: (vdrCell: IVDRCell, options: IResizeStepOptions = {}) => {
-    const { widthOffset = 0, heightOffset = 0, widthChangeRatio = 1, heightChangeRatio = 1, changeRatio = 1, w = 0, h = 0, onHooks = [], parent = null } = options;
+    const {
+      widthOffset = 0,
+      heightOffset = 0,
+      widthChangeRatio = 1,
+      heightChangeRatio = 1,
+      changeRatio = 1,
+      w = 0,
+      h = 0,
+      onHooks = [],
+      parent = null,
+    } = options;
     const ele = vdrCell.getCellElement();
     vdrCell.registerResizeStep(
       "fix-transition-issue",
@@ -31,7 +40,10 @@ export default {
         // 是否递归循环处理子节点
         const recursiveChildNodes = true;
         const rootHandle = () => {
-          if (typeof vdrCell.reserveCellTransition === "boolean" && !vdrCell.reserveCellTransition) {
+          if (
+            typeof vdrCell.reserveCellTransition === "boolean" &&
+            !vdrCell.reserveCellTransition
+          ) {
             // eslint-disable-next-line no-param-reassign
             element.style.transition = "none";
           } else if (typeof vdrCell.reserveCellTransition === "string") {
@@ -46,7 +58,8 @@ export default {
               element.style.transition = "";
             } else {
               // eslint-disable-next-line no-param-reassign
-              element.style.transition = vdrCell.getCellOriginalStyle().transition;
+              element.style.transition =
+                vdrCell.getCellOriginalStyle().transition;
             }
           };
         };
@@ -54,17 +67,20 @@ export default {
           forEachNode(ele, (htmlNode: TNodeOrVueInstance) => {
             const node = htmlNode as HTMLElement;
             let transition = "";
-            if (typeof vdrCell.reserveCellTransition === "boolean" && !vdrCell.reserveCellTransition) {
+            if (
+              typeof vdrCell.reserveCellTransition === "boolean" &&
+              !vdrCell.reserveCellTransition
+            ) {
               transition = "none";
             } else if (typeof vdrCell.reserveCellTransition === "string") {
               transition = vdrCell.reserveCellTransition;
             }
 
-            //@ts-ignore
+            // @ts-ignore
             const key = node[vdrCell.privateMarkPropertyName];
             const nodeInfo = vdrCell.getCellChildNodeInitInfoByKey(key);
 
-            //@ts-ignore
+            // @ts-ignore
             if (![undefined, null].includes(node.style?.transition)) {
               // eslint-disable-next-line no-param-reassign
               node.style.transition = transition;
@@ -76,11 +92,11 @@ export default {
           return () => {
             forEachNode(ele, (htmlNode: TNodeOrVueInstance) => {
               const node = htmlNode as HTMLElement;
-              //@ts-ignore
+              // @ts-ignore
               const key = node[vdrCell.privateMarkPropertyName];
               const nodeInfo = vdrCell.getCellChildNodeInitInfoByKey(key);
-              //@ts-ignore
-              if (![undefined, null].includes(node?.style?.transition) && nodeInfo) {
+              // @ts-ignore
+              if ((node?.style?.transition ?? false) && nodeInfo) {
                 // eslint-disable-next-line no-param-reassign
                 node.style.transition = nodeInfo?.style?.transition;
               }
@@ -94,5 +110,5 @@ export default {
       },
       { ele }
     );
-  }
+  },
 };

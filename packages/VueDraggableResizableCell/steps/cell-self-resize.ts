@@ -3,12 +3,12 @@
  * @Date         : 2022-03-21 20:08:50
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/steps/cell-self-resize.ts
- * @LastEditTime : 2022-03-24 21:28:42
+ * @LastEditTime : 2022-04-01 10:09:03
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  */
 // types
 import Vue, { VNode } from "vue";
-import { IVDRCell,  IResizeStepOptions } from "../types"
+import { IVDRCell, IResizeStepOptions } from "../types";
 
 import {
   debug,
@@ -19,12 +19,18 @@ import {
   updateHTMLNodeStyle,
 } from "../util";
 
-
 const stepName = "cell-self-resize";
 
 export default {
   install: (vdrCell: IVDRCell, options: IResizeStepOptions = {}) => {
-    const {leftOffset = 0, topOffset = 0,  widthOffset = 0, heightOffset = 0, onHooks = [], parent = null } = options;
+    const {
+      leftOffset = 0,
+      topOffset = 0,
+      widthOffset = 0,
+      heightOffset = 0,
+      onHooks = [],
+      parent = null,
+    } = options;
 
     const {
       left: wrapperInitialLeft,
@@ -38,9 +44,15 @@ export default {
       // 获得当前节点的初始化尺寸
       const nodeInfo = vdrCell.getCellRootNodeInitInfo();
       const rect = nodeInfo.boundingClientRect;
-      const { left: initialLeft, top: initialTop, width: initialWidth, height: initialHeight } = rect;
+      const {
+        left: initialLeft,
+        top: initialTop,
+        width: initialWidth,
+        height: initialHeight,
+      } = rect;
 
-      const { left: wrapperBoundClientLeft, top: wrapperBoundClientTop } = wrapperInitialClientRect;
+      const { left: wrapperBoundClientLeft, top: wrapperBoundClientTop } =
+        wrapperInitialClientRect;
       const { borderLeftWidth, borderTopWidth } = vdrCell.getWrapperBorder();
 
       debug(`${stepName} ::begin`, `${vdrCell._uid}`, {
@@ -50,8 +62,12 @@ export default {
         initialHeight,
       });
 
-      const newLeft = Math.floor(initialLeft - wrapperBoundClientLeft + leftOffset - borderLeftWidth);
-      const newTop = Math.floor(initialTop - wrapperBoundClientTop + topOffset - borderTopWidth);
+      const newLeft = Math.floor(
+        initialLeft - wrapperBoundClientLeft + leftOffset - borderLeftWidth
+      );
+      const newTop = Math.floor(
+        initialTop - wrapperBoundClientTop + topOffset - borderTopWidth
+      );
       const newWidth = Math.floor(widthOffset + initialWidth);
       const newHeight = Math.floor(heightOffset + initialHeight);
 
@@ -81,5 +97,5 @@ export default {
         newHeight,
       });
     });
-  }
+  },
 };

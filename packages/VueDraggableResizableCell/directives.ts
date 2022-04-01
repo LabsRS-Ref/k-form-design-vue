@@ -3,8 +3,8 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-03-03 11:01:33
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-15 20:43:04
- * @FilePath     : \__nuxt2.15.2_del\components\Cell\directives.ts
+ * @LastEditTime : 2022-04-01 10:04:06
+ * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/directives.ts
  * @Description  : Created by sunzhifeng, Please coding something here
  */
 
@@ -71,29 +71,27 @@ export const createLazyLoadDirective = (handler: LoadCallback = () => {}) => {
             const url = img.getAttribute("src") || "null";
             img.addEventListener("load", () => {
               const rect = getBoundingClientRect(img);
-              notice &&
-                noticeFnc(
-                  {
-                    load: true,
-                    type: "img",
-                    data: {
-                      consultWidth: rect.width,
-                      consultHeight: rect.height,
-                    },
+              noticeFnc(
+                {
+                  load: true,
+                  type: "img",
+                  data: {
+                    consultWidth: rect.width,
+                    consultHeight: rect.height,
                   },
-                  context
-                );
+                },
+                context
+              );
             });
             img.addEventListener("error", () => {
-              notice &&
-                noticeFnc(
-                  {
-                    load: false,
-                    type: "img",
-                    error: new Error("image load failed ..."),
-                  },
-                  context
-                );
+              noticeFnc(
+                {
+                  load: false,
+                  type: "img",
+                  error: new Error("image load failed ..."),
+                },
+                context
+              );
             });
             // eslint-disable-next-line no-param-reassign
             img.src = url;
@@ -114,18 +112,17 @@ export const createLazyLoadDirective = (handler: LoadCallback = () => {}) => {
               // _debug("video loadedmetadata", e);
               const videoElement = e.target as HTMLVideoElement;
               const { width, height } = getVideoControlDimensions(videoElement);
-              notice &&
-                noticeFnc(
-                  {
-                    load: true,
-                    type: "video",
-                    data: {
-                      consultWidth: width,
-                      consultHeight: height,
-                    },
+              noticeFnc(
+                {
+                  load: true,
+                  type: "video",
+                  data: {
+                    consultWidth: width,
+                    consultHeight: height,
                   },
-                  context
-                );
+                },
+                context
+              );
             });
           }
         };

@@ -2,7 +2,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-03-01 10:24:28
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-31 16:51:12
+ * @LastEditTime : 2022-04-01 10:08:25
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/util.ts
  * @Description  : Created by sunzhifeng, Please coding something here
  */
@@ -84,20 +84,22 @@ export type TForEachNodeCallback1 = (
 export type TForEachNodeCallback2 = (
   node: TNodeOrVueInstance,
   options: {
-    index?: number,
-    list?: TNodeOrVueInstance[] | NodeList,
-    level?: number,
-    parentNode?: TNodeOrVueInstance | null
+    index?: number;
+    list?: TNodeOrVueInstance[] | NodeList;
+    level?: number;
+    parentNode?: TNodeOrVueInstance | null;
   }
 ) => boolean;
 
-export type TForEachNodeCallback = TForEachNodeCallback1 | TForEachNodeCallback2;
+export type TForEachNodeCallback =
+  | TForEachNodeCallback1
+  | TForEachNodeCallback2;
 
 export type TForEachNodeOptions = {
-  deep?: boolean,
-  levels?: any[],
-  parent?: TNodeOrVueInstance,
-}
+  deep?: boolean;
+  levels?: any[];
+  parent?: TNodeOrVueInstance;
+};
 /**
  * 方便函数：循环处理每一个节点(Node, Vue实例)
  * @param {Node | Vue} 节点对象，可以是标准的HTML Node节点，也可以是Vue实例
@@ -112,7 +114,13 @@ export function forEachNode(
 ): void {
   let canContinue = true;
   if (isFunction(callback)) {
-    canContinue = callback(currentNode, 0, [currentNode], levels.length - 1, parent);
+    canContinue = callback(
+      currentNode,
+      0,
+      [currentNode],
+      levels.length - 1,
+      parent
+    );
   }
 
   // 无效节点或者不能继续循环
@@ -333,12 +341,12 @@ export function getVideoDimensions(videoElement: HTMLVideoElement): {
  */
 export function createIntersectionObserver(
   element: HTMLElement,
-  observerHandler: (...args: any[]) => void
+  observerHandler: (...args: any) => void
 ) {
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        observerHandler && observerHandler(element);
+        observerHandler(element);
         observer.unobserve(element);
       }
     });
@@ -522,7 +530,7 @@ export function assignNoNullValue(curValue = 0, newValue = 0) {
  * @param list
  * @param ele
  */
-export function splice(list: any[] = [], ele: any) {
+export function splice(list: any[] = [], ele: any = undefined) {
   if (Array.isArray(list)) {
     const index = list.indexOf(ele);
     if (index > -1) {
@@ -566,12 +574,17 @@ export function debug(group: string, ...args: any[]) {
  * @param styleKey
  * @param styleValue
  */
-export function updateVNodeStyle(vnode: VNode, styleKey: string, styleValue: string | number | boolean) {
+export function updateVNodeStyle(
+  vnode: VNode,
+  styleKey: string,
+  styleValue: string | number | boolean
+) {
   // @ts-ignore
-  const styleRef = (vnode?.data?.style || {});
+  const styleRef = vnode?.data?.style || {};
   if (typeof styleRef === "string") {
     if (vnode?.data?.style) {
       // @ts-ignore
+      // eslint-disable-next-line no-param-reassign
       vnode.data.style = styleValue;
     }
   } else if (typeof styleRef === "object") {
@@ -585,12 +598,17 @@ export function updateVNodeStyle(vnode: VNode, styleKey: string, styleValue: str
  * @param styleKey
  * @param styleValue
  */
-export function updateHTMLNodeStyle(node: HTMLElement, styleKey: string, styleValue: string | number | boolean) {
+export function updateHTMLNodeStyle(
+  node: HTMLElement,
+  styleKey: string,
+  styleValue: string | number | boolean
+) {
   // @ts-ignore
-  const styleRef = (node?.style || {});
+  const styleRef = node?.style || {};
   if (typeof styleRef === "string") {
     if (node?.style) {
       // @ts-ignore
+      // eslint-disable-next-line no-param-reassign
       node.style = styleValue;
     }
   } else if (typeof styleRef === "object") {

@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-03-31 16:23:55
+ * @LastEditTime : 2022-04-01 10:37:35
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/Cell-debug.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -151,10 +151,14 @@ export default {
         return this.resizeScope;
       }
       if (this.resizeScopeManipulation === "intersect") {
-        return DEF.resizeScope.filter((item) => this.resizeScope.includes(item));
+        return DEF.resizeScope.filter((item) =>
+          this.resizeScope.includes(item)
+        );
       }
       if (this.resizeScopeManipulation === "difference") {
-        return DEF.resizeScope.filter((item) => !this.resizeScope.includes(item));
+        return DEF.resizeScope.filter(
+          (item) => !this.resizeScope.includes(item)
+        );
       }
       if (this.resizeScopeManipulation === "union") {
         return [...new Set([...this.resizeScope, ...DEF.resizeScope])];
@@ -223,7 +227,12 @@ export default {
   },
   watch: {
     wrapperSize(val, oldVal) {
-      debug("watch", `[vid=${this._uid},parent=${this.cell.parent?._uid}] wrapper size change`, val, oldVal);
+      debug(
+        "watch",
+        `[vid=${this._uid},parent=${this.cell.parent?._uid}] wrapper size change`,
+        val,
+        oldVal
+      );
       this.updateChildLayout({
         left: this.left,
         top: this.top,
@@ -232,11 +241,21 @@ export default {
       });
     },
     xy(val, oldVal) {
-      debug("watch", `[vid=${this._uid},parent=${this.cell.parent?._uid}] xy change`, val, oldVal);
+      debug(
+        "watch",
+        `[vid=${this._uid},parent=${this.cell.parent?._uid}] xy change`,
+        val,
+        oldVal
+      );
       this.changePosition(val.x, val.y);
     },
     wh(val, oldVal) {
-      debug("watch", `[vid=${this._uid},parent=${this.cell.parent?._uid}] xywh change`, val, oldVal);
+      debug(
+        "watch",
+        `[vid=${this._uid},parent=${this.cell.parent?._uid}] xywh change`,
+        val,
+        oldVal
+      );
       this.changeSize(val.w, val.h);
     },
   },
@@ -247,12 +266,21 @@ export default {
     this.sentEvent(DEF.internalEvent.created, this);
   },
   beforeMount() {
-    debug("beforeMount", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, this.xy, this.wh);
+    debug(
+      "beforeMount",
+      `[vid=${this._uid},parent=${this.cell.parent?._uid}]`,
+      this.xy,
+      this.wh
+    );
     this.initHooks();
     this.sentEvent(DEF.internalEvent.beforeMount, this);
   },
   mounted() {
-    debug("mounted", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, this.getWrapperElement());
+    debug(
+      "mounted",
+      `[vid=${this._uid},parent=${this.cell.parent?._uid}]`,
+      this.getWrapperElement()
+    );
     // 元素挂载后的所有操作，统一调用
     this._onMounted();
   },
@@ -260,12 +288,15 @@ export default {
     debug("updated", this._uid);
     this.sentEvent(DEF.internalEvent.updated, this);
   },
-  beforeDestroy() {
-    debug("beforeDestroy", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`);
+  beforeUnmount() {
+    debug(
+      "beforeDestroy",
+      `[vid=${this._uid},parent=${this.cell.parent?._uid}]`
+    );
     // 发送要销毁事件
     this.sentEvent(DEF.internalEvent.beforeDestroy, this);
   },
-  destroyed() {
+  unmounted() {
     debug("destroyed", this._uid);
     splice(store.cells, this);
     const { parent } = this.cell;
@@ -275,7 +306,12 @@ export default {
   methods: {
     /** 统一由函数发送事件 */
     sentEvent(eventName, ...args) {
-      debug("sentEvent", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, eventName, ...args);
+      debug(
+        "sentEvent",
+        `[vid=${this._uid},parent=${this.cell.parent?._uid}]`,
+        eventName,
+        ...args
+      );
       this.$emit(eventName, ...args);
     },
     /** Vue 生命周期 onMounted 回调函数 */
@@ -284,11 +320,17 @@ export default {
       // STUB: 发现这个时候拿到的是的 #comment节点，而不是真正的 #wrapper节点
       const init = () => {
         // 初始化最原始的计算布局状态, 其他部分的计算布局状态都是基于这个状态的
-        debug("_onMounted::initDefaultLayout", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`);
+        debug(
+          "_onMounted::initDefaultLayout",
+          `[vid=${this._uid},parent=${this.cell.parent?._uid}]`
+        );
         this.initDefaultLayout();
         // 根据外部配置强制更新子元素布局 (尺寸有效，才强制更新, 并使用自动计算的最佳尺寸中的最大值作为最终尺寸)
         if (this.w >= 0 && this.h >= 0) {
-          debug("_onMounted::updateChildLayout", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`);
+          debug(
+            "_onMounted::updateChildLayout",
+            `[vid=${this._uid},parent=${this.cell.parent?._uid}]`
+          );
           this.updateChildLayout({
             left: this.x,
             top: this.y,
@@ -328,19 +370,30 @@ export default {
       }
 
       // debug
-      debug("updateHierarchy", `${this._uid} created`, `parent:${this.$parent._uid}`, {
-        store,
-        this: this,
-        parentCell,
-      });
+      debug(
+        "updateHierarchy",
+        `${this._uid} created`,
+        `parent:${this.$parent._uid}`,
+        {
+          store,
+          this: this,
+          parentCell,
+        }
+      );
     },
     /** 检测是否支持被观察 */
     checkEnableBeObserved(ele) {
-      return ele?.nodeType === window.Node.ELEMENT_NODE && !this.roObserveEleList.includes(ele);
+      return (
+        ele?.nodeType === window.Node.ELEMENT_NODE &&
+        !this.roObserveEleList.includes(ele)
+      );
     },
     /** 安装观察服务 */
     installObserveService() {
-      debug("installObserveService::begin", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`);
+      debug(
+        "installObserveService::begin",
+        `[vid=${this._uid},parent=${this.cell.parent?._uid}]`
+      );
       // 声明要观察的属性，影响size的属性还是比较多的，
       const observeAttributeNames = ["style"]; // no_use
 
@@ -356,9 +409,17 @@ export default {
         }
 
         const debugGroupName = "ObserveService::resize::callback";
-        debug(`${debugGroupName}::begin`, `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, mutationsList);
+        debug(
+          `${debugGroupName}::begin`,
+          `[vid=${this._uid},parent=${this.cell.parent?._uid}]`,
+          mutationsList
+        );
 
-        if (this.isDragging || this.isResizing || this.getCellElement()?.nodeType !== Node.ELEMENT_NODE) {
+        if (
+          this.isDragging ||
+          this.isResizing ||
+          this.getCellElement()?.nodeType !== Node.ELEMENT_NODE
+        ) {
           return;
         }
 
@@ -381,16 +442,23 @@ export default {
           return;
         }
 
-        debug(`${debugGroupName}::calc`, `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, {
-          wrapperSize,
-          width: this.width,
-          height: this.height,
-        });
+        debug(
+          `${debugGroupName}::calc`,
+          `[vid=${this._uid},parent=${this.cell.parent?._uid}]`,
+          {
+            wrapperSize,
+            width: this.width,
+            height: this.height,
+          }
+        );
 
         // 获取到最佳的，被要求的尺寸。(Note: consultWidth，consultHeight如果大于0且大于Wrapper的尺寸，会优先被使用)
         // 问题: 子元素放大尺寸，效果还可以接收，子元素缩小后，效果不理想。
         // 解决：通过设置边界， childNodeMaxWidth !== -1， childNodeMaxHeight !== -1 排除掉
-        const willUpdateLayout = [wrapperSize.width !== this.width, wrapperSize.height !== this.height].some(Boolean);
+        const willUpdateLayout = [
+          wrapperSize.width !== this.width,
+          wrapperSize.height !== this.height,
+        ].some(Boolean);
 
         debug(
           `${debugGroupName}::willUpdateLayout`,
@@ -408,7 +476,10 @@ export default {
           });
         }
 
-        debug(`${debugGroupName}::end`, `[vid=${this._uid},parent=${this.cell.parent?._uid}]`);
+        debug(
+          `${debugGroupName}::end`,
+          `[vid=${this._uid},parent=${this.cell.parent?._uid}]`
+        );
 
         // Hooks: 更新wrapper的尺寸
         tryRunHooks(afterHooks, [this, mutationsList, observer]);
@@ -461,14 +532,21 @@ export default {
         this.uninstallObserveService();
       });
 
-      debug("installObserveService::end", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`, {
-        roObserveEleList: this.roObserveEleList,
-        ro: this.ro,
-      });
+      debug(
+        "installObserveService::end",
+        `[vid=${this._uid},parent=${this.cell.parent?._uid}]`,
+        {
+          roObserveEleList: this.roObserveEleList,
+          ro: this.ro,
+        }
+      );
     },
     /** 卸载观察服务 */
     uninstallObserveService() {
-      debug("uninstallObserveService", `[vid=${this._uid},parent=${this.cell.parent?._uid}]`);
+      debug(
+        "uninstallObserveService",
+        `[vid=${this._uid},parent=${this.cell.parent?._uid}]`
+      );
       this.roObserveEleList = [];
       this.ro.disconnect();
       delete this.ro;
@@ -481,7 +559,12 @@ export default {
      * @param {number} consultWidth 参考宽度，默认0
      * @param {number} consultHeight 参考高度，默认0
      */
-    initDefaultLayout({ consultLeft = this.left, consultTop = this.top, consultWidth = 0, consultHeight = 0 } = {}) {
+    initDefaultLayout({
+      consultLeft = this.left,
+      consultTop = this.top,
+      consultWidth = 0,
+      consultHeight = 0,
+    } = {}) {
       debug("initDefaultLayout", `${this._uid}`, {
         consultLeft,
         consultTop,
@@ -582,9 +665,16 @@ export default {
      */
     getCellOffsetRect() {
       const rect = this.getCellBoundingClientRect();
-      const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      return new DOMRect(rect.left + scrollLeft, rect.top + scrollTop, rect.width, rect.height);
+      const scrollLeft =
+        window.pageXOffset || document.documentElement.scrollLeft;
+      const scrollTop =
+        window.pageYOffset || document.documentElement.scrollTop;
+      return new DOMRect(
+        rect.left + scrollLeft,
+        rect.top + scrollTop,
+        rect.width,
+        rect.height
+      );
     },
     /**
      * 获得关键影响Wrapper尺寸的子元素数组
@@ -659,15 +749,21 @@ export default {
      * @param {boolean} recursiveCalcChildrenNodes 递归计算子元素的最佳包裹宽高 (默认false)
      * @returns {object} {width, height}
      */
-    getCellBestWrapperSize({ consultWidth = 0, consultHeight = 0, recursiveCalcChildrenNodes = false } = {}) {
+    getCellBestWrapperSize({
+      consultWidth = 0,
+      consultHeight = 0,
+      recursiveCalcChildrenNodes = false,
+    } = {}) {
       debug("getCellBestWrapperSize::begin", `${this._uid}`, {
         consultWidth,
         consultHeight,
         recursiveCalcChildrenNodes,
       });
       const rect = this.getCellBoundingClientRect();
-      const { width: scrollWidth, height: scrollHeight } = this.getCellScrollSize();
-      const { width: offsetWidth, height: offsetHeight } = this.getCellOffsetSize();
+      const { width: scrollWidth, height: scrollHeight } =
+        this.getCellScrollSize();
+      const { width: offsetWidth, height: offsetHeight } =
+        this.getCellOffsetSize();
 
       // 选择最优的数值
       const useBest = (args) => Math.max(...args);
@@ -683,7 +779,8 @@ export default {
       // 问题: 如果子元素太多，会影响性能，应该提供一个配置项，只检测指定的元素大小及方法
       // 解决方案: 检测是否有设置关键影响因子. 配置项，可以指定检测的元素，以及检测的方法
       // 计算关键影响子元素的最大宽高
-      const { width: kifEleMaxWidth, height: kifEleMaxHeight } = this.getKIFOfElementsMaxRect();
+      const { width: kifEleMaxWidth, height: kifEleMaxHeight } =
+        this.getKIFOfElementsMaxRect();
 
       if ([kifEleMaxWidth, kifEleMaxHeight].some((item) => item > 0)) {
         childNodeMaxWidth = kifEleMaxWidth;
@@ -707,17 +804,30 @@ export default {
       }
 
       const [calcWidth, calcHeight] = [
-        useBest([rect.width, offsetWidth, consultWidth, this.minWidth, ...[useScrollSize ? scrollWidth : 0]]),
-        useBest([rect.height, offsetHeight, consultHeight, this.minHeight, ...[useScrollSize ? scrollHeight : 0]]),
+        useBest([
+          rect.width,
+          offsetWidth,
+          consultWidth,
+          this.minWidth,
+          ...[useScrollSize ? scrollWidth : 0],
+        ]),
+        useBest([
+          rect.height,
+          offsetHeight,
+          consultHeight,
+          this.minHeight,
+          ...[useScrollSize ? scrollHeight : 0],
+        ]),
       ];
 
       // 如果采用的子元素最大的尺寸，那么需要计算Cell的Border的尺寸，用以容纳子元素的边界
       // NOTE: 特别要注意，这里要计算的是不是Vue实例关联的元素，而是slot提供的元素
       // 计算最佳宽高
-      const { width: finalWidth, height: finalHeight } = this.calcRectWithWrapperBorderEx(
-        useBest([calcWidth, childNodeMaxWidth]),
-        useBest([calcHeight, childNodeMaxHeight])
-      );
+      const { width: finalWidth, height: finalHeight } =
+        this.calcRectWithWrapperBorderEx(
+          useBest([calcWidth, childNodeMaxWidth]),
+          useBest([calcHeight, childNodeMaxHeight])
+        );
 
       // TODO: 补充针对maxWidth，maxHeight的处理
       debug("getCellBestWrapperSize::end", `${this._uid}`, {
@@ -826,7 +936,11 @@ export default {
      * @param {VNode} vnode
      * @param {function} getProperty
      */
-    private_initEventHooks(hookMap = {}, vnode, getProperty = ($vnode) => {}) {
+    private_initEventHooks(
+      hookMap = {},
+      vnode = null,
+      getProperty = ($vnode) => {}
+    ) {
       const ref = (getProperty && getProperty(vnode)) || {};
       const check = (res) => ![false].includes(res);
       Object.keys(ref).forEach((key) => {
@@ -845,7 +959,10 @@ export default {
 
           if (returnValForBeforeHooks) {
             fns.forEach((fn) => fn(e, ...args));
-            hooksOnAfter.reduce((state, fn) => check(state) && check(fn(e, ctx, ...args)), {});
+            hooksOnAfter.reduce(
+              (state, fn) => check(state) && check(fn(e, ctx, ...args)),
+              {}
+            );
           }
         };
         handler.__extra__ = {
@@ -887,11 +1004,19 @@ export default {
     cacheDefaultLayout({ left = 0, top = 0, width = 1, height = 1 }) {
       debug("cacheDefaultLayout", `${this._uid}`, { width, height });
       const ele = this.getCellElement();
-      const beforeHooks = [].concat(this.cellChildNodeInitInfoHooks?.beforeInit || []);
-      const onCacheHooks = [].concat(this.cellChildNodeInitInfoHooks?.onCacheEachNode || []);
-      const afterHooks = [].concat(this.cellChildNodeInitInfoHooks?.afterInit || []);
+      const beforeHooks = [].concat(
+        this.cellChildNodeInitInfoHooks?.beforeInit || []
+      );
+      const onCacheHooks = [].concat(
+        this.cellChildNodeInitInfoHooks?.onCacheEachNode || []
+      );
+      const afterHooks = [].concat(
+        this.cellChildNodeInitInfoHooks?.afterInit || []
+      );
 
-      if (!tryRunHooks(beforeHooks, [this], { ele, left, top, width, height })) {
+      if (
+        !tryRunHooks(beforeHooks, [this], { ele, left, top, width, height })
+      ) {
         return;
       }
 
@@ -911,7 +1036,11 @@ export default {
           let extraInfo = {};
           onCacheHooks.forEach(
             // eslint-disable-next-line no-return-assign
-            (hook) => (extraInfo = Object.assign(extraInfo, hook(this, node, key, extraInfo) || {}))
+            (hook) =>
+              (extraInfo = Object.assign(
+                extraInfo,
+                hook(this, node, key, extraInfo) || {}
+              ))
           );
 
           // HACK: 出现嵌套子Cell的情况，是否需要处理, 直接放弃处理，交由子Cell自己处理
@@ -921,8 +1050,12 @@ export default {
           }
 
           const boundingClientRect = getBoundingClientRect(node);
-          const fontSize = parseFloat(this.getHTMLElementComputedStyle(node, "font-size"));
-          const lineHeight = parseFloat(this.getHTMLElementComputedStyle(node, "line-height"));
+          const fontSize = parseFloat(
+            this.getHTMLElementComputedStyle(node, "font-size")
+          );
+          const lineHeight = parseFloat(
+            this.getHTMLElementComputedStyle(node, "line-height")
+          );
           const getDefaultFontSize = getDocumentElementFontSize;
           const vnode = node?.__vue__?.$vnode ?? null;
 
@@ -950,7 +1083,9 @@ export default {
             // 字体大小，可能为NaN
             fontSize: Number.isNaN(fontSize) ? getDefaultFontSize() : fontSize,
             // 行高，可能为NaN
-            lineHeight: Number.isNaN(lineHeight) ? getDefaultFontSize() * 1.5 : lineHeight,
+            lineHeight: Number.isNaN(lineHeight)
+              ? getDefaultFontSize() * 1.5
+              : lineHeight,
           };
 
           // 初始化状态, 用于记录最初状态，不用频繁更新
@@ -966,7 +1101,9 @@ export default {
                 width,
                 height,
                 // 相对于视口的矩形
-                boundingClientRect: getBoundingClientRect(this.getWrapperElement()),
+                boundingClientRect: getBoundingClientRect(
+                  this.getWrapperElement()
+                ),
                 // 边框
                 border: this.getWrapperBorder(),
               },
@@ -1037,7 +1174,12 @@ export default {
         effects: { resize: resizeEffects },
       } = this.cell;
 
-      const [beforeHooks = [], afterHooks = [], beforeEachHooks = [], afterEachHooks = []] = [
+      const [
+        beforeHooks = [],
+        afterHooks = [],
+        beforeEachHooks = [],
+        afterEachHooks = [],
+      ] = [
         "beforeRunAllResizeSteps",
         "afterRunAllResizeSteps",
         "beforeRunEachResizeStep",
@@ -1063,7 +1205,9 @@ export default {
         });
         const effectHandler = step(this, context);
         // 调用后置钩子
-        afterEachHooks.forEach((hook) => hook(this, { key, step, context, effectHandler }));
+        afterEachHooks.forEach((hook) =>
+          hook(this, { key, step, context, effectHandler })
+        );
         if (isFunction(effectHandler)) {
           effectHandler.__extra__ = { key, context };
           this.registerResizeEffect(key, effectHandler);
@@ -1127,7 +1271,12 @@ export default {
      */
     getWrapperBorder() {
       const wrapperElement = this.getWrapperElement();
-      const [borderLeftWidth, borderRightWidth, borderTopWidth, borderBottomWidth] = [
+      const [
+        borderLeftWidth,
+        borderRightWidth,
+        borderTopWidth,
+        borderBottomWidth,
+      ] = [
         parseFloat(window.getComputedStyle(wrapperElement).borderLeftWidth),
         parseFloat(window.getComputedStyle(wrapperElement).borderRightWidth),
         parseFloat(window.getComputedStyle(wrapperElement).borderTopWidth),
@@ -1144,7 +1293,12 @@ export default {
      * 计算挂载元素的Border信息的矩形区域
      */
     calcRectWithWrapperBorder(rect) {
-      const { borderLeftWidth, borderRightWidth, borderTopWidth, borderBottomWidth } = this.getWrapperBorder();
+      const {
+        borderLeftWidth,
+        borderRightWidth,
+        borderTopWidth,
+        borderBottomWidth,
+      } = this.getWrapperBorder();
       return {
         left: rect.left - borderLeftWidth,
         top: rect.top - borderTopWidth,
@@ -1190,8 +1344,14 @@ export default {
     /** 变更大小 */
     changeSize(width = 0, height = 0) {
       debug("changeSize", `${this._uid}`, { width, height });
-      checkAssert(width >= 0, `width is not available [${width}], must be greater than 0`);
-      checkAssert(height >= 0, `"height is not available [${height}], must be greater than 0`);
+      checkAssert(
+        width >= 0,
+        `width is not available [${width}], must be greater than 0`
+      );
+      checkAssert(
+        height >= 0,
+        `"height is not available [${height}], must be greater than 0`
+      );
 
       this.width = assignNoNullValue(this.width, width);
       this.height = assignNoNullValue(this.height, height);
@@ -1214,7 +1374,9 @@ export default {
 
       const beforeHooks = [].concat(this.resizeHooks?.beforeResizeCell || []);
       const afterHooks = [].concat(this.resizeHooks?.afterResizeCell || []);
-      const onHooks = [].concat(this.resizeHooks?.onResizeCellForEachNode || []);
+      const onHooks = [].concat(
+        this.resizeHooks?.onResizeCellForEachNode || []
+      );
       beforeHooks.forEach((hook) => hook(this, { l, t, w, h, parent }));
 
       // 获得Cell的包裹节点（this.$el元素）的初始化尺寸
@@ -1226,7 +1388,12 @@ export default {
       } = this.getWrapperInitialData();
 
       // 获得Cell的包裹节点（this.$el元素）的Border大小
-      const { borderLeftWidth, borderTopWidth, borderRightWidth, borderBottomWidth } = this.getWrapperBorder();
+      const {
+        borderLeftWidth,
+        borderTopWidth,
+        borderRightWidth,
+        borderBottomWidth,
+      } = this.getWrapperBorder();
       const blr = borderLeftWidth + borderRightWidth;
       const btb = borderTopWidth + borderBottomWidth;
 
@@ -1238,7 +1405,12 @@ export default {
       const widthOffset = w - wrapperInitialWidth;
       const heightOffset = h - wrapperInitialHeight;
 
-      debug("resizeCell-offset", `${this._uid}`, { leftOffset, topOffset, widthOffset, heightOffset });
+      debug("resizeCell-offset", `${this._uid}`, {
+        leftOffset,
+        topOffset,
+        widthOffset,
+        heightOffset,
+      });
 
       // 宽度变化比例(精确)
       const widthChangeRatio = (w - blr) / (wrapperInitialWidth - blr);
@@ -1326,7 +1498,8 @@ export default {
       const mouseY = e.touches ? e.touches[0].pageY : e.pageY;
 
       // check the mouse is in the cell child node
-      if (this.hasChildrenCellContainsPoint({ x: mouseX, y: mouseY })) return false;
+      if (this.hasChildrenCellContainsPoint({ x: mouseX, y: mouseY }))
+        return false;
 
       return true;
     },
@@ -1340,8 +1513,16 @@ export default {
       // check enable resize for width or height
       const checkFns = [
         () => {
-          if (!this.enableResizeWidth && Math.floor(width) !== Math.floor(this.width)) return false;
-          if (!this.enableResizeHeight && Math.floor(height) !== Math.floor(this.height)) return false;
+          if (
+            !this.enableResizeWidth &&
+            Math.floor(width) !== Math.floor(this.width)
+          )
+            return false;
+          if (
+            !this.enableResizeHeight &&
+            Math.floor(height) !== Math.floor(this.height)
+          )
+            return false;
           return true;
         },
         () => {
@@ -1350,13 +1531,24 @@ export default {
           return true;
         },
         () => {
-          if (this.enableResizeWidth && Math.floor(width) < Math.floor(this.minWidth)) return false;
-          if (this.enableResizeHeight && Math.floor(height) < Math.floor(this.minHeight)) return false;
+          if (
+            this.enableResizeWidth &&
+            Math.floor(width) < Math.floor(this.minWidth)
+          )
+            return false;
+          if (
+            this.enableResizeHeight &&
+            Math.floor(height) < Math.floor(this.minHeight)
+          )
+            return false;
           return true;
         },
         () => {
           // 外部函数调用检查是否可以继续Resize
-          return this.checkEnableContinueResize(handle, left, top, width, height) && true;
+          return (
+            this.checkEnableContinueResize(handle, left, top, width, height) &&
+            true
+          );
         },
       ];
 
@@ -1377,7 +1569,8 @@ export default {
       const mouseY = e.touches ? e.touches[0].pageY : e.pageY;
 
       // check the mouse is in the cell child node
-      if (this.hasChildrenCellContainsPoint({ x: mouseX, y: mouseY })) return false;
+      if (this.hasChildrenCellContainsPoint({ x: mouseX, y: mouseY }))
+        return false;
 
       this.sentEvent(DEF.internalEvent.cellDragStart, this, e);
 
@@ -1392,7 +1585,9 @@ export default {
     checkAllowContinueDrag(left = 0, top = 0) {
       // check enable drag for left or top
       // 外部函数检查是否可以继续拖拽
-      const beAllowed = this.checkEnableContinueDrag(left, top, this.width, this.height) && true;
+      const beAllowed =
+        this.checkEnableContinueDrag(left, top, this.width, this.height) &&
+        true;
       return beAllowed;
     },
     /**
@@ -1405,7 +1600,13 @@ export default {
      */
     onResizingEvent(left, top, width, height, parent = null) {
       this.isResizing = true;
-      debug("onResizingEvent", `${this._uid} =`, { left, top, width, height, parent });
+      debug("onResizingEvent", `${this._uid} =`, {
+        left,
+        top,
+        width,
+        height,
+        parent,
+      });
 
       this.sentEvent(DEF.internalEvent.resizing, this, {
         left,
@@ -1421,10 +1622,14 @@ export default {
       const beforeHooks = [].concat(this.resizeHooks?.beforeResizing || []);
       const afterHooks = [].concat(this.resizeHooks?.afterResizing || []);
 
-      beforeHooks.forEach((hook) => hook(this, left, top, width, height, parent));
+      beforeHooks.forEach((hook) =>
+        hook(this, left, top, width, height, parent)
+      );
       // 同步更新内部元素
       this.resizeCell(left, top, width, height, parent);
-      afterHooks.forEach((hook) => hook(this, left, top, width, height, parent));
+      afterHooks.forEach((hook) =>
+        hook(this, left, top, width, height, parent)
+      );
 
       // 发送事件
       this.sentEvent(DEF.internalEvent.cellResizing, this, {
@@ -1458,7 +1663,9 @@ export default {
 
       const beforeHooks = [].concat(this.resizeHooks?.beforeResizeStop || []);
       const afterHooks = [].concat(this.resizeHooks?.afterResizeStop || []);
-      beforeHooks.forEach((hook) => hook(this, left, top, width, height, parent));
+      beforeHooks.forEach((hook) =>
+        hook(this, left, top, width, height, parent)
+      );
 
       // 同步更新内部元素
       this.resizeCell(left, top, width, height, parent);
@@ -1471,7 +1678,9 @@ export default {
       this.activeAllResizeEffects();
 
       // 钩子函数
-      afterHooks.forEach((hook) => hook(this, left, top, width, height, parent));
+      afterHooks.forEach((hook) =>
+        hook(this, left, top, width, height, parent)
+      );
 
       this.sentEvent(DEF.internalEvent.cellResizeEnd, this, {
         left,
@@ -1493,7 +1702,12 @@ export default {
       debug(`onDraggingEvent`, `${this._uid}`);
       const { width, height } = this;
 
-      this.sentEvent(DEF.internalEvent.dragging, this, { left, top, width, height });
+      this.sentEvent(DEF.internalEvent.dragging, this, {
+        left,
+        top,
+        width,
+        height,
+      });
 
       const params = JSON.stringify({ left, top });
       if (this.tempData.lastDraggingInfo === params) return;
@@ -1506,7 +1720,12 @@ export default {
       this.changePosition(left, top);
 
       afterHooks.forEach((hook) => hook(this, left, top));
-      this.sentEvent(DEF.internalEvent.cellDragging, this, { left, top, width, height });
+      this.sentEvent(DEF.internalEvent.cellDragging, this, {
+        left,
+        top,
+        width,
+        height,
+      });
 
       // 记录最后一次的改变信息
       this.tempData.lastDraggingInfo = params;
@@ -1530,7 +1749,12 @@ export default {
       this.changePosition(left, top);
 
       afterHooks.forEach((hook) => hook(this, left, top));
-      this.sentEvent(DEF.internalEvent.cellDragEnd, this, { left, top, width, height });
+      this.sentEvent(DEF.internalEvent.cellDragEnd, this, {
+        left,
+        top,
+        width,
+        height,
+      });
 
       this.isDragging = false;
       this.tempData.lastDraggingInfo = null;
