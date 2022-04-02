@@ -2,7 +2,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-03-01 10:24:28
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-04-01 11:57:34
+ * @LastEditTime : 2022-04-02 21:07:10
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/util.ts
  * @Description  : Created by sunzhifeng, Please coding something here
  */
@@ -240,6 +240,22 @@ export function getOffsetRect(el: HTMLElement): DOMRect {
       el.offsetTop,
       el.offsetWidth,
       el.offsetHeight
+    );
+  }
+
+  return new DOMRect();
+}
+
+export function getPageOffsetRect(el: HTMLElement): DOMRect {
+  const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  if (el) {
+    const rect = getBoundingClientRect(el);
+    return new DOMRect(
+      rect.left + scrollLeft,
+      rect.top + scrollTop,
+      rect.width,
+      rect.height
     );
   }
 

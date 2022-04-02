@@ -4,7 +4,7 @@
  * @Date         : 2022-03-21 15:01:39
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/types.ts
- * @LastEditTime : 2022-04-02 08:59:42
+ * @LastEditTime : 2022-04-02 17:04:01
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  */
 
@@ -46,6 +46,7 @@ export interface IState {
   isActive: boolean;
   isResizing: boolean;
   isDragging: boolean;
+  isUpdatingForChildLayout: boolean;
 
   tempData: {
     lastResizeInfo: null | string;

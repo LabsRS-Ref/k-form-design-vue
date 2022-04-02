@@ -3,7 +3,7 @@
  * @Date         : 2022-03-31 08:36:43
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/state.ts
- * @LastEditTime : 2022-04-01 10:01:55
+ * @LastEditTime : 2022-04-02 17:04:08
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  */
 
@@ -34,6 +34,7 @@ const createState = (instance: IVDRCellInstance): IState => {
     isActive: false,
     isResizing: false,
     isDragging: false,
+    isUpdatingForChildLayout: false,
 
     tempData: {
       lastResizeInfo: null,

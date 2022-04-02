@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-04-02 16:34:52
+ * @LastEditTime : 2022-04-02 21:09:35
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/Cell-debug.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -73,6 +73,7 @@ import {
   tryRunHooks,
   splice,
   getBoundingClientRect,
+  getPageOffsetRect,
   isPointInDOMRect,
   forEachNode,
   getDocumentElementFontSize,
@@ -401,6 +402,13 @@ export default {
 
       // 初始化resize观察者
       this.ro = new MutationObserver((mutationsList, observer) => {
+        const debugGroupName = "ObserveService::resize::callback";
+        debug(
+          `${debugGroupName}::begin`,
+          `[vid=${this._uid},parent=${this.cell.parent?._uid}]`,
+          mutationsList
+        );
+
         const beforeHooks = [].concat(this.observeHooks?.before || []);
         const onHooks = [].concat(this.observeHooks?.on || []);
         const afterHooks = [].concat(this.observeHooks?.after || []);
@@ -410,16 +418,13 @@ export default {
           return;
         }
 
-        const debugGroupName = "ObserveService::resize::callback";
-        debug(
-          `${debugGroupName}::begin`,
-          `[vid=${this._uid},parent=${this.cell.parent?._uid}]`,
-          mutationsList
-        );
-
         if (
+          this.isUpdatingForChildLayout ||
           this.isDragging ||
           this.isResizing ||
+          this.hasDescendantCellIsDragging() ||
+          this.hasDescendantCellIsResizing() ||
+          this.hasDescendantCellIsUpdatingForChildLayout() ||
           this.getInnerElement()?.nodeType !== Node.ELEMENT_NODE
         ) {
           return;
@@ -666,30 +671,10 @@ export default {
      * 获得内部单元相对于文档的偏移量矩形信息
      */
     getInnerEleOffsetRect() {
-      const rect = this.getInnerEleBoundingClientRect();
-      const scrollLeft =
-        window.pageXOffset || document.documentElement.scrollLeft;
-      const scrollTop =
-        window.pageYOffset || document.documentElement.scrollTop;
-      return new DOMRect(
-        rect.left + scrollLeft,
-        rect.top + scrollTop,
-        rect.width,
-        rect.height
-      );
+      return getPageOffsetRect(this.getInnerElement());
     },
     getCellWrapperElementOffsetRect() {
-      const ele = this.getCellWrapperElement();
-      const scrollLeft =
-        window.pageXOffset || document.documentElement.scrollLeft;
-      const scrollTop =
-        window.pageYOffset || document.documentElement.scrollTop;
-      return new DOMRect(
-        ele.offsetLeft + scrollLeft,
-        ele.offsetTop + scrollTop,
-        ele.offsetWidth,
-        ele.offsetHeight
-      );
+      return getPageOffsetRect(this.getCellWrapperElement());
     },
     /**
      * 获得关键影响Wrapper尺寸的子元素数组
@@ -968,13 +953,31 @@ export default {
      * @param {Object} point 点, 注意使用的是PageX和PageY
      * @summary 注意文档滚动
      */
-    isPointInCell(point = { x: 0, y: 0 }) {
+    isPointInCellWrapper(point = { x: 0, y: 0 }) {
       const rect = this.getCellWrapperElementOffsetRect();
       return isPointInDOMRect(point, rect);
     },
     isPointInInnerElement(point = { x: 0, y: 0 }) {
       const rect = this.getInnerEleOffsetRect();
       return isPointInDOMRect(point, rect);
+    },
+    hasDescendantCellIsDragging() {
+      const childrenMap = this.getDescendantCells();
+      return Object.values(childrenMap).some(
+        ({ node: cell }) => cell.isDragging
+      );
+    },
+    hasDescendantCellIsResizing() {
+      const childrenMap = this.getDescendantCells();
+      return Object.values(childrenMap).some(
+        ({ node: cell }) => cell.isResizing
+      );
+    },
+    hasDescendantCellIsUpdatingForChildLayout() {
+      const childrenMap = this.getDescendantCells();
+      return Object.values(childrenMap).some(
+        ({ node: cell }) => cell.isUpdatingForChildLayout
+      );
     },
     /**
      * 初始化WebEventHooks
@@ -1371,7 +1374,10 @@ export default {
     },
     /** 更新所有子节点布局 */
     updateChildLayout({ left = 0, top = 0, width = 0, height = 0 } = {}) {
+      this.isUpdatingForChildLayout = true;
+
       debug("updateChildLayout", `${this._uid}`, { left, top, width, height });
+
       // 重新调整Cell的布局
       this.resizeCell(left, top, width, height);
       // 副作用启动
@@ -1387,6 +1393,8 @@ export default {
         width,
         height,
       });
+
+      this.isUpdatingForChildLayout = false;
     },
     /** 变更位置 */
     changePosition(left = 0, top = 0) {
@@ -1527,17 +1535,17 @@ export default {
      * @return {boolean}
      */
     hasChildrenCellContainsPoint(point = { x: 0, y: 0 }, options = {}) {
-      const fn = (getChildrenFn = () => [], context = this) => {
-        const children = getChildrenFn(context);
-        if (children.length === 0) return false;
+      const childrenMap = this.getDescendantCells();
+      const children = Object.values(childrenMap);
+
+      if (children.length > 0) {
         return children.some((child) => {
-          if (this.isTypeOfCell(child)) {
-            return child.isPointInCell(point);
-          }
-          return fn(getChildrenFn, child);
+          const { node } = child;
+          return node.isPointInCellWrapper(point, options);
         });
-      };
-      return fn((context) => context?.$children, this);
+      }
+
+      return false;
     },
     /**
      * 是否允许Resize启动
