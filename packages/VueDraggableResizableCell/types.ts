@@ -4,7 +4,7 @@
  * @Date         : 2022-03-21 15:01:39
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/types.ts
- * @LastEditTime : 2022-04-01 10:05:32
+ * @LastEditTime : 2022-04-02 08:59:42
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  */
 
@@ -25,9 +25,10 @@ export interface IState {
   height: "auto" | number;
   zIndex: "auto" | number;
 
+  // 关联的VueDraggableResizableCell组件实例
   cell: {
-    parent: null | IVDRInstance;
-    children: IVDRInstance[];
+    parent: null | IVDRCellInstance;
+    children: IVDRCellInstance[];
     cache: {
       [key: string]: any;
     };
@@ -60,7 +61,7 @@ export interface IState {
   roObserveEleList: HTMLElement[];
 }
 
-export interface IVDRInstance extends Vue, IState, IProps {}
+export interface IVDRCellInstance extends Vue, IState, IProps {}
 
 export interface IVDRCell extends Vue {
   [key: string]: any;

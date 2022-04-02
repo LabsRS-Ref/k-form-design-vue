@@ -97,7 +97,7 @@ export default {
       onHooks = [],
       parent = null,
     } = options;
-    const ele = vdrCell.getCellElement();
+    const ele = vdrCell.getInnerElement();
     const {
       left: wrapperInitialLeft,
       top: wrapperInitialTop,
@@ -115,7 +115,7 @@ export default {
         instance: IVDRCell = vdrCell
       ) => {
         if (!key) return null;
-        const nodeInfo = instance.getCellChildNodeInitInfoByKey(key);
+        const nodeInfo = instance.getInnerChildRawDataByKey(key);
         checkAssert(nodeInfo, "nodeInfo is not available", {
           context,
           instance,
@@ -220,7 +220,7 @@ export default {
               borderTopWidth,
               borderRightWidth,
               borderBottomWidth,
-            } = vdrCell.getWrapperBorder();
+            } = vdrCell.getCellWrapperBorder();
 
             // TODO：位置偏移计算
             const newLeft = Math.floor(

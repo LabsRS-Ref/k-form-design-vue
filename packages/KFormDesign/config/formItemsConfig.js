@@ -8,7 +8,7 @@
 const defaultDraggableResizableCell = {
   // 单元格默认配置
   vdrCellOptions: {
-    enable: true,
+    enable: false,
     draggable: true,
     resizable: true,
     x: 0,

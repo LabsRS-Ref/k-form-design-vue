@@ -422,7 +422,7 @@ const props = {
   /**
    * @description: Cell节点初始化的时候钩子函数
    */
-  cellChildNodeInitInfoHooks: {
+  InnerNodeRawDataHooks: {
     type: Object,
     default: () => ({}),
     validator: (val: { [x: string]: any }) => {

@@ -3,7 +3,7 @@
  * @Date         : 2022-03-08 17:03:50
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/doc.md
- * @LastEditTime : 2022-04-01 17:01:07
+ * @LastEditTime : 2022-04-01 17:19:48
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 
@@ -35,6 +35,8 @@
 * [X] 支持自动监听Cell所有子孙节点的变化，并自动更新
   * [X] 限制只允许在非拖拽及非resize状态下进行监听
 * [X] 支持提供更多的Hooks处理，交由组件使用者自行定制
+* [ ] TODO: 支持定制Wrapper Handler的样式，圆点模式，矩形模式，等等
+* [ ] TODO: 支持组件旋转
 
 ## Issues
 

@@ -7,9 +7,9 @@
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
  */
 
-import { IState, IVDRInstance } from "./types";
+import { IState, IVDRCellInstance } from "./types";
 
-const createState = (instance: IVDRInstance): IState => {
+const createState = (instance: IVDRCellInstance): IState => {
   return {
     // 以下内容是传递给最基础组件的，参加器Props说明
     left: instance.x,

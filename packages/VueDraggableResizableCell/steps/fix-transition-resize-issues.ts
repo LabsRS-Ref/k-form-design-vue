@@ -32,7 +32,7 @@ export default {
       onHooks = [],
       parent = null,
     } = options;
-    const ele = vdrCell.getCellElement();
+    const ele = vdrCell.getInnerElement();
     vdrCell.registerResizeStep(
       "fix-transition-issue",
       // @ts-ignore
@@ -53,13 +53,13 @@ export default {
 
           // 恢复内部元素的样式Resize前的样式
           return () => {
-            if (!vdrCell.getCellOriginalStyle().transition) {
+            if (!vdrCell.getInnerRootNodeOriginalStyle().transition) {
               // eslint-disable-next-line no-param-reassign
               element.style.transition = "";
             } else {
               // eslint-disable-next-line no-param-reassign
               element.style.transition =
-                vdrCell.getCellOriginalStyle().transition;
+                vdrCell.getInnerRootNodeOriginalStyle().transition;
             }
           };
         };
@@ -78,7 +78,7 @@ export default {
 
             // @ts-ignore
             const key = node[vdrCell.privateMarkPropertyName];
-            const nodeInfo = vdrCell.getCellChildNodeInitInfoByKey(key);
+            const nodeInfo = vdrCell.getInnerChildRawDataByKey(key);
 
             // @ts-ignore
             if (![undefined, null].includes(node.style?.transition)) {
@@ -94,7 +94,7 @@ export default {
               const node = htmlNode as HTMLElement;
               // @ts-ignore
               const key = node[vdrCell.privateMarkPropertyName];
-              const nodeInfo = vdrCell.getCellChildNodeInitInfoByKey(key);
+              const nodeInfo = vdrCell.getInnerChildRawDataByKey(key);
               // @ts-ignore
               if ((node?.style?.transition ?? false) && nodeInfo) {
                 // eslint-disable-next-line no-param-reassign

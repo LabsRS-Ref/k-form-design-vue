@@ -42,7 +42,7 @@ export default {
 
     vdrCell.registerResizeStep(stepName, () => {
       // 获得当前节点的初始化尺寸
-      const nodeInfo = vdrCell.getCellRootNodeInitInfo();
+      const nodeInfo = vdrCell.getInnerRootNodeRawData();
       const rect = nodeInfo.boundingClientRect;
       const {
         left: initialLeft,
@@ -53,7 +53,7 @@ export default {
 
       const { left: wrapperBoundClientLeft, top: wrapperBoundClientTop } =
         wrapperInitialClientRect;
-      const { borderLeftWidth, borderTopWidth } = vdrCell.getWrapperBorder();
+      const { borderLeftWidth, borderTopWidth } = vdrCell.getCellWrapperBorder();
 
       debug(`${stepName} ::begin`, `${vdrCell._uid}`, {
         initialLeft,
@@ -77,14 +77,14 @@ export default {
       const heightExp = `${newHeight}px`;
 
       // 更新元素的style
-      const ele = vdrCell.getCellElement();
+      const ele = vdrCell.getInnerElement();
       updateHTMLNodeStyle(ele, `left`, leftExp);
       updateHTMLNodeStyle(ele, `top`, topExp);
       updateHTMLNodeStyle(ele, `width`, widthExp);
       updateHTMLNodeStyle(ele, `height`, heightExp);
 
       // 更新元素的VNode
-      const node = vdrCell.getCellVNode();
+      const node = vdrCell.getVNodeOfInnerElement();
       updateVNodeStyle(node, `left`, leftExp);
       updateVNodeStyle(node, `top`, topExp);
       updateVNodeStyle(node, `width`, widthExp);

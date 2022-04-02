@@ -3,7 +3,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-14 15:21:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-04-01 16:17:38
+ * @LastEditTime : 2022-04-02 16:34:52
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/Cell-debug.vue
  * @Description  : Created by sunzhifeng, Please coding something here
 -->
@@ -279,7 +279,7 @@ export default {
     debug(
       "mounted",
       `[vid=${this._uid},parent=${this.cell.parent?._uid}]`,
-      this.getWrapperElement()
+      this.getCellWrapperElement()
     );
     // 元素挂载后的所有操作，统一调用
     this._onMounted();
@@ -316,7 +316,7 @@ export default {
     },
     /** Vue 生命周期 onMounted 回调函数 */
     _onMounted() {
-      // HACK: 因为在mounted之后，this.getWrapperElement()还没有初始化，所以需要延迟执行
+      // HACK: 因为在mounted之后，this.getCellWrapperElement()还没有初始化，所以需要延迟执行
       // STUB: 发现这个时候拿到的是的 #comment节点，而不是真正的 #wrapper节点
       const init = () => {
         // 初始化最原始的计算布局状态, 其他部分的计算布局状态都是基于这个状态的
@@ -349,7 +349,7 @@ export default {
       };
 
       // 检测挂载的元素不是comment节点, 必须是 Element 节点
-      if (this.getCellElement()?.nodeType === Node.ELEMENT_NODE) {
+      if (this.getInnerElement()?.nodeType === Node.ELEMENT_NODE) {
         init();
       } else {
         this.$nextTick(this._onMounted);
@@ -420,7 +420,7 @@ export default {
         if (
           this.isDragging ||
           this.isResizing ||
-          this.getCellElement()?.nodeType !== Node.ELEMENT_NODE
+          this.getInnerElement()?.nodeType !== Node.ELEMENT_NODE
         ) {
           return;
         }
@@ -437,7 +437,7 @@ export default {
             wrapperSize,
             mutationsList,
             observer,
-            cell: this.getCellElement(),
+            cell: this.getInnerElement(),
             borderSize: this.calcRectWithWrapperBorderEx(0, 0),
           })
         ) {
@@ -488,7 +488,7 @@ export default {
       });
 
       // 哪些元素纳入观察队列
-      const cellEle = this.getCellElement();
+      const cellEle = this.getInnerElement();
 
       if (this.checkEnableBeObserved(cellEle)) {
         this.roObserveEleList.push(cellEle);
@@ -612,13 +612,13 @@ export default {
     /**
      * 获得挂载后的元素，特指包裹元素
      */
-    getWrapperElement() {
+    getCellWrapperElement() {
       return this.$el;
     },
     /**
      * 获得内部单元的VNode
      */
-    getCellVNode() {
+    getVNodeOfInnerElement() {
       checkAssert(this.$children.length > 0, "The cell node is not available");
       // 挂载完成后，才有$children
       if (this.$children.length < 1) return null;
@@ -627,8 +627,8 @@ export default {
     /**
      * 获得内部单元
      */
-    getCellElement() {
-      const { elm = null } = this.getCellVNode();
+    getInnerElement() {
+      const { elm = null } = this.getVNodeOfInnerElement();
       // STUB: 如果没有elm，则返回null
       // checkAssert(elm?.nodeType !== Node.ELEMENT_NODE, "The cell node is not available, must a element node", {
       //   elm,
@@ -639,23 +639,23 @@ export default {
     /**
      * 获得内部单元的边界矩形信息
      */
-    getCellBoundingClientRect() {
-      const ele = this.getCellElement();
+    getInnerEleBoundingClientRect() {
+      const ele = this.getInnerElement();
       return getBoundingClientRect(ele);
     },
-    getCellLineHeight() {
-      const ele = this.getCellElement();
+    getInnerEleLineHeight() {
+      const ele = this.getInnerElement();
       return parseFloat(window.getComputedStyle(ele).lineHeight);
     },
-    getCellScrollSize() {
-      const ele = this.getCellElement();
+    getInnerEleScrollSize() {
+      const ele = this.getInnerElement();
       return {
         width: ele?.scrollWidth || 0,
         height: ele?.scrollHeight || 0,
       };
     },
-    getCellOffsetSize() {
-      const ele = this.getCellElement();
+    getInnerEleOffsetSize() {
+      const ele = this.getInnerElement();
       // [Bug] svg图标
       return {
         width: ele?.offsetWidth || 0,
@@ -665,8 +665,8 @@ export default {
     /**
      * 获得内部单元相对于文档的偏移量矩形信息
      */
-    getCellOffsetRect() {
-      const rect = this.getCellBoundingClientRect();
+    getInnerEleOffsetRect() {
+      const rect = this.getInnerEleBoundingClientRect();
       const scrollLeft =
         window.pageXOffset || document.documentElement.scrollLeft;
       const scrollTop =
@@ -676,6 +676,19 @@ export default {
         rect.top + scrollTop,
         rect.width,
         rect.height
+      );
+    },
+    getCellWrapperElementOffsetRect() {
+      const ele = this.getCellWrapperElement();
+      const scrollLeft =
+        window.pageXOffset || document.documentElement.scrollLeft;
+      const scrollTop =
+        window.pageYOffset || document.documentElement.scrollTop;
+      return new DOMRect(
+        ele.offsetLeft + scrollLeft,
+        ele.offsetTop + scrollTop,
+        ele.offsetWidth,
+        ele.offsetHeight
       );
     },
     /**
@@ -723,7 +736,7 @@ export default {
       return kifElementList;
     },
     getKIFOfElementsMaxRect() {
-      const ele = this.getCellElement();
+      const ele = this.getInnerElement();
       const kifEleList = this.getKIFOfElements(ele, this);
 
       // 选择最优的数值
@@ -761,16 +774,16 @@ export default {
         consultHeight,
         recursiveCalcChildrenNodes,
       });
-      const rect = this.getCellBoundingClientRect();
+      const rect = this.getInnerEleBoundingClientRect();
       const { width: scrollWidth, height: scrollHeight } =
-        this.getCellScrollSize();
+        this.getInnerEleScrollSize();
       const { width: offsetWidth, height: offsetHeight } =
-        this.getCellOffsetSize();
+        this.getInnerEleOffsetSize();
 
       // 选择最优的数值
       const useBest = (args) => Math.max(...args);
 
-      const ele = this.getCellElement();
+      const ele = this.getInnerElement();
       // 有些元素，不能获取offsetWidth和offsetHeight， 例如：SVG元素，需要使用scrollWidth和scrollHeight
       const useScrollSize = ["SVG"].includes(ele?.nodeName);
 
@@ -956,7 +969,11 @@ export default {
      * @summary 注意文档滚动
      */
     isPointInCell(point = { x: 0, y: 0 }) {
-      const rect = this.getCellOffsetRect();
+      const rect = this.getCellWrapperElementOffsetRect();
+      return isPointInDOMRect(point, rect);
+    },
+    isPointInInnerElement(point = { x: 0, y: 0 }) {
+      const rect = this.getInnerEleOffsetRect();
       return isPointInDOMRect(point, rect);
     },
     /**
@@ -1033,16 +1050,14 @@ export default {
      */
     cacheDefaultLayout({ left = 0, top = 0, width = 1, height = 1 }) {
       debug("cacheDefaultLayout", `${this._uid}`, { width, height });
-      const ele = this.getCellElement();
+      const ele = this.getInnerElement();
       const beforeHooks = [].concat(
-        this.cellChildNodeInitInfoHooks?.beforeInit || []
+        this.InnerNodeRawDataHooks?.beforeInit || []
       );
       const onCacheHooks = [].concat(
-        this.cellChildNodeInitInfoHooks?.onCacheEachNode || []
+        this.InnerNodeRawDataHooks?.onCacheEachNode || []
       );
-      const afterHooks = [].concat(
-        this.cellChildNodeInitInfoHooks?.afterInit || []
-      );
+      const afterHooks = [].concat(this.InnerNodeRawDataHooks?.afterInit || []);
 
       if (
         !tryRunHooks(beforeHooks, [this], { ele, left, top, width, height })
@@ -1123,7 +1138,7 @@ export default {
             this.cell.cache[key]?.initial ||
             Object.freeze({
               ...common,
-              // wrapper = this.getWrapperElement()
+              // wrapper = this.getCellWrapperElement()
               wrapper: {
                 // 相对于Wrapper的相对位置
                 left,
@@ -1132,10 +1147,10 @@ export default {
                 height,
                 // 相对于视口的矩形
                 boundingClientRect: getBoundingClientRect(
-                  this.getWrapperElement()
+                  this.getCellWrapperElement()
                 ),
                 // 边框
-                border: this.getWrapperBorder(),
+                border: this.getCellWrapperBorder(),
               },
             });
 
@@ -1159,7 +1174,7 @@ export default {
           return true;
         },
         // context
-        { parent: this.getWrapperElement() }
+        { parent: this.getCellWrapperElement() }
       );
 
       tryRunHooks(afterHooks, [this], { ele, left, top, width, height });
@@ -1281,26 +1296,26 @@ export default {
      *
      * @param {string} key 关键key值
      */
-    getCellChildNodeInitInfoByKey(key) {
+    getInnerChildRawDataByKey(key) {
       return this.cell.cache[key];
     },
     /**
      * 获得根Cell节点的初始化数据
      */
-    getCellRootNodeInitInfo() {
+    getInnerRootNodeRawData() {
       return this.cell.cache[-1];
     },
     /**
      * 获得Cell最原始的样式信息
      */
-    getCellOriginalStyle() {
-      return this.getCellRootNodeInitInfo().style;
+    getInnerRootNodeOriginalStyle() {
+      return this.getInnerRootNodeRawData().style;
     },
     /**
      * 获得挂载元素的Border信息
      */
-    getWrapperBorder() {
-      const wrapperElement = this.getWrapperElement();
+    getCellWrapperBorder() {
+      const wrapperElement = this.getCellWrapperElement();
       const [
         borderLeftWidth,
         borderRightWidth,
@@ -1328,7 +1343,7 @@ export default {
         borderRightWidth,
         borderTopWidth,
         borderBottomWidth,
-      } = this.getWrapperBorder();
+      } = this.getCellWrapperBorder();
       return {
         left: rect.left - borderLeftWidth,
         top: rect.top - borderTopWidth,
@@ -1351,8 +1366,8 @@ export default {
      * 获得挂载元素的初始化数据
      */
     getWrapperInitialData() {
-      const rootNodeInitInfo = this.getCellRootNodeInitInfo();
-      return rootNodeInitInfo.initial.wrapper;
+      const rootNodeRawData = this.getInnerRootNodeRawData();
+      return rootNodeRawData.initial.wrapper;
     },
     /** 更新所有子节点布局 */
     updateChildLayout({ left = 0, top = 0, width = 0, height = 0 } = {}) {
@@ -1431,7 +1446,7 @@ export default {
         borderTopWidth,
         borderRightWidth,
         borderBottomWidth,
-      } = this.getWrapperBorder();
+      } = this.getCellWrapperBorder();
       const blr = borderLeftWidth + borderRightWidth;
       const btb = borderTopWidth + borderBottomWidth;
 
