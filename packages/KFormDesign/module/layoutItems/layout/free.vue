@@ -3,7 +3,7 @@
  * @Date         : 2022-03-18 15:50:49
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layoutItems/layout/free.vue
- * @LastEditTime : 2022-04-01 17:36:31
+ * @LastEditTime : 2022-04-02 21:29:25
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 
@@ -44,7 +44,7 @@
             :selectItem.sync="selectItem"
             :startType="startType"
             :insertAllowedType="insertAllowedType"
-            :record="wrapRecord(item)"
+            :record="wrapRecord(item, true)"
             :hideModel="hideModel"
             :config="config"
             @handleSelectItem="handleSelectItem"

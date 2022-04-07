@@ -3,7 +3,7 @@
  * @Date         : 2022-03-18 16:05:59
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layoutItems/baseItem.vue
- * @LastEditTime : 2022-04-02 15:55:00
+ * @LastEditTime : 2022-04-02 21:29:11
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 <script>
@@ -85,7 +85,7 @@ export default {
     handleColAdd(e, list) {
       this.$emit("handleColAdd", e, list);
     },
-    wrapRecord(record, isVDRCell = true) {
+    wrapRecord(record, isVDRCell = false) {
       if (
         record.vdrCellOptions &&
         typeof record.vdrCellOptions.enable === "boolean"
