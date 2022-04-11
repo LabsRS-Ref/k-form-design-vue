@@ -2,7 +2,7 @@
  * @Author       : sunzhifeng <ian.sun@auodigitech.com>
  * @Date         : 2022-02-28 10:26:57
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
- * @LastEditTime : 2022-04-01 14:02:05
+ * @LastEditTime : 2022-04-11 10:11:57
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/props.ts
  * @Description  : Created by sunzhifeng, Please coding something here
  */
@@ -122,6 +122,7 @@ const props = {
   },
   /**
    * @description: 对齐网格尺寸
+   * 通过容器CSS background-size 属性设置
    * @type: {Array}
    * @default: [1, 1]
    */

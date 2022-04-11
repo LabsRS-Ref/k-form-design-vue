@@ -3,7 +3,7 @@
  * @Date         : 2022-03-08 17:03:50
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/VueDraggableResizableCell/doc.md
- * @LastEditTime : 2022-04-01 17:19:48
+ * @LastEditTime : 2022-04-11 10:03:21
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 
@@ -23,7 +23,7 @@
 * [X] 支持附加对子节点的listener的hook操作
 * [X] 支持屏蔽子孙节点的click穿透事件（依赖Hook作为基础来实现）
 * [X] 暴露一些实例事件供外部使用，例如：Cell Resize事件
-* [X] 支持对于包裹类型的节点，可以自定义resize的处理逻辑，包括副作用的处理，例如：<div<a-button /></div> 这种情况的处理
+* [X] 支持对于包裹类型的节点，可以自定义resize的处理逻辑，包括副作用的处理，例如：<div><a-button /></div> 这种情况的处理
 * [X] [Optimize]] 统一防止事件继续透传，vue中的v-on:click.stop 是否要统一在Cell组件中禁止掉（原因：无法知道n层子孙节点是否禁用事件传播）: 交由Hook 用户定制处理
 * [ ] TODO: 支持Vue 内置组件transition 节点的处理
 * [ ] TODO: 验证zoom的设置的影响
@@ -35,8 +35,10 @@
 * [X] 支持自动监听Cell所有子孙节点的变化，并自动更新
   * [X] 限制只允许在非拖拽及非resize状态下进行监听
 * [X] 支持提供更多的Hooks处理，交由组件使用者自行定制
-* [ ] TODO: 支持定制Wrapper Handler的样式，圆点模式，矩形模式，等等
+* [x] 支持定制Wrapper Handler的样式，圆点模式，矩形模式，等等; 通过CSS实现
 * [ ] TODO: 支持组件旋转
+* [ ] TODO: 支持元素对齐与辅助线
+* [ ] TODO: 支持吸附对齐和冲突检测
 
 ## Issues
 

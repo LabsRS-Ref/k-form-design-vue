@@ -3,7 +3,7 @@
  * @Date         : 2022-03-18 15:50:49
  * @Description  : Created by sunzhifeng, Please coding something here
  * @FilePath     : /k-form-design-vue/packages/KFormDesign/module/layoutItems/layout/free.vue
- * @LastEditTime : 2022-04-02 21:29:25
+ * @LastEditTime : 2022-04-11 13:55:40
  * @LastEditors  : sunzhifeng <ian.sun@auodigitech.com>
 -->
 
@@ -29,7 +29,7 @@
       <transition-group
         tag="div"
         name="list"
-        class="list-main"
+        class="list-main grid-background"
         :style="transitionGroupStyle"
       >
         <div
@@ -77,3 +77,12 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+/* 添加背景网格 */
+.grid-background {
+  background: linear-gradient(-90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px)
+      0% 0% / 20px 20px,
+    linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px) 0% 0% / 20px 20px !important;
+}
+</style>
